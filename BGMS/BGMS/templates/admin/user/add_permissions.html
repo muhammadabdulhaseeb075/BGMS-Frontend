@@ -1,0 +1,89 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls admin_static admin_modify %}
+
+{% block extrastyle %}{{ block.super }}
+{% endblock %}
+
+
+
+<!--Overwriting title template-->
+{% block content_title %}<h1><strong>Add site user and permissions</strong></h1>{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+    <!--Send email invitation users to register-->
+    <form id="id_form_email_invitation" action="/siteadminportal/sendEmailInvitation/" method="post">
+    {% csrf_token %}
+    <p>
+        In order to add a user to the site, they must first create an account. For new users, go to step 1 to send an invite. If the user has registered previously, or has access to a different burial ground site, jump straight to step 2 and enter their username.
+    </p>
+    <br>
+    <strong>
+        Step 1: Invite user
+    </strong>
+    <br><br>
+    <p>
+        Send an invitation to register by entering the persons email address in the box below and click INVITE.
+    </p>
+    <div>
+    <fieldset class="module aligned wide">
+        <div class="form-row field-username">
+            <div>
+                <label class="required" for="id_email_invitation">Email invitation:</label>
+                <ul class="errorlist" id="error_email_invitation"></ul>
+                <input class="vTextField" id="id_email_invitation" maxlength="100" name="email_invitation" type="email">
+                <p class="help">Alternatively, if you do not know the users email address, ask the user to visit the following address to register: https://www.burialgrounds.co.uk/register/</p>
+            </div>
+        </div>
+    </fieldset>
+
+
+    <div class="submit-row">
+        <button id="id_btn_email_invitation" onclick="adminSite.sendEmailInvitation('#id_form_email_invitation','#id_btn_email_invitation')" class="btn btn-primary btn-lg btn-block ladda-button"  data-style="slide-right"><span class="ladda-label">Invite</span></button>
+    </div>
+
+    </div>
+    </form>
+    <!--FIN: Send email invitation users to register-->
+
+    <form id="id_form_add_tenantuser" action="/siteadminportal/addUserPermissions/" method="post">
+    {% csrf_token %}
+    <strong>
+        Step 2: Add the user
+    </strong>
+    <br><br>
+    <p>
+        Please enter the username of the person you would like to grant access to and then click ADD
+    </p>
+    <div>
+    <fieldset class="module aligned wide">
+        <div class="form-row field-username">
+            <div>
+                <label class="required" for="id_username">Username:</label>
+                <input class="vTextField" id="id_username" maxlength="30" name="username" type="text">
+                <p class="help">The user will need to send you this username once they have registered</p>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset class="module aligned wide">
+        <div class="form-row field-username">
+            <div>
+                <ul class="errorlist" id="error_username2" style="padding-left: 50px;"></ul>
+                <label class="required" for="id_username2">Confirm Username:</label>
+                <input class="vTextField" id="id_username2" maxlength="30" name="username2" type="text">
+            </div>
+        </div>
+    </fieldset>
+
+    {% block submit_buttons_bottom %} 
+        <div class="submit-row">
+            <button type="button" id="id_add_user" onclick="adminSite.addSiteUser('#id_form_add_tenantuser','#id_add_user')" class="btn btn-primary btn-lg btn-block ladda-button"  data-style="slide-right"><span class="ladda-label">Add</span></button>
+        </div>
+    {% endblock %}
+    </div>
+    </form>
+</div>
+
+
+{% endblock %}

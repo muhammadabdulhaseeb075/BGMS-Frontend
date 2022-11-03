@@ -1,0 +1,75 @@
+@import "styles/theme.css";
+
+.site-select {
+    @apply shadow-inner pt-3;
+    background-color: $second-color;
+    margin-top: auto;
+    height: 350px;
+    overflow-y: auto;
+
+    h3 {
+        @apply mb-2 pl-6 pr-4;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    i {
+        @apply  pl-6 pr-4;
+    }
+
+    ul {
+        @apply mb-7;
+    }
+
+    li {
+        @apply p-1 mt-2;
+
+        font-size: 16px;
+
+        
+
+        input[type="radio"]:after {
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            top: -4.5px;
+            position: relative;
+            background-color: $highligh-color;
+            content: '';
+            display: inline-block;
+            visibility: visible;
+            border: 1px solid gray;
+            transition: all 0.5s ease;
+        }
+
+        input[type="radio"]:checked:after {
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            top: -4.5px;
+            position: relative;
+            background-color: $third-color;
+            content: '';
+            display: inline-block;
+            visibility: visible;
+            border: 1px solid gray;
+        }
+
+        span {
+            @apply ml-3;
+            display: inline-block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: bottom;
+            white-space: nowrap;
+            width: 140px;
+        }
+        label{
+            @apply pl-6 pr-4;
+        }
+        
+    }
+    .current{
+        background-color: $highligh-color;
+    }
+}

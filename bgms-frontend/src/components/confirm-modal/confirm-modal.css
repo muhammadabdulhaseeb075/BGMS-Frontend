@@ -1,0 +1,10 @@
+@import "styles/theme.css";
+
+.confirm-modal {
+    .modal-header {
+        background-color: $main-color;
+    }
+    .close-button {
+        background-color: white;
+    }
+} 

@@ -1,0 +1,180 @@
+@font-face {
+	font-family: 'icomoon';
+	src:url('fonts/icomoon.eot?-maajth');
+	src:url('fonts/icomoon.eot?#iefix-maajth') format('embedded-opentype'),
+		url('fonts/icomoon.ttf?-maajth') format('truetype'),
+		url('fonts/icomoon.woff?-maajth') format('woff'),
+		url('fonts/icomoon.svg?-maajth#icomoon') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+	font-family: 'icomoon';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.icon-Tool-Box-Filled:before {
+	content: "\e600";
+}
+.icon-Tool-Box-Outlined:before {
+	content: "\e601";
+}
+.icon-Delete-Filled:before {
+	content: "\e602";
+}
+.icon-Delete-Outline:before {
+	content: "\e603";
+}
+.icon-Clear-01-Outline:before {
+	content: "\e604";
+}
+.icon-Clear-02-Filled:before {
+	content: "\e605";
+}
+.icon-Upload-Image-Filled:before {
+	content: "\e606";
+}
+.icon-Upload-Image-Outline:before {
+	content: "\e607";
+}
+.icon-Zoom-In-Outline:before {
+	content: "\e608";
+}
+.icon-Zoom-Out-Outline:before {
+	content: "\e609";
+}
+.icon-Zoom-In-Filled:before {
+	content: "\e60a";
+}
+.icon-Zoom-In-Outline2:before {
+	content: "\e60b";
+}
+.icon-Save-Filled:before {
+	content: "\e60c";
+}
+.icon-Save-Outline:before {
+	content: "\e60d";
+}
+.icon-View-Burial-Record-Filled:before {
+	content: "\e60e";
+}
+.icon-View-Burial-Record-Outline:before {
+	content: "\e60f";
+}
+.icon-Add-Burial-Record-Filled:before {
+	content: "\e610";
+}
+.icon-Add-Burial-Record-Outline:before {
+	content: "\e611";
+}
+.icon-Rotate-Map-Filled:before {
+	content: "\e612";
+}
+.icon-Rotate-Map-Outline:before {
+	content: "\e613";
+}
+.icon-Search-Filled:before {
+	content: "\e614";
+}
+.icon-Search-Outline:before {
+	content: "\e615";
+}
+.icon-Headstone-No-Lines-Filled:before {
+	content: "\e616";
+}
+.icon-Headstone-No-Lines-Outline:before {
+	content: "\e617";
+}
+.icon-Headstone-Lines-Filled:before {
+	content: "\e618";
+}
+.icon-Headstone-Lines-Outline:before {
+	content: "\e619";
+}
+.icon-Add-Headstone-No-Lines-Filled:before {
+	content: "\e61a";
+}
+.icon-Add-Headstone-No-Lines-Outline:before {
+	content: "\e61b";
+}
+.icon-Add-Headstone-Lines-Filled:before {
+	content: "\e61c";
+}
+.icon-Add-Headstone-Lines-Outline:before {
+	content: "\e61d";
+}
+.icon-Reserve-Grave-Plot-Filled:before {
+	content: "\e61e";
+}
+.icon-Reserve-Grave-Plot-Outline:before {
+	content: "\e61f";
+}
+.icon-Add-Grave-Plot-Filled:before {
+	content: "\e620";
+}
+.icon-Add-Grave-Plot-Outline:before {
+	content: "\e621";
+}
+.icon-Map-Tools-Filled:before {
+	content: "\e622";
+}
+.icon-Map-Tools-Outline:before {
+	content: "\e623";
+}
+.icon-Cancel-Filled:before {
+	content: "\e624";
+}
+.icon-Cancel-Outline:before {
+	content: "\e625";
+}
+.icon-Measure-Distance-01:before {
+	content: "\e626";
+}
+.icon-Measure-Distance-02:before {
+	content: "\e627";
+}
+.icon-Measure-Area-Filled:before {
+	content: "\e628";
+}
+.icon-Measure-Area-Outline:before {
+	content: "\e629";
+}
+.icon-Edit-Drawing-Filled:before {
+	content: "\e62a";
+}
+.icon-Edit-Drawing-Outline:before {
+	content: "\e62b";
+}
+.icon-Map-Measurement-Tools-Filled:before {
+	content: "\e62c";
+}
+.icon-Map-Measurement-Tools-Outline:before {
+	content: "\e62d";
+}
+.icon-Map-Layers-Filled:before {
+	content: "\e62e";
+}
+.icon-Map-Layers-Outline:before {
+	content: "\e62f";
+}
+.icon-Globe:before {
+	content: "\e9ca";
+}
+.icon-Globe:hover:before {
+	content: "\e9ca";
+}
+
+/*Hide the 'x' button for time input fields.*/
+input[type="time"]::-webkit-clear-button {
+    display: none;
+}

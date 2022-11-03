@@ -1,0 +1,12 @@
+<label ng-show="!imageTag.extent" class="btn btn-bgms" aria-label="Draw Tag" title="Draw Tag" ng-class='{"active": tagger.toggle.draw_tag}'>
+	<input type="checkbox" name="drawtag" ng-model="tagger.toggle.draw_tag" autocomplete="off" ng-click="tagger.selectInteraction('draw_tag')" checked hidden>
+	<span class="icon-Measure-Area-Filled"></span>
+</label>
+<label ng-show="imageTag.extent" class="btn btn-bgms" aria-label="Edit Tag" title="Edit Tag" ng-class='{"active": tagger.toggle.modify_tag}'>
+	<input type="checkbox" name="drawtag" ng-model="tagger.toggle.modify_tag" autocomplete="off" ng-click="tagger.selectInteraction('modify_tag')" checked hidden>
+	<span class="icon-Edit-Drawing-Filled"></span>
+</label>
+<label ng-show="imageTag.extent" class="btn btn-bgms" aria-label="Delete Tag" title="Delete Tag" ng-class='{"active": tagger.toggle.delete_tag}'>
+	<input type="checkbox" name="drawtag" ng-model="tagger.toggle.delete_tag" autocomplete="off" ng-click="tagger.selectInteraction('delete_tag')" checked hidden>
+	<span class="icon-Delete-Filled"></span>
+</label>

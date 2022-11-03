@@ -1,0 +1,26 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load perm_filters %}
+
+{% block content %}
+
+{% csrf_token %}
+
+
+<div id="resetNotification" class="hold-transition login-page" style="background: transparent;">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="{% static 'images/logo/BGMS_logo_white.png' %}"/>
+    </div>
+    <div class="login-box-body">
+
+          <div class="statement text-justify">Your password reset has been performed successfully.<br/><br/>
+          <p><a href="{% url 'login' %}">Return to the login page</a></p>
+          </div>
+
+
+    </div><!-- /.login-box-body -->
+  </div><!-- /.login-box -->
+</div>
+
+{% endblock %}

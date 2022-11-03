@@ -1,0 +1,18 @@
+
+{% extends "main/base.html" %} {% block content %}
+
+<div id="loginModal" class="hold-transition login-page" style="background: transparent;">
+  <div class="register-box">
+    <div class="login-logo">
+      <div style="font-size: 40px;"><a><b>BURIAL GROUND</b></a></div>
+      <div style="font-size: 32px;margin-top: -15px;"><a> MANAGEMENT SYSTEM</a></div>
+    </div>
+    <p id='resultsRegisterForm' class="center-box text-danger animated fadeInUp">
+      Your email verification has expired.
+      <br><br>
+      Please visit the <a href="{% url 'register' %}">Registration</a> page and Sign up again.
+    </p>
+  </div><!-- /.login-box -->
+</div>
+
+{% endblock %}

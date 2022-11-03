@@ -1,0 +1,60 @@
+@import "styles/theme.css";
+
+
+.table-top {
+    @apply flex justify-between items-center mb-2 mt-6;
+    h3 {
+        @apply text-2xl font-semibold flex-none;
+        color: $third-color;
+    }
+
+    .result-entries {
+        @apply py-1 px-4;
+
+        background-color: $main-color;
+        min-width: 200px;
+    }
+}
+
+.table-content {
+    display: table;
+    width: 100%;
+
+    .table-header {
+        display: table-header-group;
+        background-color: $second-color;
+        font-weight: bold;
+
+        .cell {
+            @apply py-2 px-1;
+
+            text-align: left;
+        }
+    }
+
+    .table-body {
+        display: table-row-group;
+
+        .row:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .cell {
+            @apply p-2;
+
+            border-bottom: 2px solid $main-color;
+
+            i {
+                cursor: pointer;
+            }
+        }
+    }
+
+    .row { 
+        display: table-row;
+    }
+
+    .cell {
+        display:  table-cell;
+    }
+}

@@ -1,0 +1,62 @@
+<div>
+  {% load static %}
+  <style>
+    img.displayed {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    ul li {
+      display: inline;
+    }
+
+  </style>
+
+  {% load perm_filters %}
+  <div id="id_modalBurialDetails" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" ng-click="cancel()">×</button>
+          <h4 class="modal-title">
+            <strong>Site Files</strong>
+          </h4>
+        </div>
+        <div class="modal-body detailed-form">
+          <div ng-bind-html="contents">
+
+            <div class="row">
+              <!-- DeathPerson form -->
+              <div class="col-xs-12 form-section">
+                {% comment %} <div class="text-center">
+                  <h3 class="form-title">Documents details</h3>
+                </div> {% endcomment %}
+                <table class="table">
+                    <thead style="font-size: 20px;"> <tr> <th>#</th> <th>Name</th> <th>View</th> </tr> </thead> <tbody> 
+                {% for file in files %}
+                      <tr style="font-size: 18px;"> <th scope="row">{{ forloop.counter }}</th> <td>{{ file.name }}</td> <td><a style="font-size: 25px;" target="_blank" href="{{ file.url }}"><i class="far fa-file-pdf" aria-hidden="true"></i></a></td> </tr>
+                {% endfor %}
+                {% if files|length == 0 %}
+                    <tr style="font-size: 18px;"> <th scope="row"></th> <td>No files available</td> <td></td> </tr>
+                {% endif %}
+                 </tbody> </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--<div class="modal-footer">
+        </div>-->
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
+  <script type="text/javascript" charset="utf-8">
+   
+    $(document).ready(function () {
+
+    });
+  </script>
+</div>

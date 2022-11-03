@@ -1,0 +1,181 @@
+<!-- DeathPerson form -->
+<form id="DeathPersonForm" action="/datamatching/personEdit/" method="post" class="burial-details-form burial-details-form-editable read-only-form">
+	{% csrf_token %} {{ form.id_person.as_hidden }}
+	<div class="modal-details-group input-group ">
+		<!-- form -->
+		{{ form.non_field_errors }}
+
+		<div class="row">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.first_names.errors }}
+				<label for="{{ form.first_names.id_for_label }}">First names
+				</label> {{ form.first_names }}
+			</div>
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style impossible-date">
+				{{ form.birth_date.errors }}
+				<label for="{{ form.burial_date.id_for_label }}">Date of birth
+				</label>
+				<div class="select-day">
+					{{form.impossible_date_day_person}}
+				</div>
+				<div class="select-month">
+					{{form.impossible_date_month_person}}
+				</div>
+				<div class="select-year">
+					{{form.impossible_date_year_person}}
+				</div>
+			</div>
+		</div>
+
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{{ form.last_name.errors }}
+					<label for="{{ form.last_name.id_for_label }}">Last name
+					</label> {{ form.last_name }}
+				</div>
+				{% if reserved_plot_form != 1 %}
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style impossible-date">
+					{{ form.death_date.errors }}
+					<label for="{{ form.burial_date.id_for_label }}">Date of death
+					</label>
+					<div class="select-day">
+						{{form.impossible_date_day_death}}
+					</div>
+					<div class="select-month">
+						{{form.impossible_date_month_death}}
+					</div>
+					<div class="select-year">
+						{{form.impossible_date_year_death}}
+					</div>
+				</div>
+				{% endif %}
+			</div>
+
+		<div class="row">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.title.errors }}
+				<label for="{{ form.title.id_for_label }}">Title
+				</label> {{ form.title }}
+			</div>
+			{% if reserved_plot_form != 1 %}
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.age_str.errors }}
+				<label class="field-to-hide" for="{{ form.age_str.id_for_label }}">Age</label>
+				{{ form.age_str }}
+			</div>
+			{% endif %}
+		</div>
+		<div class="row">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.nickname.errors }}
+				<label for="{{ form.nickname.id_for_label }}">Nickname
+				</label> {{ form.nickname }}
+			</div>
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.gender.errors }}
+				<label for="{{ form.gender.id_for_label }}">Gender</label>
+				{{ form.gender }}
+			</div>
+		</div>
+		{% if reserved_plot_form != 1 %}
+		<div class="row field-to-show" style="display: none;">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.age_years.errors }}
+				<label for="{{ form.age_years.id_for_label }}">Age years
+				</label> {{ form.age_years }}
+			</div>
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.age_months.errors }}
+				<label for="{{ form.age_months.id_for_label }}">Age months
+				</label> {{ form.age_months }}
+			</div>
+		</div>
+		<div class="row field-to-show" style="display: none;">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.age_weeks.errors }}
+				<label for="{{ form.age_weeks.id_for_label }}">Age weeks</label>
+				{{ form.age_weeks }}
+			</div>
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.age_days.errors }}
+				<label for="{{ form.age_days.id_for_label }}">Age days</label>
+				{{ form.age_days }}
+			</div>
+    </div>
+    <div class="row field-to-show" style="display: none;">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.age_hours.errors }}
+				<label for="{{ form.age_hours.id_for_label }}">Age hours
+				</label> {{ form.age_hours }}
+			</div>
+      <div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+        {{ form.age_minutes.errors }}
+        <label for="{{ form.age_minutes.id_for_label }}">Age minutes
+        </label> {{ form.age_minutes }}
+      </div>
+		</div>
+		{% endif %}
+		<div class="row">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.description.errors }}
+				<label for="{{ form.description.id_for_label }}">Description</label>
+				{{ form.description }}
+			</div>
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.profession.errors }}
+				<label for="{{ form.profession.id_for_label }}">Profession</label>
+				{{ form.profession }}
+			</div>
+		</div>
+		<div class="row">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.residence_address.errors }}
+				<label for="{{ form.residence_address.id_for_label }}">Residence address
+				</label> {{ form.residence_address }}
+			</div>
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.town.errors }}
+				<label for="{{ form.town.id_for_label }}">Town</label>
+				{{ form.town }}
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.second_line.errors }}
+				<label for="{{ form.second_line.id_for_label }}">Address line 2</label>
+				{{ form.second_line }}
+			</div>
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.country.errors }}
+				<label for="{{ form.country.id_for_label }}">Country</label>
+				{{ form.country }}
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.county.errors }}
+				<label for="{{ form.county.id_for_label }}">County</label>
+				{{ form.county }}
+			</div>
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.postcode.errors }}
+				<label for="{{ form.postcode.id_for_label }}">Postcode</label>
+				{{ form.postcode }}
+			</div>
+		</div>
+
+		{% if reserved_plot_form == 1 %}
+		<div class="row">
+			<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+				{{ form.notes.errors }}
+				<label for="{{ form.notes.id_for_label }}">Notes</label>
+				{{ form.notes }}
+			</div>
+		</div>
+		{% endif %}
+		{# Temp input holders to hold the memorial headpoint and graveplot feature id #}
+		{{form.graveplot_polygon_feature}}
+	</div>
+</form>

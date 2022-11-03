@@ -1,0 +1,10 @@
+@import "styles/theme.css";
+
+.form-modals {
+    .modal-header {
+        background-color: $main-color;
+    }
+    .close-button {
+        background-color: white;
+    }
+}

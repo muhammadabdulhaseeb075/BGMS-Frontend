@@ -1,0 +1,85 @@
+@import "styles/theme.css";
+
+.booking-calendar-wrapper {
+
+    .calendar-header {
+        .calendar-button {
+            button {
+                border: 2px solid gray;
+                border-radius: 3px;
+                margin: 5px;
+                padding: 5px 9px;
+            }
+        }
+
+        .date-range-title {
+            @apply flex items-center;
+            margin-left: 20px;
+        }
+
+        h3 {
+            @apply text-2xl font-semibold flex-none;
+
+            color: $third-color;
+            height: 32px;
+            margin: 5px;
+        }
+    }
+
+    .tooltip {
+        visibility: hidden;
+        z-index: $foreground;
+        &.visible {
+            visibility: visible;
+        }
+
+        .toolip-body {
+            @apply shadow-xl;
+
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            min-width: 250px;
+            padding: 8px 15px;
+        }
+
+        .tooltip-title {
+            color: $third-color;
+        }
+
+        .arrow,
+        .arrow::before {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            visibility: hidden;
+        }
+
+        .arrow.visible::before {
+            visibility: visible;
+        }
+
+        .arrow::before {
+            content: '';
+            transform: rotate(45deg);
+        }
+
+        &[data-popper-placement^='top'] > .arrow {
+            bottom: -4px;
+        }
+
+        &[data-popper-placement^='bottom'] > .arrow {
+            top: -4px;
+        }
+
+        &[data-popper-placement^='left'] > .arrow {
+            right: -4px;
+        }
+
+        &[data-popper-placement^='right'] > .arrow {
+            left: -4px;
+        }
+    }
+
+}

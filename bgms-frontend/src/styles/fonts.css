@@ -1,0 +1,6 @@
+@import './theme.css';
+
+@font-face {
+  font-family: $main-font;
+  src: url('./fonts/Droid-Sans/droid-sans-mono.ttf') format('truetype');
+}

@@ -1,0 +1,120 @@
+{% comment %}
+This is rendered in a Vue app. It allows running an Angular app within Vue.
+We won't need this once everything is migrated to Vue.
+{% endcomment %}
+
+{% load static %}
+{% load zstaticfiles %}
+
+{% block content %}
+
+  <div id="map-angular-wrapper">
+
+    <div id='mainApp' ng-controller='MapCtrl as map'>
+
+        <div ng-controller='personController as person' style="height: 100vh;">
+          <!-- Vue Components -->
+          <div id="management-tool-container" class="management-tool-container" ng-if="person.memorialsLoaded" ng-controller="ManagementToolController">
+            <div id="v-ManagementTool"></div>
+          </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        {% verbatim %}
+
+        <!-- Horizontal Toolbar -->
+        <div ng-controller='addMemorialController as memorial'>
+          <div id="horizontalToolsAccordion" class="horizontal-right-button">
+              <div id="horizontalTools" class="panel-collapse collapse">
+                <!-- Other tools -->
+                <div ng-controller="VueOtherToolsController">
+                  <div id="v-VueOtherToolsController"></div>
+                </div>
+                <!--// FIN Other tools -->
+
+                <!-- Burial tools -->
+                <div id="burialAccordion" ng-if="map.group_required_value">
+                  <label class="btn btn-bgms group-burialtools" title="Burial Tools" data-toggle="collapse" data-parent="#burialAccordion" href="#burialTools">
+                    <input type="radio" autocomplete="off" checked hidden>
+                    <span class="icon-Map-Tools-Outline"></span>
+                    <span class="icon-Map-Tools-Filled"></span>
+                  </label>
+                  <div id="burialTools" ng-controller='addGraveController as grave' class="btn-group panel-collapse collapse" role="group">
+                    <label class="btn btn-bgms" title="Add Plot" ng-class='{"active": grave.toggle.create_plot}'>
+                      <input type="checkbox" name="add_plot" ng-model="grave.toggle.create_plot" ng-click="grave.burialToolbarHandler('create_plot', $event)" autocomplete="off" checked hidden>
+                      <span class="icon-Add-Grave-Plot-Filled"></span>
+                    </label>
+                    <label class="btn btn-bgms" title="Edit Plot" ng-class='{"active": grave.toggle.edit_plot}'>
+                      <input type="checkbox" name="edit_plot" ng-model="grave.toggle.edit_plot" autocomplete="off" ng-click="grave.burialToolbarHandler('edit_plot',$event)" checked hidden>
+                      <span class="icon-Edit-Drawing-Filled"></span>
+                    </label>
+                  </div>
+                </div>
+                <!--// FIN Burial tools -->
+
+                <!-- Memorial Tools -->
+                <div id="memorialAccordion" ng-if="map.group_required_value || map.memorial_photography_group">
+                  <label class="btn btn-bgms group-burialtools" title="Memorial Tools" data-toggle="collapse" data-parent="#memorialAccordion" href="#memorialTools">
+                    <input type="radio" autocomplete="off" checked hidden>
+                    <span class="icon-Headstone-Lines-Outline"></span>
+                    <span class="icon-Headstone-Lines-Filled"></span>
+                  </label>
+                  <div id="memorialTools" class="btn-group panel-collapse collapse" role="group">
+                    <label ng-if="map.group_required_value" class="btn btn-bgms" title="Add Memorial" ng-class='{"active": memorial.toggle.create_memorial}'>
+                      <input type="checkbox" name="add_memorial" ng-model="memorial.toggle.create_memorial" ng-click="memorial.memorialToolbarHandler('create_memorial', $event)" autocomplete="off" checked hidden>
+                      <span class="icon-Add-Headstone-No-Lines-Filled"></span>
+                    </label>
+                    <label ng-if="map.group_required_value" class="btn btn-bgms" title="Edit Memorial" ng-class='{"active": memorial.toggle.edit_memorial}'>
+                      <input type="checkbox" name="edit_plot" ng-model="memorial.toggle.edit_memorial" autocomplete="off" ng-click="memorial.memorialToolbarHandler('edit_memorial',$event)" checked hidden>
+                      <span class="icon-Edit-Drawing-Filled"></span>
+                    </label>
+                    <label ng-if="map.group_required_value || map.memorial_photography_group" class="btn btn-bgms" title="Memorial Capture" ng-class='{"active": memorial.toggle.memorial_capture}'>
+                      <input type="checkbox" name="memorialCapture" ng-model="memorial.toggle.memorial_capture" autocomplete="off" checked hidden ng-click="memorial.memorialToolbarHandler('memorial_capture', $event)">
+                      <span class="icon-Upload-Image-Filled"></span>
+                    </label>
+                    <label ng-if="map.group_required_value" class="btn btn-bgms" title="Grave Link" ng-class='{"active": memorial.toggle.grave_link}'>
+                      <input type="checkbox" name="graveLink" ng-model="memorial.toggle.grave_link" autocomplete="off" checked hidden ng-click="memorial.memorialToolbarHandler('grave_link', $event)">
+                      <span class="fa fa-link"></span>
+                    </label>
+                  </div>
+                </div>
+                <!--// FIN Memorial Tools -->
+
+                <!-- Drawing tools -->
+                <div ng-controller="VueDrawingToolsController">
+                  <div id="v-VueDrawingToolsController"></div>
+                </div>
+                <!--// FIN Drawing tools -->
+              </div>
+              <button class="btn btn-bgms btn-right-toolbar" aria-label="Left Align" title="Map Tools" data-toggle="collapse" data-parent="#horizontalToolsAccordion" href="#horizontalTools">
+                <span class="icon-Tool-Box-Outlined" aria-hidden="true"></span>
+                <span class="icon-Tool-Box-Filled" aria-hidden="true"></span>
+              </button>
+          </div>
+
+          <!-- Vue Components -->
+          <div ng-if="memorial.showMemorialCaptureSidebar">
+            <div id="memorialCaptureSidebarContainer" class="sidebar-container" ng-controller="MemorialCaptureSidebarController">
+              <div id="v-MemorialCaptureSidebar"></div>
+            </div>
+          </div>
+          <div ng-if="memorial.showGraveLinkSidebar">
+            <div id="graveLinkSidebarContainer" class="sidebar-container" ng-controller="GraveLinkSidebarController">
+              <div id="v-GraveLinkSidebar"></div>
+            </div>
+          </div>
+        </div>
+        <!--// FIN Horizontal Toolbar -->
+        <!-- Layers Toolbar -->
+        <div ng-controller='layerController as layer'>
+          <div id="layersToolbarContainer" ng-controller="VueLayersToolbarController">
+            <div id="layersAccordion"></div>
+          </div>
+        </div>
+        <!--// FIN Layers Toolbar -->
+        
+        {% endverbatim %}
+        {% endif %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "mapmanagement/base.html" %}
+{% load static %}
+{% load zstaticfiles %}
+{% load render_bundle from webpack_loader %}
+{% load perm_filters %}
+
+{% block css %}
+  <link href="{% static 'css/floating-labels.css' %}" rel="stylesheet" media="screen">
+  <link href="{% static 'libs/selectize/v0.12.1/css/selectize.css' %}" rel="stylesheet" media="screen">
+  <link href="{% static 'css/flexslider.css' %}" rel="stylesheet" media="screen">
+
+  <link href="{% static 'libs/ladda/v0.9.4/css/ladda-themeless.min.css' %}" rel="stylesheet" media="screen">
+  <link href="{% static 'libs/jquery.nanoscroller/v0.8.7/css/nanoscroller.css' %}" rel="stylesheet" media="screen">
+{% endblock %}
+
+{% block content %}
+
+{% csrf_token %}
+
+{# Vue app #}
+<div id="mapmanagementapp"></div>
+{% endblock %}
+
+{% comment %}
+This files are all used by AngularJS.
+Eventually these won't be needed as Angular code is migrated to ueJs and any external packages loaded by webpack.
+{% endcomment %}
+{% block js%}
+
+<script src="{% static 'libs/jQuery-File-Upload/v9.9.3/js/vendor/jquery.ui.widget.js' %}"></script>
+<script src="{% static 'libs/jQuery-File-Upload/v9.9.3/js/jquery.iframe-transport.js' %}"></script>
+<script src="{% static 'libs/jQuery-File-Upload/v9.9.3/js/jquery.fileupload.js' %}"></script>
+
+<script src="{% static 'libs/bootstrap-datepicker/v1.4.0/js/bootstrap-datepicker.min.js' %}"></script>
+<script src="{% static 'libs/bootstrap-table/v1.7.0/js/bootstrap-table.min.js' %}"></script>
+<script src="{% static 'libs/bootstrap-table/extensions/flatJSON/bootstrap-table-flatJSON.min.js' %}"></script>
+
+<script src="{% static 'libs/css-element-queries/v0.2.1/js/ResizeSensor.js' %}"></script>
+<script src="{% static 'libs/ladda/v0.9.4/js/spin.min.js' %}"></script>
+<script src="{% static 'libs/ladda/v0.9.4/js/ladda.min.js' %}"></script>
+
+
+<script src="{% static 'libs/jquery.nanoscroller/v0.8.7/js/jquery.nanoscroller.min.js' %}"></script>
+<script src="{% static 'libs/jquery.maskedinput/v1.4.0/js/jquery.maskedinput.min.js' %}"></script>
+<script src="{% static 'libs/selectize/v0.12.1/js/standalone/selectize.min.js' %}"></script>
+<script src="{% static 'libs/jquery.flexslider/v2.5.0/js/jquery.flexslider.js' %}"></script>
+<script src="{% static 'libs/bower_components/jquery-validation/dist-js/jquery.validate.min.js' %}"></script>
+<script src="{% static 'libs/bower_components/jquery-validation/dist-js/additional-methods.min.js' %}"></script>
+<script src="{% static 'libs/canvas-toBlob.js-master/canvas-toBlob.js' %}"></script>
+<script src="{% static 'libs/lodash/v4.13.1/lodash.min.js' %}"></script>
+
+{% if debug %}
+    <script src="{% static 'js/floating-labels.js' %}"></script>
+    <script src="{% static 'js/floating-labels-style.js' %}"></script>
+    <script src="{% static 'js/notificationService.js' %}"></script>
+    <script src="{% static 'mapmanagement/js/mapmanagement.js' %}"></script>
+    <script src="{% static 'mapmanagement/js/bgms.persondetails.js' %}"></script>
+{% else %}
+    <script src="{% static 'build/js/all.js' %}"></script>
+{% endif %}
+
+<script src="{% static 'mapmanagement/js/constants.js' %}"></script>
+<script src="{% static 'mapmanagement/js/js_to_angular_interface.js' %}"></script>
+
+<script type="text/javascript">
+$(function(){
+  jsAngularInterface.mainPartialFileLocation = "{% get_static_prefix_s3 %}";
+
+  {% if debug %}
+  jsAngularInterface.vueDistLocation = "http://localhost:8080/";
+  {% endif %}
+
+  jsAngularInterface.staticFilesLocation = {
+  'logoAG.png': "{% static 'images/logo/logoAG.png'%}"
+  };
+  jsAngularInterface.mainMediaFileLocation = "{{ MEDIA_URL }}";
+  {% if not debug %}
+  jsAngularInterface.debug = false;
+  {% else %}
+  jsAngularInterface.debug = true;
+  {% endif %}
+});
+
+</script>
+
+
+<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular/angular.min.js' %}"></script>
+
+<script>window.document.user = { short_name: "{{ user.get_short_name }}", username: "{{ user.get_username }}" }</script>
+{% render_bundle 'chunk-vendors' %}
+{% render_bundle 'chunk-mapmanagement-vendors' %}
+{% render_bundle 'chunk-common' %}
+{% render_bundle 'mapmanagement' %}
+
+{% comment %}
+This must come after vue build files
+{% endcomment %}
+<link href="{% static 'build/css/mapmanagement.min.css' %}" rel="stylesheet" media="screen">
+
+<script src="{% static 'mapmanagement/bgms_angular/bower_components/ui-bootstrap-tpls-0.13.4.js' %}"></script>
+<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-animate/angular-animate.js' %}"></script>
+<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-ui-router.js' %}"></script>
+<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-route/angular-route.js' %}"></script>
+<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-resource/angular-resource.js' %}"></script>
+<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-sanitize.min.js' %}"></script>
+<script src="{% static 'js/math.js' %}"></script>
+
+{% if debug %}
+  <script src="{% static 'mapmanagement/bgms_angular/app.module.ng1.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/map.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/constants.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/mapService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/personService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/layerGroupService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/layerService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/layerToolbar/layerGeneratorService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/notificationHelper.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/featureHelperService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/geometryHelperService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/featureOverlayService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/interactionService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/eventService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/styleService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/markerService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/memorialService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/userActionService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/mapController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/modalHelperService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/map/reportingService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/layerToolbar/layerController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/person/personController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/person/personInteractionService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/security/securityService.js' %}"></script>
+
+  <script src="{% static 'mapmanagement/bgms_angular/components/layerSelection/layerSelectionController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/layerSelection/layerSelectionService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/offline/offlineService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/reservePlot/reservedPersonService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/exportMap/exportMapService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/util/subdomainService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/util/capitalizeFilter.js' %}"></script>
+
+  <script src="{% static 'mapmanagement/bgms_angular/components/vue-components/ManagementToolController.js' %}"></script>
+
+  {% if user.is_authenticated %}
+
+  <script src="{% static 'mapmanagement/bgms_angular/components/drawingToolbar/toolbarService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/person/addGraveController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/person/addMemorialController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/person/addGraveService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/person/addMemorialService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/person/floatingPlotToolbarService.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/person/floatingMemorialToolbarService.js' %}"></script>
+
+  <script src="{% static 'mapmanagement/bgms_angular/components/vue-components/MemorialCaptureSidebarController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/vue-components/GraveLinkSidebarController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/vue-components/VueOtherToolsController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/vue-components/VueDrawingToolsController.js' %}"></script>
+  <script src="{% static 'mapmanagement/bgms_angular/components/vue-components/VueLayersToolbarController.js' %}"></script>
+
+  {% endif %}
+
+{% else %}
+  <script src="{% static 'build/js/all-a.js' %}"></script>
+
+  {% if user.is_authenticated %}
+  <script src="{% static 'build/js/all-a-auth.js' %}"></script>
+  {% endif %}
+{% endif %}
+
+{% endblock %}

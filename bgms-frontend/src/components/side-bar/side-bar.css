@@ -1,0 +1,11 @@
+@import "styles/theme.css";
+
+aside {
+    @apply flex flex-col;
+    background-color: $main-color;
+    height: calc(100% - $header-height);
+    margin-top: $header-height;
+    position: fixed;
+    width: $sidebar-width;
+    z-index: $foreground;
+}

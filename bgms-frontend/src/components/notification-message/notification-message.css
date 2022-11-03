@@ -1,0 +1,35 @@
+.confirm-modal {
+    .modal-header {
+        background-color: black;
+    }
+    .close-button {
+        background-color: white;
+    }
+}
+.alert{
+    padding: 10px;
+    color: white;
+    margin: 5px;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success{background-color: rgba(4,170,109,0.9)}
+
+.alert-error{background-color: rgba(244,67,54,0.9);}
+
+.closebtn {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.closebtn:hover {
+  color: black;
+}

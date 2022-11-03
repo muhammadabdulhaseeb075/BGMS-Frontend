@@ -1,0 +1,4 @@
+name: bgms-scotia
+packages:
+  - path: BGMS 
+  - path: BGMS/BGMS

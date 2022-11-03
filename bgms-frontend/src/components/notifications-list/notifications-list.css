@@ -1,0 +1,8 @@
+.notifications-list {
+  z-index: 999999999999999999;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin-right: 15px;
+  width: 320px;
+}

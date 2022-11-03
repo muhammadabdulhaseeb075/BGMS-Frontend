@@ -1,0 +1,35 @@
+@import "styles/theme.css";
+
+.pagination {
+    @apply relative z-0 inline-flex rounded-md shadow-sm -space-x-px;
+}
+
+.page-option {
+    @apply relative inline-flex items-center px-4 py-2 border bg-white text-sm font-medium text-gray-700;
+    border-color: rgba( 0, 0, 0, .2);
+}
+
+div.option-hover:hover {
+    @apply bg-gray-200 cursor-pointer;
+}
+
+a.page-option:hover {
+    @apply bg-gray-200 cursor-pointer;
+}
+
+.page-option-selected {
+    background-color: $second-color;
+    opacity: .6;
+}
+
+.option-hover {
+    @apply bg-gray-50;
+}
+
+.option-left-rounded {
+    @apply px-2 rounded-l-md;
+}
+
+.option-right-rounded {
+    @apply px-2 rounded-r-md;
+}

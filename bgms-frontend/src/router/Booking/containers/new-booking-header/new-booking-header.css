@@ -1,0 +1,32 @@
+@import "styles/theme.css";
+
+.new-booking-header {
+    @apply flex justify-between py-4;
+    background: white;
+    border-bottom: 3px solid $main-color;
+    position: fixed;
+    width: calc(100% - (230px + 3rem));
+    z-index: $foreground;
+
+    .site-name{
+      @apply text-2xl font-bold flex-none;
+      color : black;
+    }
+
+    .operation-buttons {
+        span {
+            @apply mr-2;
+            display: inline-block;
+
+            &.disabled {
+                color: gray;
+                cursor: not-allowed;
+            }
+
+            i {
+                cursor: pointer;
+                font-size: 32px;
+            }
+        }
+    }
+}

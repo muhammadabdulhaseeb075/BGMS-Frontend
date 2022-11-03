@@ -1,0 +1,136 @@
+<div lang="en" ng-app="bgmsApp" ng-strict-di>
+  {% load static %}
+  {% load zstaticfiles %}
+  <script src="{% static 'libs/bower_components/jquery/dist-js/jquery.min.js' %}"></script>
+
+  <script
+    src="https://browser.sentry-cdn.com/6.17.4/bundle.min.js"
+    integrity="sha384-b8AsyZZuCfveCM8XQGBncVPihJcaG//cLVfziPjfE1RLhc++ZJ8x3BIS0Izv9Iey"
+    crossorigin="anonymous"
+  ></script>
+  
+  <!-- If you include the integration it will be available under Sentry.Integrations.Angular -->
+  <script
+    src="https://browser.sentry-cdn.com/6.17.4/angular.min.js"
+    crossorigin="anonymous"
+  ></script>
+  
+  <script>
+    Sentry.init({
+      dsn: "https://d1eb8523464046c9b09dc9c009ad8406@sentry.burialgrounds.co.uk/5",
+      integrations: [new Sentry.Integrations.Angular()],
+    });
+  </script>
+
+  <script type="text/javascript">
+  $(function(){
+     jsAngularInterface.mainPartialFileLocation = "{% get_static_prefix_s3 %}";
+     jsAngularInterface.staticFilesLocation = {
+     'addBurialRecord.html': "{% static 'dataentry/angular/partials/addBurialRecord.html'%}",
+     'bgmsColumnTemplate.html': "{% static 'dataentry/angular/partials/bgmsColumnTemplate.html'%}",
+     'bgmsPanzoomTemplate.html': "{% static 'dataentry/angular/partials/bgmsPanzoomTemplate.html'%}",
+     'createTemplate.html': "{% static 'dataentry/angular/partials/createTemplate.html'%}",
+     'imageStatus.html': "{% static 'dataentry/angular/partials/imageStatus.html'%}",
+     'userActivity.html': "{% static 'dataentry/angular/partials/userActivity.html'%}",
+     'editableRowTemplate.html': "{% static 'dataentry/angular/partials/editableRowTemplate.html'%}",
+     'editBurialRecordButton.html': "{% static 'dataentry/angular/partials/editBurialRecordButton.html'%}",
+     'listTemplates.html': "{% static 'dataentry/angular/partials/listTemplates.html'%}",
+     'rowTemplate.html': "{% static 'dataentry/angular/partials/rowTemplate.html'%}",
+     'bgmsBasicFieldTemplate.html': "{% static 'dataentry/angular/directives/bgmsColumnField/partials/bgmsBasicFieldTemplate.html'%}",
+     'bgmsColumnFieldTemplate.html': "{% static 'dataentry/angular/directives/bgmsColumnField/partials/bgmsColumnFieldTemplate.html'%}",
+     'imageTagger.html': "{% static 'dataentry/angular/directives/bgmsImageHandler/partials/imageTagger.html'%}",
+     'imageViewer.html': "{% static 'dataentry/angular/directives/bgmsImageHandler/partials/imageViewer.html'%}",
+     'imageCell.html': "{% static 'dataentry/angular/components/imageStatus/partials/imageCell.html'%}",
+     };
+     jsAngularInterface.mainMediaFileLocation = "{{ MEDIA_URL }}";
+     {% if not debug %}
+     	jsAngularInterface.debug = false;
+     {% else %}
+     	jsAngularInterface.debug = true;
+     {% endif %}
+  });
+
+  </script>
+  <link href="{% static 'libs/openlayers/v4.6.5-dist/ol.css' %}" rel="stylesheet" media="screen">
+  <link href="{% static 'dataentry/bower_components/angular-ui-grid/ui-grid.min.css' %}" rel="stylesheet" media="screen">
+
+  {% if debug %}
+  <script src="{% static 'libs/openlayers/v4.6.5-dist/ol-debug.js' %}"></script>
+  {% else %}
+  <script src="{% static 'libs/openlayers/v4.6.5-dist/ol.js' %}"></script>
+  {% endif %}
+
+  <script src="{% static 'libs/proj4/v2.3.3/js/proj4.js' %}"></script>
+
+  <script src="{% static 'libs/jquery-ui/v1.11.1/js/jquery-ui.min.js' %}"></script>
+  <script src="{% static 'dataentry/bower_components/bootstrap-table/bootstrap-table.min.js' %}"></script>
+  <script src="{% static 'dataentry/bower_components/angular/angular.min.js' %}"></script>
+  <script src="{% static 'dataentry/bower_components/bootstrap-table/extensions/angular/bootstrap-table-angular.js' %}"></script>
+	<script src="{% static 'dataentry/bower_components/jquery.panzoom/jquery.panzoom.js' %}"></script>
+	<script src="{% static 'mapmanagement/bgms_angular/bower_components/ui-bootstrap-tpls-0.13.4.js' %}"></script>
+	<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-animate/angular-animate.js' %}"></script>
+	<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-ui-router.js' %}"></script>
+	<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-route/angular-route.js' %}"></script>
+	<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-resource/angular-resource.js' %}"></script>
+	<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-sanitize.min.js' %}"></script>
+	<script src="{% static 'mapmanagement/bgms_angular/bower_components/angular-openlayers-directive.js' %}"></script>
+
+  {% if debug %}
+
+  <script src="{% static 'dataentry/bower_components/angular-ui-grid/ui-grid.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/openlayers-directive/olHelperExtended.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/openlayers-directive/olexHelper.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/openlayers-directive/olexInteractionHelper.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/openlayers-directive/olexMapInteractionDirective.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/openlayers-directive/olexMapEventDirective.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/openlayers-directive/olexFeatureOverlayDirective.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/openlayers-directive/olexExtentDirective.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/openlayers-directive/olexOverlayDirective.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/openlayers-directive/openlayersDecorator.js' %}"></script>
+  <script src="{% static 'dataentry/angular/app.module.js' %}"></script>
+  <script src="{% static 'dataentry/angular/app.route.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/dataentry.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/arrayHelperService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/notificationHelper.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/featureHelperService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/models/templateModel.js' %}"></script>
+  <script src="{% static 'dataentry/angular/models/columnModel.js' %}"></script>
+  <script src="{% static 'dataentry/angular/models/fieldModel.js' %}"></script>
+  <script src="{% static 'dataentry/angular/models/formModel.js' %}"></script>
+  <script src="{% static 'dataentry/angular/models/imageModel.js' %}"></script>
+  <script src="{% static 'dataentry/angular/models/tagModel.js' %}"></script>
+  <script src="{% static 'dataentry/angular/models/burialRecordModel.js' %}"></script>
+  <script src="{% static 'dataentry/angular/models/imageHistoryModel.js' %}"></script>
+  <script src="{% static 'dataentry/angular/models/userActivityModel.js' %}"></script>
+  <script src="{% static 'dataentry/angular/services/burialRecordService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/services/manyToManyFieldService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsLadda.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsPanzoom.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsBootstrapTable.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsColumnField/bgmsBasicField.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsColumnField/bgmsColumnField.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsImageHandler/imageViewerController.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsImageHandler/imageViewerService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsImageHandler/imageTaggerController.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsImageHandler/imageTaggerService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsImageHandler/openlayersService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsImageHandler/bgmsImageViewer.js' %}"></script>
+  <script src="{% static 'dataentry/angular/directives/bgmsImageHandler/bgmsImageTagger.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/createTemplate/templateCreationController.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/createTemplate/templateCreationService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/listTemplates/listTemplatesController.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/listTemplates/listTemplatesService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/addBurialRecord/addBurialRecordController.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/addBurialRecord/addBurialRecordService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/imageStatus/imageStatusController.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/imageStatus/imageStatusService.js' %}"></script>
+  <script src="{% static 'dataentry/angular/components/userActivity/userActivityController.js' %}"></script>
+
+  {% else %}
+  <script src="{% static 'dataentry/bower_components/angular-ui-grid/ui-grid.min.js' %}"></script>
+  <script src="{% static 'build/js/all-ang-de.js' %}"></script>
+  {% endif %}
+
+  <div ui-view>
+  </div>
+</div>

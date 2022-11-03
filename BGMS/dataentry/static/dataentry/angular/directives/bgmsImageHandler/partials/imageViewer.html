@@ -1,0 +1,7 @@
+<openlayers ng-if='viewer.visibleExtent' custom-layers="true" ol-defaults="viewer.defaults" classs="imageViewerController">
+	<ol-layer ng-if="layer" ol-layer-properties="layer" ng-repeat="layer in viewer.layers"></ol-layer>
+	<olex-map-extent ng-if="viewer.visibleExtent" olex-extent-properties='viewer.visibleExtent'></olex-map-extent>
+	<olex-map-interaction ng-if="interaction" olex-interaction-properties='interaction' ng-repeat="interaction in viewer.interactions"></olex-map-interaction>
+	<olex-map-event ng-if="event" olex-event-properties='event' ng-repeat="event in viewer.events"></olex-map-event>
+</openlayers>
+<div ng-transclude class="horizontal-tools"></div>

@@ -1,0 +1,284 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_modify %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "libs/jquery.modal/css/jquery.modal.min.css" %}" />
+{% endblock %}
+
+{% block userlinks %}
+
+  {% if site_url %}
+      <a href="{{ site_url }}">Return to burial ground</a> /
+  {% endif %}
+  {% if user.is_active and user.is_staff %}
+      {% url 'django-admindocs-docroot' as docsroot %}
+      {% if docsroot %}
+          <a href="{{ docsroot }}">Documentation</a> /
+      {% endif %}
+  {% endif %}
+  {% if user.has_usable_password %}
+  <a href="{% url 'admin:password_change' %}">Change password</a> /
+  {% endif %}
+  <a href="{% url 'logout' %}">Log out</a>
+{% endblock %}
+
+{% block content %}
+<h1>Data Upload Tool</h1>
+<h2>Linking scripts</h2><input type="button" value="Link burial records to registers" onclick="linkBurialRegisters()"/>
+
+<h2>Update graveplot layers</h2>
+Update any incorrect graveplot layers:
+<br>
+-burial: at least one burial,
+<br>
+-reservated plot: at least one reservation or ownership deed, and no burials,
+<br>
+-available plot: no burials, reservations or ownership deeds.
+<br>
+<input type="button" value="Update graveplot layers" onclick="updateGraveplotLayers()"/>
+
+<h2>New upload</h2>
+<div>
+  Graves can contain multiple burials. Memorials can have multiple graves and multiple burials.<br>
+  <br>- Both burials and graves are linked to memorials with the column 'memorial_id'. Remember to include this field in both!
+  <br>- Graves are linked to burials with the columns 'grave_number', 'section', 'subsection'.
+  <br>- Graves are linked to existing GravePlot topopolygons with the column 'feature_id' (this may never actually be needed.).
+  <br>- Only one deed record is created per grave unless the deed reference field is included.
+  <br><br>Note: all date fields should be formatted by Excel (YYYY-MM-DD).
+  <br>Note: it is recommended to edit data in xlsx and convert to csv just before uploading. That way Excel remembers formatting.
+</div>
+
+{% if user.is_staff %}
+<form action="">
+    {% csrf_token %}
+    <fieldset class="module aligned">
+      <div id="form-row-data-upload" class="form-row">
+        <label class="required">Select Grave CSV file:</label>
+        <input accept=".csv" class="" id="id_grave_csv_file" name="csv_grave_file" type="file"/>
+        <div>
+          <a href="#grave-table-container" data-toggle="collapse">Show accepted column titles</a>
+          <div id="grave-table-container" class="collapse table-container" aria-expanded="false" style="height: 0px;">
+          The following column titles are accepted (in any order):
+            <table>
+              <thead>
+              <tr>
+                <th>Description</th>
+                <th>CSV column title</th>
+              </tr>
+              </thead>
+              <tbody>
+                {% for field_group in grave_fields %}
+                <tr {% if forloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td>{{field_group.desc}}</td>
+                  <td>{% if field_group.fields|length == 1 and field_group.fields.0|length == 1 %}{{field_group.fields.0.0.csv_header}}{% endif %}</td>
+                </tr>
+                {% if field_group.fields|length > 1 or field_group.fields.0|length > 1 %}
+                {% for fields in field_group.fields %}
+                {% if not forloop.first %}
+                <tr {% if forloop.parentloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td></td>
+                  <td class="or_row">or</td>
+                </tr>
+                {% endif %}
+                {% for field in fields %}
+                <tr {% if forloop.parentloop.parentloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td></td>
+                  <td>{{field.csv_header}}</td>
+                </tr>
+                {% endfor %}{% endfor %}{% endif %}
+                <tr class="end-of-field-group"></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset class="module aligned">
+      <div id="form-row-data-upload" class="form-row">
+        <label class="required">Select Grave Owners CSV file:</label>
+        <input accept=".csv" class="" id="id_grave_ownership_csv_file" name="csv_grave_owners_file" type="file"/>
+        <div>
+          <a href="#grave-owners-table-container" data-toggle="collapse">Show accepted column titles</a>
+          <div id="grave-owners-table-container" class="collapse table-container" aria-expanded="false" style="height: 0px;">
+          The following column titles are accepted (in any order):
+            <table>
+              <thead>
+              <tr>
+                <th>Description</th>
+                <th>CSV column title</th>
+              </tr>
+              </thead>
+              <tbody>
+                {% for field_group in grave_owners_fields %}
+                <tr {% if forloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td>{{field_group.desc}}</td>
+                  <td>{% if field_group.fields|length == 1 and field_group.fields.0|length == 1 %}{{field_group.fields.0.0.csv_header}}{% endif %}</td>
+                </tr>
+                {% if field_group.fields|length > 1 or field_group.fields.0|length > 1 %}
+                {% for fields in field_group.fields %}
+                {% if not forloop.first %}
+                <tr {% if forloop.parentloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td></td>
+                  <td class="or_row">or</td>
+                </tr>
+                {% endif %}
+                {% for field in fields %}
+                <tr {% if forloop.parentloop.parentloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td></td>
+                  <td>{{field.csv_header}}</td>
+                </tr>
+                {% endfor %}{% endfor %}{% endif %}
+                <tr class="end-of-field-group"></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset class="module aligned">
+      <div id="form-row-data-upload" class="form-row">
+        <label class="required">Select Burial (inc. reservations) CSV file:</label>
+        <input accept=".csv" class="" id="id_burial_csv_file" name="burial_csv_file" type="file"/>
+        <div>
+          <a href="#burial-table-container" data-toggle="collapse">Show accepted column titles</a>
+          <div id="burial-table-container" class="collapse table-container" aria-expanded="false" style="height: 0px;">
+          The following column titles are accepted (in any order):
+            <table>
+              <thead>
+              <tr>
+                <th>Description</th>
+                <th>CSV column title</th>
+              </tr>
+              </thead>
+              <tbody>
+                {% for field_group in burial_fields %}
+                <tr {% if forloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td>{{field_group.desc}}</td>
+                  <td>{% if field_group.fields|length == 1 and field_group.fields.0|length == 1 %}{{field_group.fields.0.0.csv_header}}{% endif %}</td>
+                </tr>
+                {% if field_group.fields|length > 1 or field_group.fields.0|length > 1 %}
+                {% for fields in field_group.fields %}
+                {% if not forloop.first %}
+                <tr {% if forloop.parentloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td></td>
+                  <td class="or_row">or</td>
+                </tr>
+                {% endif %}
+                {% for field in fields %}
+                <tr {% if forloop.parentloop.parentloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td></td>
+                  <td>{{field.csv_header}}</td>
+                </tr>
+                {% endfor %}{% endfor %}{% endif %}
+                <tr class="end-of-field-group"></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset class="module aligned">
+      <div id="form-row-data-upload" class="form-row">
+        <label class="required">Select Grave Relations CSV file:</label>
+        <input accept=".csv" class="" id="id_relations_csv_file" name="relations_csv_file" type="file"/>
+        <div>
+          <a href="#relations-table-container" data-toggle="collapse">Show accepted column titles</a>
+          <div id="relations-table-container" class="collapse table-container" aria-expanded="false" style="height: 0px;">
+          The following column titles are accepted (in any order):
+            <table>
+              <thead>
+              <tr>
+                <th>Description</th>
+                <th>CSV column title</th>
+              </tr>
+              </thead>
+              <tbody>
+                {% for field_group in relation_fields %}
+                <tr {% if forloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td>{{field_group.desc}}</td>
+                  <td>{% if field_group.fields|length == 1 and field_group.fields.0|length == 1 %}{{field_group.fields.0.0.csv_header}}{% endif %}</td>
+                </tr>
+                {% if field_group.fields|length > 1 or field_group.fields.0|length > 1 %}
+                {% for fields in field_group.fields %}
+                {% if not forloop.first %}
+                <tr {% if forloop.parentloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td></td>
+                  <td class="or_row">or</td>
+                </tr>
+                {% endif %}
+                {% for field in fields %}
+                <tr {% if forloop.parentloop.parentloop.counter|divisibleby:2 %}class="even_row"{% endif %}>
+                  <td></td>
+                  <td>{{field.csv_header}}</td>
+                </tr>
+                {% endfor %}{% endfor %}{% endif %}
+                <tr class="end-of-field-group"></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="submit-row">
+      <div><input type="button" name="upload" value="Upload" onclick="beginDataUpload()"/></div>
+    </div>
+</form>
+{% else %}
+Data uploads are currently performed by Atlantic Geomatics. Contact our office for more information.
+{% endif %}
+
+
+<h2>Previous data uploads</h2><input type="button" value="Refresh" onclick="refreshPage()"/>
+<table style="width:100%" id="previousdataUploadsTable">
+  <thead>
+  <tr>
+    <th>Filename</th>
+    <th>Date</th>
+    <th>Record Count</th>
+    <th>Status</th>
+    <th>Report</th>
+		<th></th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for upload in uploads %}
+  <tr id="{{ upload.id }}">
+    <td>{{ upload.file_name }}</td>
+    <td>{{ upload.date|date:"d M Y" }}</td>
+    <td>{% if upload.record_count %}{{ upload.record_count }}{% endif %}</td>
+    <td id="status_{{ upload.id }}">{{ upload.status }}</td>
+    <td>{% if upload.report %}
+      <div id="modal_{{ upload.id }}" class="modal" style="display: none; max-width: none">
+        <pre>{{ upload.report|safe }}</pre>
+      </div>
+      <a href="#modal_{{ upload.id }}" rel="modal:open">Open</a>
+      {% endif %}</td>
+		<td id="delete_icon_{{ upload.id }}">{% if upload.status == "Successful" or upload.status == "Delete Failed" %}<a class="glyphicon glyphicon-trash" onclick="deleteDataUpload({{ upload.id }}, {{ upload.record_count }}, '{{ upload.file_name }}')"></a>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<script>
+	// list of headers that are allowed to be included in csv files
+	const validGraveHeaders = [{% for field_group in grave_fields %}{% for fields in field_group.fields %}{% for field in fields %}"{{field.csv_header}}",{% endfor %}{% endfor %}{% endfor %}]
+	const validGraveOwnersHeaders = [{% for field_group in grave_owners_fields %}{% for fields in field_group.fields %}{% for field in fields %}"{{field.csv_header}}",{% endfor %}{% endfor %}{% endfor %}]
+	const validBurialHeaders = [{% for field_group in burial_fields %}{% for fields in field_group.fields %}{% for field in fields %}"{{field.csv_header}}",{% endfor %}{% endfor %}{% endfor %}]
+	const validRelationsHeaders = [{% for field_group in relation_fields %}{% for fields in field_group.fields %}{% for field in fields %}"{{field.csv_header}}",{% endfor %}{% endfor %}{% endfor %}]
+</script>
+
+{% endblock %}
+
+{% block footer %}{{ block.super }}
+<script src="{% static 'admin/libs/axios/axios.min.js' %}"></script>
+<script src="{% static 'admin/js/data_upload.js' %}"></script>
+<script src="{% static 'admin/libs/moment/moment.min.js' %}"></script>
+<script src="{% static 'libs/bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'libs/jquery.modal/js/jquery.modal.min.js' %}"></script>
+{% endblock %}

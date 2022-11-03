@@ -1,0 +1,216 @@
+////
+/// Memorial capture
+////
+
+#memorialForm label, #memorialForm select,
+#inspectionForm select {
+  display: block;
+  width: 100%;
+}
+
+#memorialCapture video, #memorialCapture canvas,
+#addOrTakePhoto video, #addOrTakePhoto canvas {
+  max-height: 50vh;
+  max-width: 100%;
+  margin: 10px auto;
+  display: block;
+}
+
+#memorialCapture button, #memorialCapture label,
+#addOrTakePhoto button, #addOrTakePhoto label {
+  background: rgba(194,173,66,.76);
+  border: none;
+  padding: 4px 11px;
+  color: #fff;
+  font-weight: normal;
+  margin-top: 10px;
+}
+
+#memorialCapture input {
+  margin-top: 10px;
+}
+
+#memorialCapture select {
+  margin: 0;
+  padding: 3px;
+}
+
+#memorialCapture .photos_offline {
+  background: orangered;
+  padding: 10px;
+  color: white;
+}
+
+#memorialCapture .photos_offline .fa {
+  padding-right: 6px;
+  vertical-align: middle;
+}
+
+#memorialCapture .photos {
+  margin-top: 20px;
+}
+
+#memorialCapture .uploadedImage {
+  margin: 10px 7px;
+  display: inline-block;
+  position: relative;
+}
+
+#memorialCapture .uploadedImage img {
+  max-height: 60px;
+  max-width: 60px!important;
+}
+
+#memorialCapture .uploadedImage .closethumb {
+  position: absolute;
+  right: -7px;
+  top: -7px;
+  z-index: 100;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 19px;
+  border-radius: 50%;
+  background: white;
+}
+
+#memorialCapture .uploadedImage .closethumb:hover {
+  color: orangered;
+}
+
+/* Toggler icons */
+.toggler .fa-chevron-up, .toggler .fa-chevron-down {
+  position: absolute;
+  right: 17px;
+  top: 20px;
+  font-size: 1.5em;
+}
+
+.toggler .fa-chevron-down {display: none;}
+.toggler .fa-chevron-up {display: block;}
+.toggler.collapsed .fa-chevron-down {display: block;}
+.toggler.collapsed .fa-chevron-up {display: none;}
+
+/* Uses the adjacent sibling selector to select all save buttons adjacent to
+a collapsed toggle element */
+.toggler.collapsed + .btn-form-details {display: none;}
+
+#inspection-list .new-inspection, #person-list .new-person {
+  background: lightgreen;
+}
+
+.fileUploaderInput, #fileUploaderInput, #cameraUploaderInput, #uploaderInputInspection, #startTakePhotoButton, #startTakePhotoButtonLabel {
+  display: none!important;
+}
+
+#remove-icon a {
+  color: #700;
+}
+#remove-icon a:hover {
+  color: #f00;
+}
+
+.image-loading-spinner {
+    position:absolute;
+    z-index: 0;
+    color: #333;
+    padding: 13px
+}
+
+.image-thumbnail {
+    width: 60px;
+    height: 60px;
+    position: relative;
+}
+
+.mc-spinner{
+    text-align: center;
+    padding-top: 10px;
+    width: 100%;
+}
+
+#memorialCaptureSidebar {
+
+	#inscriptionsComponent {
+		.inscription-table {
+		  font-size: 17px;
+		}
+	}
+
+	#inspectionsComponent {
+		.inspection-table {
+		  font-size: 15px;
+		}
+
+		.photo-buttons label, #remove-button {
+		margin: 0 0 10px 0;
+		}
+
+		img {
+		  max-width: 335px;
+		  margin: 0 0 10px 0;
+		}
+
+		.table-date-heading {
+			font-weight: 600;
+			text-decoration: underline;
+
+			td {
+				line-height: 2px;
+			}
+		}
+
+		.table-row-bottom {
+			border: 0px;
+			line-height: 18px;
+		}
+	}
+
+	#detailsComponent {
+		form {
+			margin-bottom: 5px;
+		}
+	}
+}
+
+.photosComponent {
+
+    #uploaderCanvas {
+        max-height: 50vh;
+        max-width: 100%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .savedImage {
+      margin: 10px 7px;
+      display: inline-block;
+      position: relative;
+    }
+
+    .savedImage img {
+      max-height: 60px;
+      max-width: 60px!important;
+      object-fit: cover;
+    }
+
+    .savedImage .closethumb {
+      position: absolute;
+      right: -7px;
+      top: -7px;
+      z-index: 100;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 19px;
+      border-radius: 50%;
+      background: white;
+    }
+
+    .savedImage .closethumb:hover {
+      color: orangered;
+    }
+
+    #photoThumbnails {
+        margin: 5px 0;
+    }
+}

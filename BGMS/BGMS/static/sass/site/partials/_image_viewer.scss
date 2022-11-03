@@ -1,0 +1,59 @@
+.viewer-button {
+  background-color: rgba(0, 0, 0, 0.8)!important;
+}
+
+.viewer-toolbar > ul > li {
+  height: 40px!important;
+  margin-bottom: -3px!important;
+  margin-top: -3px!important;
+  width: 40px!important;
+  background-color: rgba(0, 0, 0, 1)!important;
+}
+
+.viewer-toolbar > ul > li::before {
+  margin: 10px!important;
+}
+
+.viewer-zoom-in::before, .viewer-zoom-out::before, .viewer-one-to-one::before, .viewer-reset::before, .viewer-reset::before,
+.viewer-prev::before, .viewer-play::before, .viewer-next::before, .viewer-rotate-left::before,
+.viewer-rotate-right::before, .viewer-flip-horizontal::before, .viewer-flip-vertical::before,
+.viewer-fullscreen::before, .viewer-fullscreen-exit::before {
+  transform: scale(1.45);
+}
+
+.viewer-backdrop, .viewer-container {
+  background-color: rgba(0, 0, 0, 0.8)!important;
+}
+
+.viewer-button {
+  height: 120px!important;
+  width: 120px!important;
+  right: -60px!important;
+  top: -60px!important;
+}
+
+.viewer-close {
+  font-family: "Font Awesome 5 Free";
+  white-space: nowrap;
+
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+}
+
+.viewer-close::before {
+  bottom: 15px!important;
+  left: 25px!important;
+  background-image: none!important;
+  color: white!important;
+  font-weight: 900!important;
+  font-size: 36px!important;
+  //transform: scale(1.6);
+  content: '\f00d'!important;
+  box-sizing: border-box;
+  //height: 80px!important;
+  //width: 80px!important;
+}

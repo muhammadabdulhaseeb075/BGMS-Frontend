@@ -1,0 +1,15 @@
+////
+/// Header section refers to the top bar of the admin portal
+////
+
+// Background and font colors
+#header{
+  background: $base-gold;
+}
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: $base-white;
+}
+
+div.breadcrumbs{
+  background: $base-gold-light-1;
+}

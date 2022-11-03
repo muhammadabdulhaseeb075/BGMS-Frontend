@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+{% load perm_filters %}
+{% load zstaticfiles %}
+{% load value_from_settings %}
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Burial Ground Management System Map Management{% endblock %}</title>
+    <link rel="icon" href="{% static 'images/icons/gravestone.ico' %}" type="image/x-icon">
+    <link href="{% static 'libs/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'libs/bootstrap-datepicker/v1.4.0/css/bootstrap-datepicker3.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'libs/bootstrap-table/v1.7.0/css/bootstrap-table.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'libs/bootstrap-dropdowns-enhancement/css/dropdowns-enhancement.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'fonts/fontawesome-free-5.6.3/css/fontawesome.min.css' %}" rel="stylesheet" media="screen" />
+    <link href="{% static 'fonts/fontawesome-free-5.6.3/css/solid.min.css' %}" rel="stylesheet" media="screen" />
+    <link href="{% static 'fonts/fontawesome-free-5.6.3/css/regular.min.css' %}" rel="stylesheet" media="screen" />
+
+    {# block css_ol //TODO: test styles ol if they works adding this at the end #}
+
+    <link href="{% static 'fonts/bgms-font/style.css' %}" rel="stylesheet" media="screen">
+
+    <link href="{% static 'fonts/fertigo-pro/fertigo-pro.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'libs/ionicons/v1.5.2/css/ionicons.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'libs/bower_components/AdminLTE/dist-js/css/AdminLTE.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'css/hover-effects.css' %}" rel="stylesheet" media="screen">
+
+    <!--block sass/main-->
+
+    <link href="{% static 'libs/pnotify/v2.0.1/css/pnotify.custom.min.css' %}" rel="stylesheet" media="screen">
+    {% block css %}{% endblock %}
+		<link href="{% static 'libs/openlayers/v4.6.5-dist/ol.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'css/map-styles-custom.css' %}" rel="stylesheet" media="screen">
+
+    {% csrf_token %}
+
+</head>
+<body class="{% if SiteDetails %}skin-bgms{% endif %}">
+  <div class="wrapper">
+
+    {% if SiteDetails %}
+		<div class="top-nav">
+      <nav class="navbar navbar-expand-lg navbar-light" role="navigation">
+				<a href='{% value_from_settings "HOMEPAGE" %}' style="position: absolute;">
+					<div class="logo">
+						<div class="logo-navigation-bar">
+						</div>
+					</div>
+				</a>
+
+			  <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="glyphicon glyphicon-menu-hamburger"></span>
+			  </button>
+      	{% block navbar %}{% endblock %}
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="nav navbar-nav mr-auto">
+
+          {% block header %} {% endblock %}
+
+            {% if user.is_authenticated %}
+
+              <!-- Download user guide -->
+              <li class="nav-item dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">User Guide<span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                  <li><a target="_blank" href="{% static_sign SiteDetails.user_guide %}">View user guide</a></li>
+                  </ul>
+              </li>
+              <!-- FIN: Download user guide -->
+
+            {% endif %}
+
+  		    {% block dropdown %}{% endblock %}
+
+              <li class="nav-item dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ SiteDetails.name }}<span class="caret"></span></a>
+                <ul class="dropdown-menu site-details-popup bg-light-blue" role="menu">
+                  <div class="row">
+              			<div class="fieldWrapper form-group floating-label-form-group-style">
+                      <div class="col-xs-4"><label>Address:</label> </div>
+                      <div class="col-xs-8 value-text"> {{ SiteDetails.address.first_line }} </div>
+              			</div>
+              		</div>
+                  <div class="row">
+              			<div class="fieldWrapper form-group floating-label-form-group-style">
+                      <div class="col-xs-4"> <label>Town:</label> </div>
+                      <div class="col-xs-8 value-text"> {{ SiteDetails.address.town }} </div>
+              			</div>
+              		</div>
+                  <div class="row">
+              			<div class="fieldWrapper form-group floating-label-form-group-style">
+                      <div class="col-xs-4"> <label>County:</label> </div>
+                      <div class="col-xs-8 value-text"> {{ SiteDetails.address.county }} </div>
+              			</div>
+              		</div>
+                  <div class="row">
+              			<div class="fieldWrapper form-group floating-label-form-group-style">
+                      <div class="col-xs-4"> <label>Postcode:</label> </div>
+                      <div class="col-xs-8 value-text"> {{ SiteDetails.address.postcode }} </div>
+              			</div>
+              		</div>
+                </ul>
+              </li>
+
+              {% if user.is_authenticated %}
+
+              <!-- User Account: style can be found in dropdown.less -->
+              <li class="nav-item dropdown user user-menu">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                      <i class="glyphicon glyphicon-user"></i>
+                      <span><i class="user-menu-user"> {{ user }}</i> <i class="caret"></i></span>
+                  </a>
+                  <ul class="dropdown-menu">
+                      <!-- User image -->
+                      <li class="user-header bg-light-blue">
+                          <p>
+                              {{ user }}
+                          </p>
+                      </li>
+                      <!-- Menu Footer-->
+                      <li class="user-footer">
+                          {% comment %} <div class="pull-left">
+                              <a href="#" class="btn btn-default btn-flat">Profile</a>
+                          </div> {% endcomment %}
+                          <div class="pull-right">
+                              <a href="{% url 'logout' %}" class="btn btn-default btn-flat">Log Out</a>
+                          </div>
+                      </li>
+                  </ul>
+              </li>
+
+              {% else %}
+
+              <li class="nav-item">
+                <a href="{% url 'login' %}" class="nav-link">Log In</a>
+              </li
+
+              {% endif %}
+
+          </ul>
+        </div>
+      </nav>
+		</div>
+
+  {% endif %}
+
+	{% block sidebar %}{% endblock %}
+
+    <!-- Right side column. Contains the navbar and content of the page -->
+    <div class="content-wrapper">
+        {% block content %}{% endblock %}
+    </div>
+
+    </div><!-- ./wrapper -->
+    {% block jquery_js %}{% endblock %}
+    <!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raven.js/3.8.1/raven.min.js"></script>
+    <script>Raven.config('https://00faab69fe7347469ebd65a7276ff66e@sentry.burialgrounds.co.uk/6').install()</script>
+    -->
+
+    <script
+  src="https://browser.sentry-cdn.com/6.17.4/bundle.min.js"
+  integrity="sha384-b8AsyZZuCfveCM8XQGBncVPihJcaG//cLVfziPjfE1RLhc++ZJ8x3BIS0Izv9Iey"
+  crossorigin="anonymous"
+></script>
+
+<!-- If you include the integration it will be available under Sentry.Integrations.Angular -->
+<script
+  src="https://browser.sentry-cdn.com/6.17.4/angular.min.js"
+  crossorigin="anonymous"
+></script>
+
+<script>
+  Sentry.init({
+    dsn: "https://d1eb8523464046c9b09dc9c009ad8406@sentry.burialgrounds.co.uk/5",
+    tracesSampleRate: 1.0,
+  });
+</script>
+
+    <script src="{% static 'libs/bower_components/jquery/dist-js/jquery.min.js' %}"></script>
+    <script src="{% static 'libs/jquery-ui/v1.11.1/js/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'libs/bower_components/AdminLTE/dist-js/js/app.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-dropdowns-enhancement/js/dropdowns-enhancement.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.custom.min.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.buttons.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.confirm.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.callbacks.js' %}"></script>
+    {% if GOOGLE_ANALYTICS_KEY %}
+        <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', '{{GOOGLE_ANALYTICS_KEY}}', 'auto');
+        ga('send', 'pageview');
+        </script>
+        <script>
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-12345-1']);
+        _gaq.push(['_setDomainName', 'example-petstore.com']);
+        _gaq.push(['_trackPageview']);
+        </script>
+    {% endif %}    
+    {% block js%}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,21 @@
+@import "styles/theme.css";
+
+.modal-panel {
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    height: 100vh;
+    position: fixed;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    z-index: $closeup;
+    justify-content: center;
+    align-items: center;
+
+    .modal-content {
+        background-color: white;
+        border: 3px solid $main-color;
+        border-radius: 5px;
+
+    }
+}

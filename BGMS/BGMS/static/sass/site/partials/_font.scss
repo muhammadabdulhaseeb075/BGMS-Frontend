@@ -1,0 +1,18 @@
+////
+/// Fonts definition
+/// @group FONTS
+////
+
+html {
+  font-family: $base-font-family;
+}
+
+.uppercase-text {
+  input {
+    text-transform: uppercase;
+  }
+}
+
+input.uppercase-text {
+  text-transform: uppercase;
+}

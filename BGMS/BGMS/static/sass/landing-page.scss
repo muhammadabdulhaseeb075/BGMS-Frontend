@@ -1,0 +1,68 @@
+////
+/// This is the primary stylesheet to load all sass files
+/// It will load all the sass styles related to Landing page and login
+/// @group BGMS
+////
+
+/// The base stylesheet sets global variables.
+@import 'site/partials/base';
+
+// Reset
+// @import 'partials/reset';
+
+html,
+body {
+  // overflow-y: hidden;
+  scrollbar-face-color: $base-grey-alpha;
+  scrollbar-arrow-color: $base-grey-alpha;
+  scrollbar-track-color: #F5F5F5;
+}
+
+body{
+ background: url(#{$image-path}landingpage/loginBackground.jpg) no-repeat center center fixed;
+ -webkit-background-size: cover;
+ -moz-background-size: cover;
+ -o-background-size: cover;
+ background-size: cover;
+}
+
+// hide overflow in y axis for the skin-bgms applied for AdminLTE
+body.skin-bgms {
+  overflow-y: hidden;
+}
+
+// All images should be responsive
+img {
+  max-width: 100% !important;
+}
+
+//AdminLTE custom
+.login-logo a, .register-logo a{
+  color: white;
+}
+.login-box{
+  margin-top: 6%;
+  margin-bottom: 1%;
+}
+.register-box{
+  width: 600px;
+  margin: 2% auto;
+}
+#login-disclaimer {
+  margin-top: 0px;
+
+  .statement {
+    line-height: 1.2;
+    padding-top: 5px;
+  }
+  .list-group-item {
+    padding: 5px 10px;
+    border: 0px;
+  }
+}
+
+/// Partials: where all CSS is constructed.
+@import 'util/partials/no-margin';
+@import 'util/partials/button';
+@import 'site/partials/collapse';
+@import 'public/partials/container';

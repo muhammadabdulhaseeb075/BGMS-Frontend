@@ -1,0 +1,15 @@
+{	
+	"csrfmiddlewaretoken":{
+		"name": "csrfmiddlewaretoken",
+		"value": "{{csrf_token}}"
+	},
+	"fields": {	
+		{% for field in form %}
+			{% if forloop.counter0 > 0 %}
+				,
+			{% endif %}
+			{% include "dataentry/json/base-field.json" with field=field %}
+		{% endfor %}	
+	}
+	{% block additional_fields %}{% endblock %}
+}

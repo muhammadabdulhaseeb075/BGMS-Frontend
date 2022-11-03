@@ -1,0 +1,14 @@
+////
+/// Definitions for the Grid layout
+////
+
+
+// fix padding when adding modal to body
+body.modal-open {
+  padding-right:inherit !important;
+}
+
+.nopadding {
+   padding: 0;
+   margin: 0;
+}

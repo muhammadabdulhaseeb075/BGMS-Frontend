@@ -1,0 +1,17 @@
+.vertical-menu {
+    background-color: rgb(41, 43, 51);
+    height: calc(100vh - 50px);
+    width: 50px;
+}
+
+.vertical-menu .router-link-exact-active i.glyphicon {
+    border-left: 3px solid aliceblue;
+}
+
+.vertical-menu i.glyphicon {
+    color: white;
+    display: block;
+    font-size: 24px;
+    padding: 15px 5px;
+    text-align: center;
+}

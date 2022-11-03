@@ -1,0 +1,116 @@
+<!-- search form -->
+<form method="post" class="search-form" id="search-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="row">
+      <div class="fieldWrapper form-group col-xs-12 floating-label-form-group">
+      	{{ form.first_names.errors }}
+        <label for="{{ form.first_names.id_for_label }}">First names</label>
+        {{ form.first_names }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="fieldWrapper form-group col-xs-12 floating-label-form-group">
+        {{ form.last_name.errors }}
+        <label for="{{ form.last_name.id_for_label }}">Last name</label>
+        {{ form.last_name }}
+      </div>
+    </div>
+    {% comment %} <div class="row">
+      <div class="fieldWrapper form-group col-xs-12 slidebar">
+        <input id="id_fuzzy_value" name="fuzzy_value" type="range" min="75" max="100" value="87" step="5" onchange="rangevalue.value=value" style="margin-top: 25px;background: none; border: none;"/>
+        <span>Broad</span>
+        <span style="float: right;">Exact</span>
+        <output id="rangevalue" hidden></output>
+      </div>
+    </div> {% endcomment %}
+    <div class="row" style="text-align: right; padding-right: 10px;">
+      <label id='advanced-search-button' class="btn btn-bgms btn-form advanced-search-expand" title="Advance search" onclick="searchSection.showOrHideAdvancedSearch()">
+        <span id="advanced-search-button-text">More </span>
+        <span id="advanced-search-button-icon" class="glyphicon glyphicon-chevron-down"></span>
+      </label>
+    </div>
+
+    <div id="advanced-search-section" style="display: none;">
+      <div class="row">
+       <div class="fieldWrapper form-group col-xs-6 floating-label-form-group">
+         {{ form.age.errors }}
+         <label for="{{ form.age.id_for_label }}">Age (from)</label>
+         {{ form.age }}
+       </div>
+       <div class="fieldWrapper form-group col-xs-6 floating-label-form-group">
+         {{ form.age_to.errors }}
+         <label for="{{ form.age_to.id_for_label }}">Age (to)</label>
+         {{ form.age_to }}
+       </div>
+     </div>
+      <div id="year_burial_date_range" class="row">
+        <div class="fieldWrapper form-group col-xs-6 floating-label-form-group">
+          {{ form.year_burial_date.errors }}
+          <label for="{{ form.year_burial_date.id_for_label }}">Burial Year (from)</label>
+          {{ form.year_burial_date }}
+        </div>
+        <div class="fieldWrapper form-group col-xs-6 floating-label-form-group">
+          {{ form.year_burial_date_to.errors }}
+          <label for="{{ form.year_burial_date_to.id_for_label }}">Burial Year (to)</label>
+          {{ form.year_burial_date_to }}
+        </div>
+      </div>
+      <div id="burial_date_range" class="row" style="display: none;">
+       {# <div class="input-daterange input-group" id="datepicker"> #}
+        <div class="fieldWrapper form-group col-xs-6 floating-label-form-group">
+          {{ form.burial_date.errors }}
+          <label for="{{ form.burial_date.id_for_label }}">Date of Burial (from)</label>
+          {{ form.burial_date }}
+        </div>
+        <div class="fieldWrapper form-group col-xs-6 floating-label-form-group">
+          {{ form.burial_date_to.errors }}
+          <label for="{{ form.burial_date_to.id_for_label }}">Date of Burial (to)</label>
+          {{ form.burial_date_to }}
+        </div>
+      <!--</div>-->
+      </div>
+      <div class="specific-date row" >
+        <div class="col-xs-12" >
+          <div class="checkbox">
+            <label>
+              <span><input id="specific-date-check" class="simple" type="checkbox">Specific date of burial?</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 floating-label-form-group-style">
+          {{ form.memorial_types.errors }}
+          <label for="{{ form.memorial_types.id_for_label }}">Memorial type</label>
+          {{ form.memorial_types }}
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="row">
+      <div class="fieldWrapper form-group col-xs-2 floating-label-form-group search-button">
+      	<button title="Clear" type="button" class="btn btn-bgms btn-form" aria-label="Left Align" style="float: left;"
+        onclick="searchSection.clearSearhForm() {{ mapSearch|yesno:";person.clearSearchForm(),," }}">
+        <span class="icon-Clear-02-Filled" aria-hidden="true"></span>
+    	</button>
+      </div>
+      <div class="fieldWrapper form-group col-xs-8">
+        <input id="id_fuzzy_value" name="fuzzy_value" type="range" min="75" max="100" value="87" step="5" onchange="rangevalue.value=value" class="input-range"/>
+        <span>Broad</span>
+        <span style="float: right;">Exact</span>
+        <output id="rangevalue" hidden></output>
+      </div>
+      <div class="fieldWrapper form-group col-xs-2 floating-label-form-group search-button">
+      	<button title="Search" id="searchForm" type="submit" class="btn btn-bgms btn-form ladda-button" data-style="slide-right" aria-label="Left Align" style="float: right;"
+        onclick='{{ action }}{{ mapSearch|yesno:";person.clearSearchForm(),," }}'><span class="ladda-label">
+        </span><span class="icon-Search-Filled" aria-hidden="true"></span>
+    	  </button>
+      </div>
+    </div>
+</form>
+<!-- /.search form -->
+
+<input type="hidden" id="mapSearch" value="{{ mapSearch }}">

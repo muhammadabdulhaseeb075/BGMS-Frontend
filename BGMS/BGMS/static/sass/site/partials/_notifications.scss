@@ -1,0 +1,49 @@
+////
+/// Custom styles for PNotify
+////
+
+.ui-pnotify.permanent {
+  z-index: 1049; // modal is 1050s
+}
+
+.hideStickerAndCloser .ui-pnotify-sticker, .hideStickerAndCloser .ui-pnotify-closer {
+  visibility: hidden;
+}
+
+.ui-pnotify {
+  color: white;
+  
+  button {
+    padding: 10px;
+    //color: $base-grey;
+    color: black;
+    font-weight: bold;
+    background-color: transparent;
+    border-style: none;
+    text-transform: uppercase;
+  }
+
+  button:hover {
+    background-color: transparent;// rgba(0, 0, 0, 0.05);  
+    //color: black;
+    color: $base-grey;
+  }
+
+  &.confirmationNotice {
+    color: #8a6d3b!important;
+    background-color: #fcf8e3!important;
+    border-color: #faebcc;
+  }
+
+  .alert-danger {
+    background-color: #dd4b39;
+  }
+
+  .alert-success {
+    background-color: #00a65a !important;
+  }
+
+  &.alert-warning {
+    background-color: #f39c12 !important
+  }
+}

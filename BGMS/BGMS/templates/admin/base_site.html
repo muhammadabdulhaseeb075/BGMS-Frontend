@@ -1,0 +1,61 @@
+{% extends "admin/base1.9.html" %}
+
+{% block title %} BGMS site admin {% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+<!-- Custom Styles -->
+{% load static %}
+{% block extrastyle %}
+  <link rel="stylesheet" type="text/x-scss" href="{% static 'sass/vendor/pure-release-0.6.0/menus-min.css' %}" />
+  <link href="{% static 'fonts/fontawesome-free-5.6.3/css/fontawesome.min.css' %}" rel="stylesheet" media="screen" />
+  <link href="{% static 'fonts/fontawesome-free-5.6.3/css/solid.min.css' %}" rel="stylesheet" media="screen" />
+  <link href="{% static 'fonts/fontawesome-free-5.6.3/css/regular.min.css' %}" rel="stylesheet" media="screen" />
+  <link href="{% static 'libs/fine-uploader/fine-uploader-gallery.css' %}" rel="stylesheet" media="screen" />
+  <link href="{% static 'libs/ladda/v0.9.4/css/ladda-themeless.min.css' %}" rel="stylesheet" media="screen">
+  <link href="{% static 'libs/pnotify/v2.0.1/css/pnotify.custom.min.css' %}" rel="stylesheet" media="screen">
+  <link href="{% static 'admin/libs/bootstrap-glyphicons/css/bootstrap.css' %}" rel="stylesheet" media="screen">
+
+  <link href="{% static 'build/css/adm.min.css' %}" rel="stylesheet" media="screen">
+{% endblock %}
+<!-- FIN Custom Styles -->
+
+<!-- Custom Scripts -->
+{% block extrahead %}
+    <link rel="shortcut icon" href="{% static 'images/icons/gravestone.ico' %}" type="image/x-icon">
+
+    <script src="{% static 'libs/bower_components/jquery/dist-js/jquery.min.js' %}"></script>
+    <script src="{% static 'libs/fine-uploader/fine-uploader.js' %}"></script>
+    <script src="{% static 'main/js/ag-upload-files.js' %}"></script>
+    <script src="{% static 'libs/ladda/v0.9.4/js/spin.min.js' %}"></script>
+    <script src="{% static 'libs/ladda/v0.9.4/js/ladda.min.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.custom.min.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.buttons.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.confirm.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.callbacks.js' %}"></script>
+    <script src="{% static 'admin/libs/axios/axios.min.js' %}"></script>
+
+    <script src="{% static 'js/notificationService.js' %}"></script>
+    <script src="{% static 'admin/js/admin.js' %}"></script>
+{% endblock %}
+<!-- FIN Custom Scripts -->
+
+{% block userlinks %}
+  {% if site_url %}
+      <a href="{{ site_url }}">Return to burial ground</a> /
+  {% endif %}
+  {% if user.is_active and user.is_staff %}
+      {% url 'django-admindocs-docroot' as docsroot %}
+      {% if docsroot %}
+          <a href="{{ docsroot }}">Documentation</a> /
+      {% endif %}
+  {% endif %}
+  {% if user.has_usable_password %}
+  <a href="{% url 'admin:password_change' %}">Change password</a> /
+  {% endif %}
+  <a href="{% url 'logout' %}">Log out</a>
+{% endblock %}

@@ -1,0 +1,144 @@
+<div id="id_modalBurialDetails_all">
+{% load static %}
+<style>
+  img.displayed {
+    display: block;
+    margin-left: auto;
+    margin-right: auto
+  }
+
+  ul li {
+    display: inline;
+  }
+</style>
+
+{% load perm_filters %}
+<div id="id_modalBurialDetails" class="modal fade" tabindex="-1" role="dialog">
+<div class="modal-dialog modal-lg">
+  <div class="modal-content">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h4 class="modal-title"><strong>Burial Record Information</strong></h4>
+  </div>
+  <div class="modal-body detailed-form">
+    <div ng-bind-html="contents">
+
+
+<div class="row">
+  <!-- DeathPerson form -->
+  <div class="col-xs-12 form-section">
+    <div class="text-center">
+      <h3 class="form-title">Person Details</h3>
+      <!--if user|has_group:"SiteAdmin" -->
+      {% if user|group_required:"SiteAdmin, SiteWarden" and not unknown_grave %}
+      <span id="edit_buttons">
+        <button title="Edit" type="submit" class="btn btn-bgms btn-form-details field-to-hide editDetailPersonForm"
+          data-style="slide-right" aria-label="Left Align" onclick="modalBurialDetails.enableFields('#DeathPersonForm')">
+          <span class="ladda-label">
+          </span>
+          <span class="icon-Edit-Drawing-Filled" aria-hidden="true"></span>
+        </button>
+        <button title="Save" onclick="person.submitDetailsForm('/datamatching/personEdit/', '#DeathPersonForm', '#savePersonDetailsButton')" id="savePersonDetailsButton" class="btn btn-bgms ladda-button btn-form-details field-to-show" data-style="slide-right" aria-label="Left Align" style="display: none;">
+          <span class="ladda-label">
+          </span>
+          <span class="icon-Save-Filled" aria-hidden="true"></span>
+        </button>
+        <button title="Cancel" onclick="modalBurialDetails.disableFields('#DeathPersonForm')" class="btn btn-bgms ladda-button btn-form-details field-to-show" data-style="slide-right" aria-label="Left Align" style="display: none;">
+          <span class="ladda-label">
+          </span>
+          <span class="icon-Cancel-Filled" aria-hidden="true"></span>
+        </button>
+        <button title="Clear" onclick="modalBurialDetails.clearFields('#id_modalBurialDetails_all')" class="btn btn-bgms ladda-button btn-form-details btn-clear-fields hide-after-save" data-style="slide-right" aria-label="Left Align" style="display: none;">
+          <span class="ladda-label">
+          </span>
+          <span class="icon-Clear-02-Filled" aria-hidden="true"></span>
+        </button>
+      </span>
+      {% endif %}
+    </div>
+    {% include 'mapmanagement/edit/person-edit.html' with form=DeathPersonForm burial_official_formset=burial_official_formset reserved_plot_form=0 %}
+  </div>
+</div>
+<div class="row row-eq-height">
+  <div class="row-height">
+  <!-- Memorial form -->
+  <div class="col-xs-3 left-form-section">
+  <div id="flexslider-memorial" class="flexslider">
+  <ul class="slides">
+  {% for memorial_form in MemorialForm %}
+  <li>
+  <div class="">
+    <div class="text-center">
+      <h3 class="form-title">Memorial Details</h3>
+      {% if user|group_required:"SiteAdmin, SiteWarden" %}
+        <button title="Save" onclick="" id="saveMemorialDetailsButton-{{forloop.counter|add:'-1'}}" class="btn btn-bgms ladda-button btn-form-details field-to-show" data-style="slide-right" aria-label="Left Align" style="display: none;">
+          <span class="ladda-label">
+          </span>
+          <span class="icon-Save-Filled" aria-hidden="true"></span>
+        </button>
+        <button title="Cancel" onclick="modalBurialDetails.disableFields('#MemorialForm-{{forloop.counter|add:'-1'}}')" class="btn btn-bgms ladda-button btn-form-details field-to-show" data-style="slide-right" aria-label="Left Align" style="display: none;">
+          <span class="ladda-label">
+          </span>
+          <span class="icon-Cancel-Filled" aria-hidden="true"></span>
+        </button>
+      {% endif %}
+    </div>
+    <div class="text-center counter">
+      <i>{{ forloop.counter }} of {{ MemorialForm|length }}</i>
+    </div>
+    {# memorial_images=memorial_images|get_images:memorial_form.memorial_id.value #}
+    {% include 'datamatching/memorial-edit.html' with form=memorial_form memorial_images=memorial_form.initial|get_item:'images' counter=forloop.counter|add:'-1' management_form=MemorialForm.management_form action='/datamatching/memorialEdit/' delete_thumbs=0 %}
+  </div>
+  </li>
+  {% endfor %}
+  </ul>
+  </div>
+  </div>
+
+  <!-- BurialRecord form -->
+  <div class="col-xs-9 right-form-section">
+  <div class="">
+    <div class="text-center">
+      <h3 class="form-title">Burial Record Details</h3>
+      {% if user|group_required:"SiteAdmin, SiteWarden" and not unknown_grave %}
+      <span id="edit_buttons">
+        <button title="Edit" type="submit" class="btn btn-bgms btn-form-details field-to-hide editDetailPersonForm" data-style="slide-right" aria-label="Left Align" onclick="modalBurialDetails.enableFields('#BurialForm')">
+          <span class="ladda-label">
+          </span>
+          <span class="icon-Edit-Drawing-Filled" aria-hidden="true"></span>
+        </button>
+        <button title="Save" onclick="person.submitDetailsForm('/datamatching/burialEdit/', '#BurialForm', '#saveBurialDetailsButton')" id="saveBurialDetailsButton" class="btn btn-bgms ladda-button btn-form-details field-to-show" data-style="slide-right" aria-label="Left Align" style="display: none;">
+          <span class="ladda-label">
+          </span>
+          <span class="icon-Save-Filled" aria-hidden="true"></span>
+        </button>
+        <button title="Cancel" onclick="modalBurialDetails.disableFields('#BurialForm')" class="btn btn-bgms ladda-button btn-form-details field-to-show" data-style="slide-right" aria-label="Left Align" style="display: none;">
+          <span class="ladda-label">
+          </span>
+          <span class="icon-Cancel-Filled" aria-hidden="true"></span>
+        </button>
+      </span>
+      {% endif %}
+    </div>
+    {% include 'datamatching/burial-record-edit.html' with form=BurialForm burial_image=burial_image%}
+  </div>
+  </div>
+  </div>
+</div>
+
+</div>
+</div>
+{% comment %} <div class="modal-footer">
+</div> {% endcomment %}
+</div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/javascript" charset="utf-8">
+
+  $(document).ready(function() {
+    baseModal.initModal();
+  });
+
+</script>
+</div>

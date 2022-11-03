@@ -1,0 +1,95 @@
+<div>
+	<select ng-if="field.type==='Select'"
+		name="{{ field.name }}" 
+		ng-model="field.value"
+		id="{{ field.id }}"
+		ng-init="field.value = (field.value || field.choices[0].value)" 
+		ng-options="option.value as option.label for option in field.choices"
+		placeholder="{{field.label}}">
+	</select>
+
+	<div ng-if="field.name==='person-profession-profession'">
+		<select
+			ng-show="!column.addProfession"
+			name="{{ field.name + '-select' }}" 
+			ng-model='field.value'
+			id="{{ field.id + '-select' }}"
+			class='width120'
+			ng-init="field.value = (field.value || field.choices[0].value)" 
+			ng-options="option.value as option.label for option in field.choices">
+		</select>
+		<button type="button" ng-click="column.addProfession = !column.addProfession; column.addProfession ? column.clearFieldValue(false) : '';">{{ column.addProfession ? 'Add existing profession' : 'Add new profession' }}</button>
+	</div>
+
+	<div ng-if="field.name==='death-religion-religion'">
+		<select
+			ng-show="!column.addReligion"
+			name="{{ field.name + '-select' }}" 
+			ng-model='field.value'
+			id="{{ field.id + '-select' }}"
+			class='width120'
+			ng-init="field.value = (field.value || field.choices[0].value)" 
+			ng-options="option.value as option.label for option in field.choices">
+		</select>
+		<button type="button" ng-click="column.addReligion = !column.addReligion; column.addReligion ? column.clearFieldValue(false) : '';">{{ column.addReligion ? 'Add existing religion' : 'Add new religion' }}</button>
+	</div>
+
+	<div ng-if="field.name==='death-parish-parish'">
+		<select
+			ng-show="!column.addParish"
+			name="{{ field.name + '-select' }}" 
+			ng-model='field.value'
+			id="{{ field.id + '-select' }}"
+			class='width120'
+			ng-init="field.value = (field.value || field.choices[0].value)" 
+			ng-options="option.value as option.label for option in field.choices">
+		</select>
+		<button type="button" ng-click="column.addParish = !column.addParish; column.addParish ? column.clearFieldValue(false) : '';">{{ column.addParish ? 'Add existing parish' : 'Add new parish' }}</button>
+	</div>
+
+	<div ng-if="field.name==='death-event-name'">
+		<select
+			ng-show="!column.addEvent"
+			name="{{ field.name + '-select' }}" 
+			ng-model='field.value'
+			id="{{ field.id + '-select' }}"
+			class='width120'
+			ng-init="field.value = (field.value || field.choices[0].value)" 
+			ng-options="option.value as option.label for option in field.choices">
+		</select>
+		<button type="button" ng-click="column.addEvent = !column.addEvent; column.addEvent ? column.clearFieldValue(false) : '';">{{ column.addEvent ? 'Add existing event' : 'Add new event' }}</button>
+	</div>
+	
+	<input ng-if="field.type==='TextInput'"
+		type="text"
+		class="width120" 
+		name="{{ field.name }}" 
+		id="{{ field.id }}"
+		ng-model="field.value"
+		placeholder="{{field.label}}" maxlength="{{field.maxlength}}"
+		ng-show="(field.name!=='person-profession-profession' || column.addProfession) && (field.name!=='death-religion-religion' || column.addReligion) && (field.name!=='death-parish-parish' || column.addParish) && (field.name!=='death-event-name' || column.addEvent) && (field.name!=='death-event-description' || column.addEvent)"/>
+	
+	<input ng-if="(field.type==='NumberInput')"
+		type="number"
+		name="{{ field.name }}" 
+		id="{{ field.id }}"
+		ng-model="field.value"
+		placeholder="{{field.label}}" maxlength="{{field.maxlength}}"/>
+		    
+	<input  ng-if="field.type==='CheckboxInput'"
+		type="checkbox" 
+		name="{{ field.name }}" 
+		id="{{ field.id }}"
+		ng-model="field.value"
+		placeholder="{{field.label}}"/>
+		
+	<input  ng-if="field.type==='HiddenInput'"
+		type="hidden" 
+		name="{{ field.name }}" 
+		id="{{ field.id }}"
+		ng-model="field.value"
+		placeholder="{{field.label}}"/>
+</div>
+<div ng-show="field.error" style="color: #FF3434;" role="alert">
+    <div>{{field.error}}</div>
+</div>

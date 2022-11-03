@@ -1,0 +1,14 @@
+////
+/// Customisation to hide overflow and remove sidebar in mapmanagement
+////
+
+// hide overflow in y axis for the skin-bgms applied for AdminLTE
+body.skin-bgms {
+  overflow-y: hidden;
+}
+
+// Fix for AdminLTE v2.4. right side map content.
+.content-wrapper {
+  margin-left: 0px;
+  position: relative;
+}

@@ -1,0 +1,103 @@
+////
+/// Buttons across the admin portal
+////
+
+////
+/// Changes for Django 1.8
+///
+
+// Link Button
+.object-tools a:link, .object-tools a:visited {
+    background-color: $base-grey;
+}
+.object-tools a:hover, .object-tools li:hover a {
+    background-color: $base-orange;
+}
+
+// Button add
+.object-tools a.addlink {
+    background-color: $base-grey;
+}
+
+// Save button
+.button.default, input[type=submit].default, .submit-row input.default {
+    border: 2px solid $base-grey;
+    background: $base-grey;
+}
+
+// Table actions buttons
+#changelist #toolbar {
+  border-bottom: 0px!important;
+  background: $base-gold!important;
+}
+#changelist .actions {
+    color: $base-white!important;
+    border-top: 0px!important;
+    background: $base-gold!important;
+}
+#changelist .paginator {
+    color: $base-white!important;
+    background: $base-gold!important;
+}
+
+////
+/// FIN: Changes for Django 1.8
+////
+
+
+////
+/// Changes for Django 1.9
+////
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: $base-grey;
+}
+.button:active, input[type=submit]:active, input[type=button]:active, .button:focus, input[type=submit]:focus, input[type=button]:focus, .button:hover, input[type=submit]:hover, input[type=button]:hover, input[type=submit].default:hover, .ladda-button:active, .ladda-button:hover {
+    background: $base-orange;
+    border: 2px solid $base-orange;
+}
+
+////
+/// FIN: Changes for Django 1.9
+////
+
+
+//fineuploader.js buttons
+.qq-gallery .qq-upload-button {
+    background: $base-orange;
+    border: 0px;
+}
+
+//Ladda button
+.ladda-button{
+    padding: 10px 15px;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    border: 2px solid #383b3d;
+    background: #383b3d;
+    margin: 0 0 0 8px;
+    text-transform: uppercase;
+}
+
+//Notifications PNotify
+.alert-success {
+    border-color: #008d4c;
+}
+
+.alert-danger,.alert-error {
+    border-color: #d73925
+}
+
+.alert-warning {
+    border-color: #e08e0b
+}
+
+.alert-info {
+    border-color: #00acd6
+}
+
+.qq-gallery.qq-uploader {
+  min-height: 300px!important;
+  max-height: 545px!important;
+}

@@ -1,0 +1,79 @@
+<form id='tableform'>
+	<input type="hidden" name="{{creator.template.csrfmiddlewaretoken[0].name}}" value="{{creator.template.csrfmiddlewaretoken[0].value}}"/>
+	<div class="row">
+		<div class="col-md-4">
+			<label for="{{  creator.form.fields.burial_image.id }}">Select Register Image</label> 
+			<select name="{{ creator.form.fields.burial_image.name }}" ng-model="creator.template.burialImage" 
+	    		class="form-control" id="{{ creator.form.fields.burial_image.id }}" ng-change="creator.changeImage()"
+	    		ng-options="'Book from '+option.bookName for option in creator.form.fields.burial_image.choices | orderBy: ['-bookName']">
+			</select>
+		</div>
+		<div class="col-md-4">
+			<label>Base on Existing Template</label>
+			<select name="{{ creator.form.fields.base_template.name }}" ng-model="creator.baseTemplate" 
+				class="form-control" id="{{ creator.form.fields.base_template.id }}" ng-change="creator.changeTemplate()"
+				ng-options="option.label for option in creator.form.fields.base_template.choices">
+				<option value="">-- New Template --</option>
+			</select>
+		</div>
+		<div class="col-md-4">
+			<label for="{{ creator.form.fields.name.id }}">Template Name</label> 
+			<input type="text" name="{{ creator.form.fields.name.name }}" ng-model="creator.template.name" 
+				class="form-control" id="{{ creator.form.fields.name.id }}"/>
+				<div ng-show="creator.form.fields.name.error" style="color: #FF3434;" role="alert">
+				    <div>{{creator.form.fields.name.error}}</div>
+				</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<label for="{{  creator.form.fields.description.id }}">Description</label>
+			<textarea name="{{ creator.form.fields.description.name }}" ng-model="creator.template.description" 
+			    	class="form-control" id="{{ creator.form.fields.description.id }}" rows=1 placeholder="Enter any templates notes or description here"></textarea>
+		</div>
+	</div>
+	<div class="row" ondragstart="return false;" ondrop="return false;" ondragenter="return false;" ondragleave="return false;" ondragover="return false;" ondrag="return false;" >
+		<div class="col-md-12" ondragstart="return false;" ondrop="return false;" ondragenter="return false;" ondragleave="return false;" ondragover="return false;" ondrag="return false;" >
+			<label>Template</label>
+			<div class="template-columns" ondragstart="return false;" ondrop="return false;" ondragenter="return false;" ondragleave="return false;" ondragover="return false;" ondrag="return false;" >
+				<div ui-grid="creator.columnOptions" ondragenter="return false;" ondragleave="return false;" ondragover="return false;" ondrag="return false;" class="grid"  ui-grid-move-columns ui-grid-resize-columns></div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+	  <div class="col-md-9 burialImage">
+		<label ng-show="creator.template.burialImage">
+	  	Burial Record from {{creator.template.burialImage.bookName}}, Page No. {{creator.template.burialImage.pageNo}}
+	  	</label>
+	    <bgms-image-viewer image="creator.template.burialImage" width="creator.imageViewerWidth" image-id-for-tags="null"></bgms-image-viewer>
+	  </div>
+	  <div class="col-md-3">	
+	  	<div class="row columnsTable">		
+			<label>Select Columns</label>
+			<div ui-grid="creator.rowOptions" ui-grid-selection></div>
+			<div ng-show="creator.form.fields.columns.error" style="color: #FF3434;" role="alert">
+			    <div>{{creator.form.fields.columns.error}}</div>
+			</div>
+		</div>
+		<div class="row">
+		  		<div ng-show="!creator.templateId" class="dataentry hi-icon-wrap hi-icon-effect-2 hi-icon-effect-2b row" style="display: flex;">
+					<div class="col-md-12">
+	      				<button class='hi-icon icon-Save-Filled' style="color: green;" data-spinner-color='red' bgms-ladda="creator.submitLoading" type="submit" id="submit" ng-click="creator.submit()">
+	      				</button>
+	      				<div>
+	        				<h4>Save Template</h4>
+	      				</div>
+	    			</div>
+	    		</div> 
+		  		<div ng-show="creator.templateId" class="dataentry hi-icon-wrap hi-icon-effect-2 hi-icon-effect-2b row" style="display: flex;">
+					<div class="col-md-12">
+	      				<button class='hi-icon icon-Save-Filled' style="color: green;" data-spinner-color='red' bgms-ladda="creator.submitLoading" ng-click="creator.updateTemplate()">
+	      				</button>
+	      				<div>
+	        				<h4>Save Template</h4>
+	      				</div>
+	    			</div>
+	    		</div> 
+	  </div>
+	</div>  
+</form>

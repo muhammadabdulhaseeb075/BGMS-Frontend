@@ -1,0 +1,29 @@
+{% load static %}
+
+<!DOCTYPE html>
+<head>
+    <title>{% block title %}Burial Ground Management System{% endblock %}</title>
+    <link rel="shortcut icon" href="{% static 'images/icons/gravestone.ico' %}" type="image/x-icon">
+    <link href="{% static 'fonts/fontawesome-free-5.6.3/css/fontawesome.min.css' %}" rel="stylesheet" media="screen" />
+    <link href="{% static 'fonts/fontawesome-free-5.6.3/css/solid.min.css' %}" rel="stylesheet" media="screen" />
+    <link href="{% static 'fonts/fontawesome-free-5.6.3/css/regular.min.css' %}" rel="stylesheet" media="screen" />
+    <link href="{% static 'fonts/bgms-font/style.css' %}" rel="stylesheet" media="screen" />   
+    <link rel="stylesheet" href="{% static 'build/bgms-frontend/styles.css' %}" />
+</head>
+
+
+
+{% block content %}
+
+{% csrf_token %}
+
+{# Vue app #}
+<div id="main"></div>
+<script>window.document.user = { short_name: "{{ user.get_short_name }}", username: "{{ user.get_username }}" }</script>
+{% endblock %}
+
+{% block js%}
+    {# Vue #}
+    <script src="{% static 'build/bgms-frontend/bundle.js' %}"></script>
+{% endblock %}
+

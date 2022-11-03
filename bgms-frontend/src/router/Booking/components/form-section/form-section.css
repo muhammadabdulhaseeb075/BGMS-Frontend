@@ -1,0 +1,18 @@
+@import "styles/theme.css";
+
+.form-section {
+    @apply flex pt-3;
+
+    border-bottom: 1px solid $main-color;
+
+    h3 {
+        @apply text-2xl font-semibold flex-none;
+
+        color: $third-color;
+        width: 180px;
+    }
+
+    .section-fields {
+        @apply w-full;
+    }
+} /** form */

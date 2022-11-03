@@ -1,0 +1,125 @@
+{% extends "dataentry/json/base-form.json" %}
+
+
+{% block additional_fields %}
+	,
+	"status": "{{status}}",
+	"image": {
+		"url": "{{image}}",
+		"id": "{{image_id}}",
+		"extent": {{image_extent}}
+	},
+	"records": [
+		{% for record in records %}
+			{% if forloop.counter0 > 0 %}
+				,
+			{% endif %}
+			{
+				"person___id": "{{record.death__person_id|default_if_none:''}}",
+				"person___name":{
+					"person___title": "{{record.death__person__title|default_if_none:''}}",
+					"person___first_names": "{{record.death__person__first_names|default_if_none:''}}",
+					"person___birth_name": "{{record.death__person__birth_name|default_if_none:''}}",
+					"person___other_names": "{{record.death__person__other_names|default_if_none:''}}",
+					"person___last_name": "{{record.death__person__last_name|default_if_none:''}}"
+				},
+				"person___tag": {
+					"id": "{{record.death__person__tag__id|default_if_none:''}}",
+					"extent_points_wkt": "{{record.death__person__tag__top_left_bottom_right|default_if_none:''}}"
+				},
+				"person___birth_date": {
+					"person___impossible_date_day": "{{record.death__person__impossible_date_day|default_if_none:''}}",
+					"person___impossible_date_month": "{{record.death__person__impossible_date_month|default_if_none:''}}",
+					"person___impossible_date_year": "{{record.death__person__impossible_date_year|default_if_none:''}}"
+				},				
+				"person___gender": "{{record.death__person__gender|default_if_none:''}}",
+				"person___description": "{{record.death__person__description|default_if_none:''}}",
+				"person___profession": {
+					"profession": "{{record.death__person__profession__profession|default_if_none:''|escapejs}}"
+				},
+				"person___residence_address": {
+					"first_line": "{{record.death__person__residence_address__first_line|default_if_none:''}}",
+					"second_line": "{{record.death__person__residence_address__second_line|default_if_none:''}}",
+					"town": "{{record.death__person__residence_address__town|default_if_none:''}}",
+					"county": "{{record.death__person__residence_address__county|default_if_none:''}}",
+					"postcode": "{{record.death__person__residence_address__postcode|default_if_none:''}}",
+					"country": "{{record.death__person__residence_address__country|default_if_none:''}}"
+				},				
+				
+				"death___event": {
+					"name": "{{record.death__event__name|default_if_none:''|escapejs}}",
+					"description": "{{record.death__event__description|default_if_none:''|escapejs}}"
+				},
+				"death___address": {
+					"first_line":"{{record.death__address__first_line|default_if_none:''}}",
+					"second_line":"{{record.death__address__second_line|default_if_none:''}}",
+					"town":"{{record.death__address__town|default_if_none:''}}",
+					"county":"{{record.death__address__county|default_if_none:''}}",
+					"postcode":"{{record.death__address__postcode|default_if_none:''}}",
+					"country":"{{record.death__address__country|default_if_none:''}}"
+				},
+				"death___age": {
+					"death___age_years": "{{record.death__age_years|default_if_none:''}}",
+					"death___age_months": "{{record.death__age_months|default_if_none:''}}",
+					"death___age_weeks": "{{record.death__age_weeks|default_if_none:''}}",
+					"death___age_days": "{{record.death__age_days|default_if_none:''}}",
+					"death___age_hours": "{{record.death__age_hours|default_if_none:''}}",
+					"death___age_minutes": "{{record.death__age_minutes|default_if_none:''}}"
+				},
+				"death___parish": {
+					"parish": "{{record.death__parish__parish|default_if_none:''|escapejs }}"
+				},
+				"death___religion": {
+					"religion": "{{record.death__religion__religion|default_if_none:''|escapejs}}"
+				},
+				"death___death_date": {
+					"death___impossible_date_day": "{{record.death__impossible_date_day|default_if_none:''}}",
+					"death___impossible_date_month": "{{record.death__impossible_date_month|default_if_none:''}}",
+					"death___impossible_date_year": "{{record.death__impossible_date_year|default_if_none:''}}"
+				},
+				"death___death_cause": "{{record.death__death_cause|default_if_none:''}}",
+				
+				"burial___burial_officials": [
+					{% for official in record.burial_official %}
+						{% if forloop.counter0 > 0 %}
+							,
+						{% endif %}
+						{
+							"official_type": "{{official.burial_official__official_type|default_if_none:''}}",
+							"burial_official_type": "{{official.burial_official__burial_official_type__id|default_if_none:''}}",
+							"id": "{{official.burial_official__official__id|default_if_none:''}}",
+							"title": "{{official.burial_official__official__title|default_if_none:''}}",
+							"first_names": "{{official.burial_official__official__first_names|default_if_none:''}}",
+							"last_name": "{{official.burial_official__official__last_name|default_if_none:''}}"
+						}
+					{% endfor %}
+				],
+				"burial___burial_number": "{{record.burial_number|default_if_none:''}}",
+				"burial___burial_date": {
+					"burial___impossible_date_day": "{{record.impossible_date_day|default_if_none:''}}",
+					"burial___impossible_date_month": "{{record.impossible_date_month|default_if_none:''}}",
+					"burial___impossible_date_year": "{{record.impossible_date_year|default_if_none:''}}"
+				},
+				"burial___consecrated": "{{record.consecrated|default_if_none:''}}",
+				"burial___cremation_certificate_no": "{{record.cremation_certificate_no|default_if_none:''}}",
+				"burial___cremated": "{{record.cremated|default_if_none:''}}",
+				"burial___cremation_date": {
+					"burial___impossible_cremation_date_day": "{{record.impossible_cremation_date_day|default_if_none:''}}",
+					"burial___impossible_cremation_date_month": "{{record.impossible_cremation_date_month|default_if_none:''}}",
+					"burial___impossible_cremation_date_year": "{{record.impossible_cremation_date_year|default_if_none:''}}"
+				},
+				"burial___interred": "{{record.interred|default_if_none:''}}",
+				"burial___depth": "{{record.depth|default_if_none:''}}",
+				"burial___depth_units": "{{record.depth_units|default_if_none:''}}",
+				"burial___burial_remarks": "{{record.burial_remarks|default_if_none:''}}",
+				"burial___requires_investigation": "{{record.requires_investigation|default_if_none:''|lower}}",
+				"burial___user_remarks": "{{record.user_remarks|default_if_none:''}}",
+				"burial___situation": "{{record.situation|default_if_none:''}}",
+				"burial___place_from_which_brought": "{{record.place_from_which_brought|default_if_none:''}}",
+				"burial___graveref": {
+					"grave_number": "{{record.graveref__grave_number|default_if_none:''}}"
+				}
+			}
+		{% endfor %}
+	]
+{% endblock %}

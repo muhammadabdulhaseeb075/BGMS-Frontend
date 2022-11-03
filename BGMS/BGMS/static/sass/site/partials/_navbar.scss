@@ -1,0 +1,202 @@
+$navbar-height: 50px;
+$navbar-menu-top: calc(#{$navbar-height} - 5px);
+
+.top-nav {
+  z-index: 1030;
+
+  .navbar {
+    height: $navbar-height!important;
+    background-size: contain;
+    margin-bottom: 0px;
+    position: relative;
+    border: 0px;
+    background-color: $base-gold!important;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    border-radius: 0px;
+
+    .logo {
+      font-family: $base-font-family;
+      font-weight: $heading-font-weight;
+      font-size: $heading-font-size;
+      line-height: 0px;
+      width: 230px;
+      height: $navbar-height;
+    };
+
+    .navbar-brand {
+      padding-top: 0px!important;
+      padding-bottom: 0px!important;
+    }
+    .nav-item .nav-link {
+      color: white;
+    }
+    .nav-item .nav-link:hover,
+    .nav-item .nav-link:active,
+    .nav-item .nav-link:focus,
+    .nav-item.show .nav-link,
+    .nav-item > .active > .nav-link {
+      background: rgba(0, 0, 0, 0.1);
+      color: #f6f6f6;
+    }
+
+    @media (max-width: 900px) {
+      .user-menu-user {
+        display: none;
+      }
+    }
+    /*@media (max-width: 767px) {
+      .user-menu-user {
+        display: inline;
+      }
+    }*/
+    // Styles for the logo section
+    .logo {
+      color: #ffffff;
+      border-bottom: 0 solid transparent;
+      background-size: cover;
+    }
+    .logo:hover {
+      background-color: lighten($base-grey, 15%);
+    }
+    li.user-header {
+      background-color: #3c8dbc;
+    }
+    .content-header {
+      background: transparent;
+    }
+
+    .user-panel > .info,
+    .user-panel > .info > a {
+      color: #fff;
+    }
+    .treeview-menu > li > a {
+      color: #8aa4af;
+    }
+    .treeview-menu > li.active > a,
+    .treeview-menu > li > a:hover {
+      color: #ffffff;
+    }
+    .skin-bgms.layout-top-nav > .logo {
+      background-color: #3c8dbc;
+      color: #ffffff;
+      border-bottom: 0 solid transparent;
+    }
+    .skin-bgms.layout-top-nav > .logo:hover {
+      background-color: #3b8ab8;
+    }
+    .alert-warning{
+      color: #8a6d3b!important;
+      background-color: #fcf8e3!important;
+      border-color: #faebcc;
+    }
+    .bg-light-blue {
+      background-color: $base-gold !important;
+    }
+
+    @media (min-width: 768px) {
+      #navbarSupportedContent {
+        float: right;
+      }
+    }
+
+    @media (max-width: 767px) {
+      #navbarSupportedContent {
+        margin: $navbar-height 0px 0px 0px;
+      }
+    }
+
+	.v-btn {
+	  border-radius: 0px;
+      height: calc(#{$navbar-height} - 10px)!important;
+      top: 5px;
+
+      .fa-user {
+        margin-right: 5px;
+      }
+
+      .fa-caret-down, .fa-caret-up {
+        margin-left: 5px;
+      }
+	}
+
+	.v-btn:before {
+      display: none;
+    }
+
+	.v-btn:hover:not(:focus), .v-btn:focus:before, .v-btn.active {
+	  background-color: rgb(174, 156, 59);
+	  opacity: 1;
+      display: inline-flex;
+	}
+
+    .v-toolbar__content {
+      padding: 0px;
+      height: $navbar-height!important;
+    }
+  }
+}
+
+.menu-dropdown {
+  border-radius: 0px;
+  top: $navbar-menu-top!important;
+
+  .v-list {
+    border-radius: 0px;
+
+    h4 {
+      background-color: $base-gold;
+      color: white;
+      min-height: 25px;
+      padding-top: 3px;
+    }
+
+    .v-list-item {
+      min-height: 35px;
+
+      .v-list-item__title {
+        color: #777;
+      }
+    }
+  }
+
+  a {
+    color: $base-orange;
+    font-weight: 600;
+  }
+}
+
+.menu-legend {
+  height: calc(100vh - #{$navbar-menu-top});
+  overflow-y: auto;
+  min-width: 140px!important;
+
+  .v-list-item {
+      min-height: 15px!important;
+      line-height: 1;
+  }
+}
+
+.site-details {
+  background-color: #c3af42!important;
+  //border-top: 2px solid white;
+  width: 250px;
+  padding: 12px;
+
+  .row {
+    div {
+      padding-top: 0px;
+      padding-bottom: 0px;
+    }
+  }
+}
+
+#MainVueApp {
+  // there should be a way to build this menu that doesn't require custom css
+  .user-menu {
+    top: $navbar-menu-top!important;
+    right: 0px!important;
+    left: auto!important;
+  }
+}

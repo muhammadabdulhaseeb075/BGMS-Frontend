@@ -1,0 +1,84 @@
+{% extends "mapmanagement/base.html" %}
+{% load static %}
+{% load perm_filters %}
+{% load render_bundle from webpack_loader %}
+
+{% block css %}
+	  <link href="{% static 'build/css/dm.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'css/floating-labels.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'libs/ladda/v0.9.4/css/ladda-themeless.min.css' %}" rel="stylesheet" media="screen">
+    
+    <link href="{% static 'libs/selectize/v0.12.1/css/selectize.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'css/flexslider.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'libs/prettyPhoto/v3.1.6/css/prettyPhoto.css' %}" rel="stylesheet" media="screen">
+
+{% endblock %}
+
+{% block navbar %}
+{% endblock %}
+
+{% block dropdown %}
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Actions <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="{{ SiteUrls.mapmanagement }}">Map Portal</a></li>
+      {% if user|group_required:"DataEntry, SiteWarden, SiteAdmin" %}
+        <li><a href="{{ SiteUrls.dataentry }}">Burial Record Entry Portal</a></li>
+      {% endif %}
+      {% if user|group_required:"SiteAdmin" %}
+        <li><a href="/siteadminportal/">Admin Portal</a></li>
+      {% endif %}
+    </ul>
+  </li>
+{% endblock %}
+
+{% block content %}
+{# Vue app #}
+<div id="dmapp"></div>
+{% endblock %}
+
+{% block jquery_js %}
+  <script src="{% static 'libs/bower_components/jquery/dist-js/jquery.min.js' %}"></script>
+{% endblock %}
+
+{% block js%}
+    <script src="{% static 'libs/jQuery-File-Upload/v9.9.3/js/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/v9.9.3/js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/v9.9.3/js/jquery.fileupload.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-datepicker/v1.4.0/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-table/v1.7.0/js/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-table/extensions/flatJSON/bootstrap-table-flatJSON.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-table/extensions/jquery.tablesorter.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-table/extensions/jquery.tablesorter.widgets.js' %}"></script>
+    <script src="{% static 'libs/prettyPhoto/v3.1.6/js/jquery.prettyPhoto.js' %}"></script>
+    <script src="{% static 'js/floating-labels.js' %}"></script>
+    <script src="{% static 'js/floating-labels-style.js' %}"></script>
+    <script src="{% static 'libs/ladda/v0.9.4/js/spin.min.js' %}"></script>
+    <script src="{% static 'libs/ladda/v0.9.4/js/ladda.min.js' %}"></script>
+    <script src="{% static 'libs/jquery.maskedinput/v1.4.0/js/jquery.maskedinput.min.js' %}"></script>
+    <script src="{% static 'libs/selectize/v0.12.1/js/standalone/selectize.min.js' %}"></script>
+    <script src="{% static 'libs/jquery.flexslider/v2.5.0/js/jquery.flexslider.js' %}"></script>
+    <script src="{% static 'libs/bower_components/jquery-validation/dist-js/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'libs/bower_components/jquery-validation/dist-js/additional-methods.min.js' %}"></script>
+
+    {# Vue #}
+
+    {% render_bundle 'chunk-vendors' %}
+    {% render_bundle 'chunk-common' %}
+    {% render_bundle 'datamatching' %}
+
+    {% if debug %}
+        <script src="{% static 'mapmanagement/js/messages.js' %}"></script>
+        <script src="{% static 'mapmanagement/js/js_to_angular_interface.js' %}"></script>
+        <script src="{% static 'datamatching/js/person.js' %}"></script>
+        <script src="{% static 'mapmanagement/js/bgms.persondetails.js' %}"></script>
+        <script src="{% static 'datamatching/js/datamatching.js' %}"></script>
+        <script src="{% static 'datamatching/js/bgms.search.js' %}"></script>
+        <script src="{% static 'datamatching/js/prettyPhotoTemplate.js' %}"></script>
+        <script src="{% static 'datamatching/js/basemodal.js' %}"></script>
+    {% else %}
+        <script src="{% static 'build/js/all.js' %}"></script>
+        <script src="{% static 'build/js/all-dm.js' %}"></script>
+    {% endif %}
+
+{% endblock %}

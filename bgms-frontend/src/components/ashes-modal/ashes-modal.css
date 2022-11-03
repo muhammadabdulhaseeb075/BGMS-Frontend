@@ -1,0 +1,34 @@
+@import "styles/theme.css";
+
+.ashes-modal {
+    .modal-header {
+        background-color: $main-color;
+    }
+    .close-button {
+        background-color: white;
+    }
+    .fill-button {
+        background-color: $main-color;
+        border-radius: 5px;
+        display: inline-block;
+        font-color: $main-font-color;
+        min-width: 100px;
+        padding: 3px 5px;
+        margin-right: 20px;
+        margin-left: 20px;
+        margin-bottom: 15px;
+        &:focus { outline: none; }
+    }
+    .empty-button {
+        background-color: white;
+        border-radius: 5px;
+        display: inline-block;
+        font-color: $main-font-color;
+        min-width: 100px;
+        padding: 3px 5px;
+        margin-right: 20px;
+        margin-left: 20px;
+        margin-bottom: 15px;
+        &:focus { outline: none; }
+    }
+} 

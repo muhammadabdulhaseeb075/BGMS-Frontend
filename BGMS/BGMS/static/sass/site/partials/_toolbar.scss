@@ -1,0 +1,370 @@
+////
+/// Any Toolbar on the map
+/// @example
+///   Search toolbar, Layers and Map toolbar
+////
+
+// Search toolbar: left top corner
+// @group Search
+#v-SearchController {
+  position: absolute;
+  top: 55px;
+  left: 5px;
+  z-index: 1;
+
+  button {
+  	position: relative;
+  }
+
+  #search-panel {
+  	position: absolute;
+  	top: 0px;
+
+  	#search-tabs {
+  	  list-style-type: none;
+  	  width: 100%;
+  	  margin: 0px;
+  	  padding: 0px;
+      border-right: 4px solid $base-gold;
+      border-left: 2.5px solid $base-gold;
+      border-top: 4px solid $base-gold;
+
+  	  li {
+        line-height: 25px;
+        float: left;
+        padding: 0px;
+
+        text-align: center;
+        font-weight: bold;
+
+        background-color: $base-gold-light-1;
+
+        a {
+          display:block;
+          color: $base-grey;
+
+          border-left: 1.5px solid $base-gold;
+        }
+       
+        a:hover, a.focus-visible:focus, .active {
+          cursor: pointer;
+          background-color: $base-orange;
+        }
+
+        .active {
+          color: white;
+        }
+      }
+  	}
+  }
+
+  .offline-message {
+    padding: 20px;
+    text-align: center;
+
+    h2 {
+    	font-size: 24px;
+    }
+  }
+
+  input[type="number"], input[type="date"] {
+	  box-shadow: none;
+	  background-color: #fafafa;
+	  border: 1px solid #fafafa;
+	  height: 25px;
+	  -webkit-transition: all 0.3s ease-in-out;
+	  -o-transition: all 0.3s ease-in-out;
+	  transition: all 0.3s ease-in-out;
+  }
+
+  select {
+  	width: 100%;
+  }
+
+  .result-info {
+  	height: 35px;
+  }
+
+  .collapse-menu-results {
+	padding:0px;
+  }
+
+  .sidebar-form {
+	margin-bottom: 0px!important;
+
+	.fuzzy-container {
+	  margin-bottom: 5px;
+	}
+  }
+
+  .advanced-search-expand {
+    .glyphicon {
+      top: 3px;
+    }
+  }
+
+  .model-list-select {
+  	height: 43px;
+
+  	#grave-numbers {
+  		// i'm not sure why this is needed, but it is
+  		z-index: 2;
+  	}
+
+  	.model-list-select-div {
+  		position: fixed;
+  		width: 130px;
+  		z-index: 3;
+
+  		&.model-list-select-div-12 {
+  		  width: 270px;
+  		  z-index: 4;
+  		}
+
+        .dropdown, .dropdown input {
+          min-height: 25px;
+          padding: 5px 0px 5px 0px;
+        }
+
+  		.text {
+  			white-space: nowrap;
+  			overflow: hidden;
+  			font-size: 1em;
+  			line-height: 15px;
+  		}
+
+  		.search {
+  			line-height: 10px;
+  			border-radius: 0;
+  		}
+
+	  .ui.dropdown .menu .item {
+		font-size: 15px;
+	  }
+
+	  .ui.dropdown .menu {
+	  }
+
+	  .default.text {
+	  	color: rgba(115, 115, 115, 0.87);
+	  }
+  	}
+  }
+
+  .grave-feature-radio {
+  	padding-top: 10px;
+
+  	div {
+  		margin-bottom: 0px;
+
+  		input {
+  			margin-left: 10px;
+  		}
+  	}
+  }
+
+  table {
+    position: relative;
+    padding: 4px !important;
+    border-spacing: 0;
+    margin-bottom: 0!important;
+	border-bottom: 1px solid #ddd;
+	border-collapse: collapse!important;
+	border-radius: 1px;
+
+	// font size is important as column widths are fixed
+
+    // Edge
+	tbody tr td {
+     font-size: 12px!important;
+    }
+
+    // Webkit
+	@media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm)
+    { 
+        tbody tr td {
+         font-size: 14px!important;
+        }
+    }
+
+    // Firefox
+    @-moz-document url-prefix()
+    { 
+        tbody tr td {
+         font-size: 13px!important;
+        }
+    }
+
+	&.burial-table {
+      .name-column {
+        width: 155px;
+      }
+      .burial-date-column {
+        width: 82px;
+      }
+      .age-column {
+        width: 38px;
+        text-align: right;
+      }
+	}
+
+	&.reservation-table {
+      .name-column {
+        width: 274px;
+      }
+	}
+
+	&.owner-table {
+      .name-column {
+        width: 140px;
+      }
+      .address-column {
+        width: 134px;
+      }
+	}
+
+    &.grave-table-1 {
+
+      .gravenumber-column {
+        width: 226px;
+      }
+    }
+
+    &.grave-table-2 {
+
+      .section-column {
+        width: 102px;
+      }
+
+      .gravenumber-column {
+        width: 125px;
+      }
+	}
+
+    &.grave-table-3 {
+
+      .section-column {
+        width: 75px;
+      }
+
+      .subsection-column {
+        width: 77px;
+      }
+
+      .gravenumber-column {
+        width: 75px;
+      }
+	}
+
+    .layer-column {
+      width: 48px;
+
+      div {
+        height: 19px;
+      }
+    }
+
+    td.layer-column {
+      text-align: center;
+    }
+
+	th {
+	  border-bottom: 2px solid #ddd;
+	  padding: 3px;
+	  margin: 0;
+	  cursor: pointer;
+	}
+
+    tbody {
+      position: absolute;
+      overflow-y: auto;
+      //width: 101.55%;
+    }
+
+    td {
+    	padding: 4px !important;
+    }
+  }
+
+  .loadingGraveID {
+  	font-size: 20px;
+  	text-align: center;
+  	padding: 5px;
+  }
+}
+
+#atlanticGeomaticsInfo.collapsed {
+  right: -147px;
+}
+
+#atlanticGeomaticsInfo:not(.collapsed) {
+  right: 5px;
+}
+
+#atlanticGeomaticsInfo {
+  display: inline-flex;
+  position: fixed;
+  bottom: 5px;
+
+  z-index: 1031;
+  
+  background-color: rgba(255, 255, 255, 0);
+  border: none;
+  box-shadow: none!important;
+
+  transition: 0.3s;
+  -webkit-transition: 0.3s;
+
+  button {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0);
+    border: none;
+    padding-top: 3px;
+    padding-bottom: 0px;
+    margin-bottom: -7px;
+    height: 45px;
+    width: 100%;
+    right: -24px;
+    
+    text-align: right;
+
+    box-shadow: none!important;
+
+    img {
+      height: 100%;
+    }
+  }
+
+  .ag-info-panel.collapsed {
+    right: -280px;
+  }
+
+  .ag-info-panel:not(.collapsed) {
+    right: 0px;
+  }
+
+  .ag-info-panel {
+    background: hsl(240, 2%, 90%);
+    position: absolute;
+    bottom: 45px;
+    right: 0px;
+    width: 275px;
+
+    border: 1px solid #ddd;
+
+    transition: 0.3s;
+    -webkit-transition: 0.3s;
+
+    text-align: left!important;
+
+    .ag-info-panel-body {
+      padding: 10px;
+      margin: 0px;
+
+      span {
+        color: #ee592a;
+        font-weight: bold;
+      }
+    }
+  }
+}

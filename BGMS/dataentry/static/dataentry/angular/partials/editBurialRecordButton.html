@@ -1,0 +1,40 @@
+<div class="ui-grid-cell-contents" title="TOOLTIP">
+	<div class="row" style="display: flex;">
+		<div ng-show="!row.entity.editable" class="col-md-6">
+    		<label class="btn btn-bgms" aria-label="Delete Record" title="Delete Record">
+				<input type="checkbox" name="drawtag" autocomplete="off" ng-click="grid.appScope.deleteRecord(row.entity)"  data-spinner-color='red' bgms-ladda="addRecord.loading" checked hidden>
+				<span class="icon-Delete-Filled"></span>
+			</label>
+    	</div>
+    	<div ng-show="!row.entity.editable && !grid.appScope.isEditing && !grid.appScope.loadingFormOption" class="col-md-6">
+    		<label class="btn btn-bgms" aria-label="Edit Record" title="Edit Record">
+				<input type="checkbox" name="drawtag" autocomplete="off" ng-click="grid.appScope.editRecord(row)"  data-spinner-color='red' bgms-ladda="addRecord.loading" checked hidden>
+				<span class="icon-Edit-Drawing-Filled"></span>
+			</label>
+  		</div>
+    	<div ng-show="row.entity.editable && !row.entity.isNewRow && grid.appScope.isEditing" class="col-md-6">
+    		<label class="btn btn-bgms" aria-label="Cancel Edit" title="Cancel Edit">
+				<input type="checkbox" name="drawtag" autocomplete="off" ng-click="grid.appScope.cancleEdit(row)"  data-spinner-color='red' bgms-ladda="addRecord.loading" checked hidden>
+				<span class="icon-Cancel-Filled"></span>
+			</label>
+  		</div>
+    	<div ng-show="row.entity.editable && row.entity.isNewRow && grid.appScope.isEditing" class="col-md-6">
+    		<label class="btn btn-bgms" aria-label="Cancel" title="Cancel">
+				<input type="checkbox" name="drawtag" autocomplete="off" ng-click="grid.appScope.cancleNewRow(row)"  data-spinner-color='red' bgms-ladda="addRecord.loading" checked hidden>
+				<span class="icon-Cancel-Filled"></span>
+			</label>
+  		</div>
+  		<div ng-show="row.entity.editable && row.entity.isNewRow" class="col-md-6">
+  			<label class="btn btn-bgms" aria-label="Save Record" title="Save Record">
+				<input type="checkbox" name="drawtag" autocomplete="off" ng-click="grid.appScope.submitRecord(row)"  data-spinner-color='red' bgms-ladda="addRecord.loading" checked hidden>
+				<span class="icon-Save-Filled"></span>
+			</label>
+		</div>
+  		<div ng-show="row.entity.editable && !row.entity.isNewRow" class="col-md-6">
+  			<label class="btn btn-bgms" aria-label="Save Record" title="Save Record">
+				<input type="checkbox" name="drawtag" autocomplete="off" ng-click="grid.appScope.submitEditRecord(row)"  data-spinner-color='red' bgms-ladda="addRecord.loading" checked hidden>
+				<span class="icon-Save-Filled"></span>
+			</label>
+		</div>
+  	</div> 	
+</div>

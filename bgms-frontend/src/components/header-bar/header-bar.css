@@ -1,0 +1,25 @@
+@import "styles/theme.css";
+
+header {
+    @apply flex flex-row;
+
+    color: $second-font-color;
+    background-color: $main-color;
+    height: $header-height;
+    position: fixed;
+    width: 100%;
+    z-index: $foreground;
+
+    .logo {
+        background-size: cover;
+        background-image: url("./assets/BGMS_logo_header.png");
+        cursor: pointer;
+        height: $header-height;
+        width: $sidebar-width;
+    }
+
+    nav {
+        @apply flex flex-auto justify-end items-center;
+    }
+
+}

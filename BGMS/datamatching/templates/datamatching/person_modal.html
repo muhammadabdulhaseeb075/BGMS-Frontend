@@ -1,0 +1,148 @@
+<div id="id_modalBurialDetails_all">
+  {% load static %}
+  <style>
+    img.displayed {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    ul li {
+      display: inline;
+    }
+
+  </style>
+
+  {% load perm_filters %}
+  <div id="id_modalBurialDetails" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">
+            <strong>Burial Record Information</strong>
+          </h4>
+        </div>
+        <div class="modal-body detailed-form">
+          <div ng-bind-html="contents">
+
+            <div class="row">
+              <!-- DeathPerson form -->
+              <div class="col-xs-12 form-section">
+                <div class="text-center">
+                  <h3 class="form-title">Person Details</h3>
+                  {# if user|has_group:"SiteAdmin" #}
+                  {% if user|group_required:"SiteAdmin, SiteWarden" %}
+                    <button title="Edit" type="submit" class="btn btn-bgms btn-form-details field-to-hide editDetailPersonForm"
+                      data-style="slide-right" aria-label="Left Align" onclick="modalBurialDetails.enableFields('#DeathPersonForm')"
+                      ng-hide="hideButtons">
+                      <span class="ladda-label"></span>
+                      <span class="icon-Edit-Drawing-Filled" aria-hidden="true"></span>
+                    </button>
+                    <button
+                      title="Save and Close"
+                      onclick="person.submitDetailsForm('/datamatching/personEdit/', '#DeathPersonForm', '#savePersonDetailsButton')"
+                      id="savePersonDetailsButton"
+                      class="btn btn-bgms ladda-button btn-form-details field-to-show"
+                      data-style="slide-right"
+                      aria-label="Left Align"
+                      style="display: none;">
+                      <span class="ladda-label"></span>
+                      <span class="icon-Save-Filled" aria-hidden="true"></span>
+                    </button>
+                    <button title="Cancel" onclick="modalBurialDetails.disableFields('#DeathPersonForm')" class="btn btn-bgms ladda-button btn-form-details field-to-show" data-style="slide-right" aria-label="Left Align" style="display: none;">
+                      <span class="ladda-label"></span>
+                      <span class="icon-Cancel-Filled" aria-hidden="true"></span>
+                    </button>
+                    <button title="Clear" onclick="modalBurialDetails.clearFields('#id_modalBurialDetails_all')" class="btn btn-bgms ladda-button btn-form-details btn-clear-fields hide-after-save" data-style="slide-right" aria-label="Left Align" style="display: none;">
+                      <span class="ladda-label">
+                      </span>
+                      <span class="icon-Clear-02-Filled" aria-hidden="true"></span>
+                    </button>
+                  {% endif %}
+                </div>
+                {% include 'mapmanagement/edit/person-edit.html' with form=DeathPersonForm %}
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!--<div class="modal-footer">
+        </div>-->
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
+  <script type="text/javascript" charset="utf-8">
+
+    $(document).ready(function () {
+
+      //Create custom prettyphoto
+      prettyPhotoTemplate.getTemplate();
+
+      modalBurialDetails.enableFields('#DeathPersonForm.burial-details-form-editable');
+      // modalBurialDetails.enableFields('#BurialForm');
+      $('.editDetailPersonForm').hide();
+      $('div[id^=memorial_image_input]').hide();
+      // $('#BurialForm').parent().find('.field-to-show.ladda-button').hide();
+      $('#DeathPersonForm').parent().find('.field-to-show.ladda-button').not(document.getElementById("savePersonDetailsButton")).hide();
+      $('#savePersonDetailsButton').attr('onclick', 'person.submitNewDetailsForm("/datamatching/personEdit/", "#DeathPersonForm", "/datamatching/burialEdit/", "#BurialForm", "#savePersonDetailsButton")');
+      person.initialiseUploadImage('/datamatching/personEdit/', '#DeathPersonForm', '#savePersonDetailsButton', '/datamatching/burialEdit/', '#BurialForm');
+      $('.btn-clear-fields').show(); //show clear button when entering a new burial record
+
+      //Add mask to dates of death and date of birth
+      $("#id_death_date").mask("99/99/9999", {placeholder: "dd/mm/yyyy"});
+      $("#id_birth_date").mask("99/99/9999", {placeholder: "dd/mm/yyyy"});
+
+
+      // $('#flexslider-burial-official') Initialize form validation
+      modalBurialDetails.validator = $('.burial-details-form').validate({
+        // errorPlacement: function(error, element) { 	// Append error within linked label 	$( element ).parent().append( error ); },
+        errorElement: "span",
+        rules: {
+          age_years: {
+            min: 0,
+            max: 150,
+            digits: true
+          },
+          age_months: {
+            min: 0,
+            max: 36,
+            digits: true
+          },
+          age_days: {
+            min: 0,
+            max: 365,
+            digits: true
+          },
+          age_hours: {
+            min: 0,
+            max: 99,
+            digits: true
+          },
+          age_minutes: {
+            min: 0,
+            max: 59,
+            digits: true
+          }
+        }
+      });
+
+
+      //Closing modal
+      $('#id_modalBurialDetails').on('hide.bs.modal', function () {
+        $('#id_modalBurialDetails_all').remove();
+        $('#id_modalBurialDetails').remove();
+        return true;
+      });
+
+      //
+      $("#DeathPersonForm").on("change", function () {
+        modalBurialDetails.hasFormBeenEdited['#DeathPersonForm'] = true;
+      });
+
+    });
+  </script>
+</div>

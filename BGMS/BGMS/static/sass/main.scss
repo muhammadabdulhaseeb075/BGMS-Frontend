@@ -1,0 +1,33 @@
+////
+/// This is the primary stylesheet to load all sass files
+/// It will load all the sass styles related to BGMS main app
+/// @group BGMS
+////
+
+/// The base stylesheet sets global variables.
+@import 'site/partials/base';
+
+// Reset
+// @import 'partials/reset';
+
+html,
+body {
+  overflow-y: auto;
+}
+
+/// Partials: where all CSS is constructed.
+@import 'site/partials/grid';
+@import 'site/partials/overflow';
+@import 'site/partials/toolbar';
+@import 'site/partials/layers-buttons';
+@import 'site/partials/export-map';
+@import 'site/partials/buttons';
+@import 'site/partials/modal';
+@import 'site/partials/form';
+@import 'site/partials/font';
+@import 'site/partials/notifications';
+@import 'site/partials/navbar';
+@import 'site/partials/footer';
+@import 'site/partials/homepage';
+@import 'site/partials/booking';
+@import 'site/partials/vuetify-overrides';

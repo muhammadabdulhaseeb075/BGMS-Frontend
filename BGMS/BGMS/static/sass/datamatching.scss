@@ -1,0 +1,47 @@
+////
+/// This is the primary stylesheet to load all sass files
+/// It will load all the sass styles related to BGMS mapmanagement app
+/// @group BGMS
+////
+
+/// The base stylesheet sets global variables.
+@import 'site/partials/base';
+/// The modules import
+@import 'datamatching/modules/utility';
+// Reset
+// @import 'partials/reset';
+
+html,
+body {
+  scrollbar-face-color: $base-grey-alpha;
+  scrollbar-arrow-color: $base-grey-alpha;
+  scrollbar-track-color: #F5F5F5;
+  height: 100%;
+  font-family: $base-font-family;
+}
+
+// All images should be responsive
+img {
+  max-width: 100% !important;
+}
+
+
+/// Partials: where all CSS is constructed.
+@import 'datamatching/partials/layout';
+@import 'datamatching/partials/button';
+@import 'datamatching/partials/data-matching';
+@import 'site/partials/skin-bgms';
+@import 'site/partials/collapse';
+@import 'site/partials/header';
+@import 'site/partials/grid';
+@import 'site/partials/overflow';
+@import 'site/partials/toolbar';
+@import 'site/partials/notifications';
+@import 'site/partials/openlayers-custom';
+@import 'site/partials/buttons';
+@import 'site/partials/modal';
+@import 'site/partials/form';
+@import 'site/partials/font';
+
+///Vendor librariers customizations
+@import 'vendor/flexslider/flexslider';

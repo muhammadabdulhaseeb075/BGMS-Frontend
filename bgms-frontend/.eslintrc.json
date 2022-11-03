@@ -1,0 +1,65 @@
+{
+    "extends": [
+        "eslint:recommended",
+        "plugin:vue/vue3-essential"
+    ],
+    "rules": {
+        "semi": [
+            "error",
+            "always"
+        ],
+        "quotes": [
+            "error",
+            "double",
+            {
+                "allowTemplateLiterals": true
+            }
+        ],
+        "no-console": [
+            "error",
+            { 
+                "allow": ["warn", "error", "info", "table"]
+            }
+        ],
+        "indent": ["error", 4],
+
+        "vue/prop-name-casing": ["error", "camelCase"],
+        "vue/html-closing-bracket-newline": ["error", {
+            "singleline": "never",
+            "multiline": "always"
+        }],
+        "vue/attribute-hyphenation": ["error", "always"],
+        "vue/component-definition-name-casing": ["error", "kebab-case"],
+        "vue/max-attributes-per-line": [
+            "error",
+            {
+                "singleline": 3,
+                "multiline": {
+                    "max": 1,
+                    "allowFirstLine": false
+                }
+            }
+        ],
+        "vue/mustache-interpolation-spacing": ["error", "always"],
+        "vue/no-multi-spaces": [
+            "error",
+            {"ignoreProperties": false}
+        ],
+        "vue/no-spaces-around-equal-signs-in-attribute": ["error"],
+        "vue/require-prop-types": [ "error"],
+        "vue/require-explicit-emits": [
+            "error",
+            {
+                "allowProps": false
+            }
+        ],
+        "vue/custom-event-name-casing": [
+            "error",
+            "kebab-case",
+            {
+                "ignores": []
+            }
+        ]
+
+    }
+}

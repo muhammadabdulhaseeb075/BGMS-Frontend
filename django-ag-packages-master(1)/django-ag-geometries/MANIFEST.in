@@ -1,0 +1,7 @@
+include LICENSE
+include README.rst
+recursive-include geometries/static *
+recursive-include geometries/templates *
+recursive-include docs *
+recursive-include geometriespublic/static *
+recursive-include geometriespublic/templates *

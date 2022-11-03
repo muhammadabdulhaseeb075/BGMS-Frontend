@@ -1,0 +1,71 @@
+@import "styles/theme.css";
+
+.time-picker-container {
+    @apply relative w-full;
+    background-color : #e1e1e1;
+
+    &.highlight {
+         background-color: $second-color;
+     }
+
+    &.active {
+        background-color: transparent;
+    }
+}
+
+.view-mode {
+       :deep(input[disabled]),
+       :deep(select[disabled]) {
+           background: transparent;
+           border-color: transparent;
+       }
+}
+
+.time-container {
+    @apply flex flex-row fixed bg-white;
+    width: 175px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.time-row {
+    @apply flex-1 overflow-scroll;
+    margin: 2px;
+    height: 220px;
+}
+
+.time-row::-webkit-scrollbar {
+  display: none;
+}
+
+.time-option {
+    @apply text-center;
+    border: solid transparent 2px;
+    padding: 6px;
+}
+
+.time-option:hover {
+    @apply cursor-pointer;
+    background-color: lightskyblue;
+}
+
+.time-active {
+    @apply font-bold text-white;
+    background-color: dodgerblue;
+    border: black solid 2px;
+}
+
+.time-picker-button {
+    @apply cursor-pointer absolute;
+    top: 0;
+    right: 0;
+    transform: translate(-5px,40%);
+}
+
+.time-picker {
+    @apply w-full;
+    background-color: transparent;
+
+    &::-webkit-calendar-picker-indicator {
+        display: none;
+    }
+}

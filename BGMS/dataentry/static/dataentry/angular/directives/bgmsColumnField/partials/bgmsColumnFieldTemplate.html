@@ -1,0 +1,19 @@
+<div ng-if="column.type!='ManyToManyKey'">
+	<div ng-repeat="field in column.fieldObjs">
+		<bgms-basic-field properties='field'></bgms-basic-field>
+	</div>
+</div>
+
+<div ng-if="column.type==='ManyToManyKey'">
+	<div ng-repeat="fieldset in column.fieldObjs">
+		<div ng-repeat="field in fieldset">
+			<bgms-basic-field properties='field'></bgms-basic-field>
+		</div><br>
+	</div>
+	<div class="row">
+		<label class="col-md-offset-4 btn btn-bgms btn-form btn-table ladda-button" aria-label="Add More" title="Add More">
+			<input type="checkbox" name="add_more" autocomplete="off" ng-click="column.addMoreFields()" checked hidden>
+			<span class="glyphicon glyphicon-plus" style="color: green;"></span>
+		</label>
+	</div>
+</div>

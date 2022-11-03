@@ -1,0 +1,98 @@
+@import "styles/theme.css";
+
+.new-event-form {
+    position: relative;
+
+    .form {
+        @apply py-20;
+
+.form-section {
+    @apply flex pt-3;
+
+    border-bottom: 1px solid $ main-color;
+
+h3 {
+    @apply text-2xl font-semibold flex-none;
+
+    color: $ third-color;
+    width: 180px;
+}
+
+.form-field-group {
+    @apply flex justify-between mb-4;
+}
+
+.form-field {
+    @apply flex mr-4;
+    flex: 1;
+
+.field-label {
+    @apply flex-initial font-semibold mr-2;
+
+}
+
+.option-group {
+    flex: 1;
+
+}
+
+&
+.view-medium {
+    flex: 2;
+}
+
+&
+.view-large {
+    flex: 3;
+}
+
+}
+} /** form */
+
+input {
+    @apply border;
+    width: 100%;
+}
+
+.view-empty {
+    visibility: hidden;
+}
+
+.view-mode {
+
+:deep(input[disabled]) {
+    #background-color: #FFFFFF;
+}
+
+:deep(select[disabled]) {
+    border-color: transparent;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+:deep(number[disabled]) {
+    #background-color: #FFFFFF;
+}
+
+}
+.disabled_background {
+
+:deep(input[disabled]) {
+    #background-color: #FFFFFF;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+}
+
+}
+}
+.addFlex{
+    flex-grow: 1;
+}
+
+input:disabled {
+    background-color: #FFFFFF;
+}

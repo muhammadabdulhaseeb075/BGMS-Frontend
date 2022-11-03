@@ -1,0 +1,23 @@
+////
+/// Global overrides for vuetify components
+////
+
+.v-btn {
+  text-transform: none;
+}
+
+.v-date-picker-table {
+  height: auto;
+}
+.v-input__icon--clear .v-icon {
+  color: red!important;
+  font-size: 1.2em;
+}
+
+$body-font-family: 'Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif;
+
+#MapManagementVueApp {
+  &.v-application {
+    font-family: $body-font-family !important;
+  }
+}

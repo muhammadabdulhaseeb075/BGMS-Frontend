@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+{% load value_from_settings %}
+<head>
+    <title>{% block title %}Burial Ground Management System Map Management{% endblock %}</title>
+    <link rel="shortcut icon" href="{% static 'images/icons/gravestone.ico' %}" type="image/x-icon">
+    <link href="{% static 'libs/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'libs/bootstrap-table/v1.7.0/css/bootstrap-table.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'fonts/fontawesome-free-5.6.3/css/fontawesome.min.css' %}" rel="stylesheet" media="screen" />
+    <link href="{% static 'fonts/fontawesome-free-5.6.3/css/solid.min.css' %}" rel="stylesheet" media="screen" />
+    <link href="{% static 'fonts/fontawesome-free-5.6.3/css/regular.min.css' %}" rel="stylesheet" media="screen" />
+    <link href="{% static 'libs/ionicons/v1.5.2/css/ionicons.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'libs/bower_components/AdminLTE/dist-js/css/AdminLTE.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'build/css/main.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'css/map-styles-custom.css' %}" rel="stylesheet" media="screen">
+    {% block css %}{% endblock %}
+</head>
+<body class="skin-bgms">
+  <div class="wrapper">
+    <div class="top-nav">
+      <nav class="navbar navbar-expand-lg navbar-light" role="navigation">
+        <a href="/mapmanagement/" class="logo">
+        </a>
+        <div class="navbar-right">
+            <ul class="nav navbar-nav">
+            </ul>
+        </div>
+      </nav>
+    </div>
+    <div class="wrapper row-offcanvas row-offcanvas-left">
+            <!-- Side column. Contains the navbar and content of the page -->
+            <aside class="right-side">
+                <!-- Main content -->
+                <section class="content">
+
+                    <div class="error-page">
+                        <h2 class="headline text-info"> 403</h2>
+                        <div class="error-content">
+                            <h3><i class="fa fa-warning text-yellow"></i><strong>Forbidden, CSRF verification failed.</strong></h3>
+                            <p>
+                                We could not find the page you were looking for.
+                                Meanwhile, you may <a href='{% value_from_settings "HOMEPAGE" %}'>return to homepage</a>.
+                            </p>
+                        </div><!-- /.error-content -->
+                    </div><!-- /.error-page -->
+
+                </section><!-- /.content -->
+            </aside><!-- /.right-side -->
+    </div><!-- ./wrapper -->
+  </div>
+    <script src="{% static 'libs/bower_components/jquery/dist-js/jquery.min.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/v9.9.3/js/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/v9.9.3/js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/v9.9.3/js/jquery.fileupload.js' %}"></script>
+    <script src="{% static 'libs/jquery-ui/v1.11.1/js/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-datepicker/v1.4.0/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-table/v1.7.0/js/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-table/extensions/flatJSON/bootstrap-table-flatJSON.min.js' %}"></script>
+    <script src="{% static 'libs/bower_components/AdminLTE/dist-js/js/app.min.js' %}"></script>
+</body>
+</html>

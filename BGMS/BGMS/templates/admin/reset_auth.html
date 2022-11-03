@@ -1,0 +1,178 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_modify %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "libs/jquery.modal/css/jquery.modal.min.css" %}" />
+{% endblock %}
+
+{% block userlinks %}
+
+  {% if site_url %}
+      <a href="{{ site_url }}">Return to burial ground</a> /
+  {% endif %}
+  {% if user.is_active and user.is_staff %}
+      {% url 'django-admindocs-docroot' as docsroot %}
+      {% if docsroot %}
+          <a href="{{ docsroot }}">Documentation</a> /
+      {% endif %}
+  {% endif %}
+  {% if user.has_usable_password %}
+  <a href="{% url 'admin:password_change' %}">Change password</a> /
+  {% endif %}
+  <a href="{% url 'logout' %}">Log out</a>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex;">
+  <div>
+    <h1>Password Reset Link Auth Tool</h1>
+  </div>
+  <div style="margin-left: auto;">
+    <input type="button" value="Refresh" onclick="location.href='{% url 'admin:resetAuth' %}';"/>
+  </div>
+</div>
+
+<!-- Active superusers are the only people who ought to get a link to this
+     page, for now. -->
+
+{% if user.is_staff %}
+  {% if active_requests.all %}
+  <h2>Requests history</h2>
+  <table style="width: 80%;
+                margin-left: auto;
+                margin-right:auto">
+    <col width=30%>
+    <col width=20%>
+    <col width=20%>
+    <col width=15%>
+    <col width=10%>
+    <col width=5%>
+  <thead>
+    <tr>
+      <th>User email address</th>
+      <th>Request date</th>
+      <th>Last status update</th>
+      <th>Status</th>
+      <th>Reset Count</th>
+		  <th>Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for request in active_requests %}
+    <tr id="{{ request.id }}">
+      <td>
+        <div style="display: flex;">
+          <button title="Send a reset email to this user" onclick="action_entry('{{ request.id }}')" id="MyButton"><a class="glyphicon glyphicon-envelope"></a></button>
+          <div style="margin-right: auto; padding-left: 10%">
+            {{ request.user.email}}
+          </div>
+        </div>
+      </td>
+      <td>{{ request.date|date:"H:i, d M Y" }}</td>
+      <td>{{ request.date_update|date:"H:i, d M Y" }}</td>
+      <td>{{ request.status }}</td>
+      <td>{{ request.count }}</td>
+      <td>
+        <button title="Delete this (still active!) request" onclick="delete_entry('{{ request.id }}', 'active')"><a class="glyphicon glyphicon-trash"></a></button>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+  <p id="status_active"></p>
+  {% else %}
+    <h2>There are no active password reset requests to display.</h2>
+  {% endif %}
+
+  <br><br>
+
+  {% if inactive_requests.all %}
+  <h2>Inactive request history</h2>
+  <table style="width: 80%;
+                margin-left: auto;
+                margin-right:auto">
+  <col width=30%>
+  <col width=20%>
+  <col width=20%>
+  <col width=15%>
+  <col width=10%>
+  <col width=5%>
+  <thead>
+    <tr>
+      <th>User email address</th>
+      <th>Request date</th>
+      <th>Last status update</th>
+      <th>Status</th>
+      <th>Reset Count</th>
+		  <th>Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for request in inactive_requests %}
+    <tr id="{{ request.id }}">
+      <td>{{ request.user.email }}</td>
+      <td>{{ request.date|date:"H:i, d M Y" }}</td>
+      <td>{{ request.date_update|date:"H:i, d M Y" }}</td>
+      <td>{{ request.status }}</td>
+      <td>{{ request.count }}</td>
+      <td>
+        <button title="Delete this (inactive) request" onclick="delete_entry('{{ request.id }}', 'inactive')"><a class="glyphicon glyphicon-trash"></a></button>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+  <p id="status_inactive"></p>
+  {% else %}
+    <h2>There are no inactive password reset requests to display.</h2>
+  {% endif %}
+
+{% else %} <!-- User is not staff, shouldn't be here anyway. -->
+  <p>You are not staff!</p>
+{% endif %}
+
+{% endblock %}
+
+{% block footer %}{{ block.super }}
+<script src="{% static 'admin/libs/moment/moment.min.js' %}"></script>
+<script src="{% static 'libs/bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'libs/jquery.modal/js/jquery.modal.min.js' %}"></script>
+<script>
+  /**
+   * Function for sending bespoke request to the AdminView. Authorizes reset
+   *  email send.
+   */
+  function action_entry(id) {
+    theUrl = '{% url 'admin:resetAuth' %}' + '?ActionButton=' + id;
+
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", theUrl, true);
+    xmlHttp.send(null);
+
+    alert("You've successfully actioned a reset email.\n\n The user has {{ password_timeout }} days to use it before it expires, and the request is made \"Open\" again.");
+
+    window.location.reload(true);
+
+    return xmlHttp.responseText;
+  }
+
+  /**
+   * Function for sending bespoke request to the AdminView. Deletes reset
+   *  request.
+   */
+  function delete_entry(id, status) {
+    theUrl = '{% url 'admin:resetAuth' %}' + '?DeleteButton=' + id;
+
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", theUrl, true);
+    xmlHttp.send(null);
+
+    window.location.reload();
+    // Could have a "confirm" option here. Especially if status == "active"
+    alert("You've deleted an " + status + " request.");
+
+    return xmlHttp.responseText;
+  }
+</script>
+{% endblock %}

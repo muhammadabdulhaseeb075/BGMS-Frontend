@@ -1,0 +1,14 @@
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.fc-v-event { /* allowed to be top-level */
+  display: block;
+  border: 3px solid #3788d8;
+  border: 3px solid var(--fc-event-border-color, #3788d8);
+  background-color: #3788d8;
+  background-color: var(--fc-event-bg-color, #3788d8)
+}

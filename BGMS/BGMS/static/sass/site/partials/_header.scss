@@ -1,0 +1,49 @@
+////
+/// Header section refers to the top bar of the site
+////
+
+// Logo section: left side top bar header
+.top-nav {
+
+	z-index: 1030;
+
+	.logo {
+	  font-family: $base-font-family;
+	  font-weight: $heading-font-weight;
+	  font-size: $heading-font-size;
+	  line-height: 0px;
+	  width: 230px;
+	  height: 50px;
+	};
+
+	.navbar-toggle {
+		float: right;
+		padding: 10px 10px 0px 0px
+	}
+
+	.glyphicon-menu-hamburger {
+		font-size: 27px;
+	}
+
+	.dropdown-menu {
+		position:absolute;
+		right: 0;
+		left: auto;
+	}
+
+	li {
+		position: relative;
+	}
+
+	@media (min-width: 768px) {
+		#navbarSupportedContent {
+			float: right;
+		}
+	}
+
+	@media (max-width: 767px) {
+		#navbarSupportedContent {
+			margin: 50px 0px 0px 0px;
+		}
+	}
+}

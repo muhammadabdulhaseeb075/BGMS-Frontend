@@ -1,0 +1,51 @@
+////
+/// Layout datamatching for content part
+////
+
+//allow columns to be height 100%
+.wrapper, .content-wrapper {
+  height: 100%;
+}
+
+.container.full-height {
+  display: table;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.row.full-height {
+display: table-row;
+height: 100%;
+}
+
+.col-md-3.full-height {
+  background: $base-gold-alpha;
+  float: none;
+  display: table-cell;
+}
+
+.col-md-9.full-height {
+float: none;
+display: table-cell;
+}
+
+
+.dm.column-one-search-results, thead .dm.column-one-search-results {
+  width: 42%;
+}
+.dm.column-two-search-results, thead .dm.column-two-search-results {
+  width: 28%;
+}
+.dm.column-three-search-result, thead .dm.column-three-search-result {
+  width: 10%;
+}
+.dm.column-four-search-results, thead .dm.column-four-search-results {
+  width: 20%;
+}
+thead .dm.column-two-search-results .th-inner{
+  line-height: 15px;
+}
+thead .dm.column-four-search-results .th-inner{
+  line-height: 15px;
+}

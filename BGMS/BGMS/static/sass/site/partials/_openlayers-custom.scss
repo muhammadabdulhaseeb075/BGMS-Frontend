@@ -1,0 +1,38 @@
+////
+/// Everything related to customization of OpenLayers styles.
+////
+
+// Custom zoom buttons position and style.
+// @group Zoom-Buttons
+.ol-zoom {
+  top: 2.2px !important;
+  left: 55px !important;
+}
+.ol-control {
+  background-color: transparent!important;
+}
+%ol-control-custom{
+  background-color: transparent !important;
+  color: $base-grey !important;
+  font-size: 22px!important;
+  border-radius: 0px!important;
+}
+
+.ol-control{
+  button.ol-zoom-in, button.ol-zoom-out{
+    @extend %ol-control-custom;
+    background-color: $base-light-grey-alpha !important; //override parent color
+    height: 18px !important;
+    width: 18px !important;
+  }
+  button.ol-rotate-reset{
+    @extend %ol-control-custom;
+  }
+}
+.ol-rotate{
+  // top: 2.2px;
+  left: 190px;
+}
+button.ol-zoom-in:hover, button.ol-zoom-in:active, button.ol-zoom-in.hover, button.ol-zoom-in.active, button.ol-zoom-out:hover, button.ol-zoom-out:active, button.ol-zoom-out.hover, button.ol-zoom-out.active {
+  background-color: $base-orange !important;
+}

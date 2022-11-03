@@ -1,0 +1,16 @@
+////
+/// Menus section refers to any manu or list
+////
+
+// Remove square for pure-menus
+.pure-menu {
+  ul li {
+    list-style-type: none;
+  }
+  li{
+      font-size: 14px;
+  }
+  .menu-icon {
+      margin-right: 6px;
+  }
+}

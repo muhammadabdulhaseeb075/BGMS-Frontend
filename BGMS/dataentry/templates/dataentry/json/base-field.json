@@ -1,0 +1,24 @@
+{% load bgms_field_filters %}
+"{{field.html_name}}":
+	{
+		"name": "{{field.html_name}}",
+		"errors": "{{field.errors}}",
+		"help_text": "{{field.help_text}}",
+		"maxlength": "{{field|max_length}}",
+		"id": "{{field.id_for_label}}",
+		"label": "{{field.label}}",
+		"value": "{{field.value|default_if_none:''}}",
+		"type": "{{field|field_type}}"
+		{% if field.field.choices and field|field_type != 'ForeignKey' and field|field_type != 'ManyToManyKey' %}
+			,
+			"choices": [
+				{% for choice in field.field.choices %}
+					{% if forloop.counter0 > 0 %}
+						,
+					{% endif %}					
+					{ "value": "{{choice.0}}",
+					  "label": "{{choice.1}}" }
+				{% endfor %}
+			]
+		{% endif %}
+	}

@@ -1,0 +1,17 @@
+////
+/// Definition of button for datamatching
+////
+
+//memorial thimnail "as" button
+
+.thumb{
+  margin-top: 10px;
+}
+.thumb.selected{
+  border: 2px solid $base-orange;
+  @include filter(60%);
+}
+
+.panzoom-fit-img{
+  height: calc(100vh - 225px);
+}

@@ -1,0 +1,6 @@
+@import "styles/theme.css";
+
+.pagination-wrapper {    
+    @apply mb-4 mb-3 flex sm:px-6;
+    background-color: white;
+}

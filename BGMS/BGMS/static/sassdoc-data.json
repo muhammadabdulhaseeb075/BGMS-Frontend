@@ -1,0 +1,333 @@
+[
+  {
+    "description": "Colors: base, base-light, base-alplha, base-light-alpha color versions.\n",
+    "commentRange": {
+      "start": 13,
+      "end": 19
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-gold",
+      "value": "rgb(194, 173, 66)",
+      "scope": "private",
+      "line": {
+        "start": 20,
+        "end": 20
+      }
+    },
+    "group": [
+      "colors"
+    ],
+    "example": [
+      {
+        "type": "scss",
+        "code": "$base-grey: rgb(56,59,61);\n$base-grey-alpha: rgba($base-grey, 0.7);\n$base-light-grey: rgb(223, 223, 224);\n$base-light-grey-alpha: rgba($base-light-grey, 0.8);"
+      }
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 21,
+      "end": 21
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-light-gold",
+      "value": "rgb(222, 214, 174)",
+      "scope": "private",
+      "line": {
+        "start": 22,
+        "end": 22
+      }
+    },
+    "group": [
+      "colors"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 23,
+      "end": 23
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-grey",
+      "value": "rgb(56,59,61)",
+      "scope": "private",
+      "line": {
+        "start": 24,
+        "end": 24
+      }
+    },
+    "group": [
+      "colors"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 25,
+      "end": 25
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-light-grey",
+      "value": "rgb(223, 223, 224)",
+      "scope": "private",
+      "line": {
+        "start": 26,
+        "end": 26
+      }
+    },
+    "group": [
+      "colors"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 27,
+      "end": 27
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-orange",
+      "value": "rgb(238, 89, 42)",
+      "scope": "private",
+      "line": {
+        "start": 28,
+        "end": 28
+      }
+    },
+    "group": [
+      "colors"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 29,
+      "end": 29
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-white",
+      "value": "rgb(255, 255, 255)",
+      "scope": "private",
+      "line": {
+        "start": 30,
+        "end": 30
+      }
+    },
+    "group": [
+      "colors"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 31,
+      "end": 31
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-grey-alpha",
+      "value": "rgba($base-grey, 0.7)",
+      "scope": "private",
+      "line": {
+        "start": 32,
+        "end": 32
+      }
+    },
+    "group": [
+      "colors"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 33,
+      "end": 33
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-light-grey-alpha",
+      "value": "rgba($base-light-grey, 0.8)",
+      "scope": "private",
+      "line": {
+        "start": 34,
+        "end": 34
+      }
+    },
+    "group": [
+      "colors"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 35,
+      "end": 35
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-orange-alpha",
+      "value": "rgba($base-orange, 0.7)",
+      "scope": "private",
+      "line": {
+        "start": 36,
+        "end": 36
+      }
+    },
+    "group": [
+      "colors"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "Fonts\n",
+    "commentRange": {
+      "start": 5,
+      "end": 6
+    },
+    "context": {
+      "type": "variable",
+      "name": "base-font-family",
+      "value": "'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+      "scope": "private",
+      "line": {
+        "start": 7,
+        "end": 7
+      }
+    },
+    "group": [
+      "font"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 8,
+      "end": 8
+    },
+    "context": {
+      "type": "variable",
+      "name": "heading-font-size",
+      "value": "25px",
+      "scope": "private",
+      "line": {
+        "start": 9,
+        "end": 9
+      }
+    },
+    "group": [
+      "font"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "",
+    "commentRange": {
+      "start": 10,
+      "end": 10
+    },
+    "context": {
+      "type": "variable",
+      "name": "heading-font-weight",
+      "value": "500",
+      "scope": "private",
+      "line": {
+        "start": 11,
+        "end": 11
+      }
+    },
+    "group": [
+      "font"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  },
+  {
+    "description": "Media querys\n",
+    "commentRange": {
+      "start": 39,
+      "end": 40
+    },
+    "context": {
+      "type": "variable",
+      "name": "break-portrait-tablet",
+      "value": "768px",
+      "scope": "private",
+      "line": {
+        "start": 41,
+        "end": 41
+      }
+    },
+    "group": [
+      "media-querys"
+    ],
+    "access": "public",
+    "file": {
+      "path": "site\\partials\\_base.scss",
+      "name": "_base.scss"
+    }
+  }
+]

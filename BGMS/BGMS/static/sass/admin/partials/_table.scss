@@ -1,0 +1,44 @@
+////
+/// Table definitions
+////
+
+
+// Background and font top table
+.module h2, .module caption, .inline-group h2{
+  background: $base-gold-light-0;
+}
+#content-related .module h2 {
+    background: $base-light-grey;
+}
+.selector .selector-available h2 {
+    background: $base-light-grey!important;
+}
+a.section:link, a.section:visited {
+    color: $base-grey;
+}
+.module h2, .module caption, .inline-group h2 {
+    color: $base-grey;
+}
+
+// Background and font column titles
+table thead th.sortable:hover {
+    background: $base-gold;
+}
+thead th.sorted{
+  background: $base-gold;
+}
+thead th, tfoot td {
+    color: $base-white;
+    background: $base-gold;
+}
+thead th a:link, thead th a:visited {
+    color: $base-white;
+}
+
+// Background row table
+.row1 {
+    background: $base-gold-light-0;
+}
+.row2 {
+    background: $base-gold-light-0;
+}

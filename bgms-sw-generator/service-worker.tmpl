@@ -1,0 +1,3394 @@
+// Django ignores the JavaScript comment and so will still load these
+/** @preserve {% load staticfiles %}{% load zstaticfiles %} */
+self.importScripts(
+  "{% static 'js/offline/idb.js'%}",
+  "{% static 'js/offline/queue.js'%}",
+  "{% static 'js/offline/router.js'%}"
+);
+
+// Every time a page controlled by a SW is loaded, the SW checks to see if it
+// needs to update. The way it does this is by comparing itself to the previous
+// version - if they're byte-for-byte the same, there's no need to update.
+// Unfortunately, scripts from importScripts aren't included in this comparison,
+// so making a change to one of them won't trigger a SW update (yet). Modify the
+// value of this variable to force an update. See
+// https://github.com/w3c/ServiceWorker/issues/839
+const forceSWUpdate = "changethis3";
+
+/**
+ * Class representing a message.
+ */
+class Message {
+  /**
+   * Creates a message.
+   * @param {string} type - The type of the message
+   * @param {*} [value] - The contents of the message
+   * @return {Object} An object representing the message.
+   */
+	constructor(type, value){
+    let message = {
+      type: type
+    };
+
+    if(value !== undefined) {
+      message.value = value;
+    }
+
+		return message;
+  }
+}
+
+// Config
+const appName = "BGMS";
+const router = new Router();
+
+// Cache Variables
+const cacheVersion = <%= version %>; // These tags are used by the gulp process
+const staticCacheName = appName + '-static-v' + cacheVersion;
+const runtimeCacheName = appName + '-runtime-v' + cacheVersion;
+const formCacheName = appName + '-forms-v' + cacheVersion;
+
+// Database Variables
+// note: this must match the version number in mixins\databaseTools.ts
+const databaseVersion = 5; // Change this when adding new tables (also in databaseTools.ts)
+const databaseName = appName + '-db';
+const layerTable = "layers";
+const securityTable = "security";
+const featureTable = "features";
+const personTable = "persons";
+const memorialInscriptionTable = "memorialInscriptions";
+const materialsTable = "materials";
+
+// File lists
+const staticPrefix = "{% get_static_prefix_s3 %}";
+
+const staticFilesFromGlobs = <%= precacheConfig %>; // These tags are used by the gulp process
+
+let dataSavedInIndexedDBFlag = false;
+
+// if true, then all persons have been downloaded and inserted into indexeddb
+let personsAvailableOfflineFlag = false;
+
+// staticFilesFromGlobs will contain cache-busted URLs to precache, but the styleService
+// doesn't use these URLs for certain files so those need to be cached seperately
+// TODO: generate these automatically as part of gulp build?
+const otherStaticFiles = [
+  "https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic",
+  staticPrefix + "mapmanagement/assets/img/selected_8x8.png",
+  staticPrefix + "mapmanagement/assets/img/selected_16x16.png",
+  staticPrefix + "mapmanagement/assets/img/selected_24x24.png",
+  staticPrefix + "mapmanagement/assets/img/selected_32x32.png",
+  staticPrefix + "mapmanagement/assets/img/selected_48x48.png",
+  staticPrefix + "mapmanagement/assets/img/selected_64x64.png",
+  staticPrefix + "mapmanagement/assets/img/added_16x16.png",
+  staticPrefix + "mapmanagement/assets/img/added_24x24.png",
+  staticPrefix + "mapmanagement/assets/img/added_32x32.png",
+  staticPrefix + "mapmanagement/assets/img/added_48x48.png",
+  staticPrefix + "mapmanagement/assets/img/added_64x64.png",
+];
+
+const staticFiles = staticFilesFromGlobs.concat(otherStaticFiles);
+
+const runtimeFiles = [
+  '/mapmanagement/getLayerGroups/?groups_to_load%5B%5D=memorials',
+  '/mapmanagement/mapInitialisation',
+  '/mapmanagement/getReservedPersons/',
+  '/mapmanagement/getBurialOfficials/',
+  '/mapmanagement/getRenderedMapManagementIndex',
+];
+
+// Key:value pairs, where the key is the resource being requested and the value
+// is the file being served when the user is offline. The value must be cached
+// either in the static or runtime cache.
+const offlineFiles = {
+  "/mapmanagement/siteFiles/": "{% static 'mapmanagement/bgms_angular/components/offline/templates/unavailable_modal.html' %}",
+};
+
+/**
+ * Event fires when the service worker is first registered
+ */
+self.addEventListener("install", (event) => {
+  console.debug('[SW] Installing...');
+
+  event.waitUntil(
+
+    self.getQueueLength().then(length => {
+
+      if(length === 0) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject("Cannot upgrade Service Worker whilst queue still has items!");
+      }
+
+    }).then(() => {
+
+      // Prevent the Service Worker taking control until all caching is done
+      return Promise.all([
+        self.populateStaticCache(),
+        self.populateRuntimeCache(),
+      ]);
+
+    }).then(() => {
+
+      console.debug('[SW] Installed! Waiting to activate...');
+      return self.skipWaiting();
+
+    })
+
+  );
+});
+
+/**
+ * Event fires when the service worker activates. This typically occurs when the new service worker is
+ * installed AND the old service worker is no longer active (i.e. all webpages in it's scope are closed)
+ */
+self.addEventListener("activate", (event) => {
+  console.debug('[SW] Activating...');
+
+  let cacheWhitelist = [staticCacheName, runtimeCacheName, formCacheName];
+
+  event.waitUntil(
+    Promise.all([
+
+      // Delete old caches
+      caches.keys().then((keyList) => {
+        return Promise.all(keyList.map((key) => {
+          if (cacheWhitelist.indexOf(key) === -1) {
+            return caches.delete(key);
+          } else {
+            return Promise.resolve();
+          }
+        }));
+      }),
+
+      // Create the queue database
+      self.getQueue(),
+
+      // Create the BGMS database
+      self.getBGMSDatabase().then(db => {
+
+        // Then partially populate it
+        return Promise.all([
+          self.populateLayerTable(),
+        ]);
+
+      }),
+
+      // Set up routing
+      self.defineRoutes(),
+
+    ]).then(() => {
+
+      // Claim control of all clients
+      return clients.claim();
+
+    }).then(() => {
+
+      // Message all clients that offline mode is available
+      // NOTE: This would message them whenever the SW updates too
+      console.debug('[SW] Activated!');
+      self.emitToClients(new Message('offlineReady'));
+
+    })
+  );
+
+});
+
+/**
+ * Event fires whenever a page under its control is requested, or requests a page. (i.e. it controls
+ * /mapmanagement/, and so also controls any request made by /mapmanagement/, even external requests)
+ */
+self.addEventListener("fetch", (event) => {
+
+  let request = event.request;
+  let url = new URL(request.url);
+  
+  // Webpack build files will not have django's cache busting hash.
+  // So we need to map the url so the sw can find it.
+  if(url.pathname.includes('/main/dist/')) {
+    
+    const noExtensionPathName = url.pathname.replace(/\.[^/.]+$/, "");
+    const extension = url.pathname.match(/\.[^/.]+$/, "")[0];
+    
+    // find url with the hash
+    const result = staticFiles.find( staticURL => (staticURL.indexOf(noExtensionPathName) !== -1 && staticURL.endsWith(extension)));
+    
+    if (result) {
+      // create new request using the new url (with hash)
+      let newRequest = new Request(result, {
+        method: request.method,
+        headers: request.headers,
+        mode: request.mode,
+        credentials: request.credentials,
+        redirect: request.redirect
+      });
+      
+      event.respondWith(
+        router.fetch(newRequest)
+      );
+    }
+  }
+  else
+    event.respondWith(
+      router.fetch(request)
+    );
+});
+
+/**
+ * Fires when a client sends a message. The client expects a response via the given port!
+ * A message type of 'error' causes the client-side Promise to reject
+ */
+self.addEventListener("message", (event) => {
+
+  let message = event.data;
+  let client = event.ports[0];
+
+  switch (message.type) {
+    case 'getQueueLength':
+      self.getQueueLength().then(length => {
+        client.postMessage(new Message('length', length));
+      }).catch(err => {
+        client.postMessage(new Message('error', err));
+      });
+      break;
+    case 'getStatus':
+      fetch('/sw.js').then(response => {
+        client.postMessage(new Message('onlineStatus', true));
+      }).catch(err => {
+        client.postMessage(new Message('onlineStatus', false));
+      });
+      break;
+    case 'group_required':
+      self.setSecurityValue('group_required', message.value).then(() => {
+        client.postMessage(new Message('success', true));
+      }).catch(err => {
+        client.postMessage(new Message('error', err));
+      });
+      break;
+    case 'synchroniseFirstItemInQueue':
+      event.waitUntil(
+        self.synchroniseFirstItemInQueue().then(() => {
+          return self.getQueueLength();
+        }).then(length => {
+          client.postMessage(new Message('synchronised', length));
+        }).catch(err => {
+          console.debug('[SW] Error while synchronising', err);
+          client.postMessage(new Message('error', err));
+        })
+      );
+      break;
+    case 'unblockQueue':
+      self.getQueue()
+        .then(queue => queue.unshift())
+        .then((item) => client.postMessage(new Message('success', item)))
+        .catch(err => client.postMessage(new Message('error', err)));
+        break;
+    case 'dataSavedInIndexedDB':
+      self.dataSavedInIndexedDBFlag = message.value;
+      break;
+    case 'personsAvailableOffline':
+      self.personsAvailableOfflineFlag = message.value;
+      break;
+    default:
+      console.error('[SW] Recieved message from client with unknown type:', message);
+      client.postMessage(new Message('error', "Unknown message type"));
+  }
+});
+
+/************************
+ * CACHE FUNCTIONS
+ ************************/
+
+/**
+ * Gets a list of files in the given cache
+ * @return {Set} A set of absolute URLs
+ */
+function filesInCache(cache) {
+  return cache.keys().then(requests => requests.map(request => request.url) ).then(urls => new Set(urls));
+}
+
+/**
+ * Populates the runtime cache.
+ * @return {Promise} Resolves if the cache is successfully populated
+ */
+function populateRuntimeCache() {
+  console.debug('[SW] Populating the Runtime Cache');
+
+  return caches.open(runtimeCacheName).then((runtimeCache) => {
+
+    // Cache /mapmanagement/
+    fetch('/mapmanagement/', { credentials: 'include' }).then((response) => {
+      runtimeCache.put('/mapmanagement/', response).catch((err) => console.error('[SW] Error populating Runtime Cache:', '/mapmanagement/', err));
+    });
+
+    // Cache the runtime files
+    return Promise.all(
+      runtimeFiles.map((url) => {
+        return fetch(url, { credentials: 'include' }).then((response) => {
+          return runtimeCache.put(url, response).catch((err) => console.error('[SW] Error populating Runtime Cache:', url, err));
+        });
+      })
+    );
+
+  }).then(() => {
+
+    console.debug('[SW] Runtime Cache populated');
+
+  }).catch((err) => {
+
+    // Print the error then re-throw it
+    console.error('[SW] Error populating the runtime cache:', err);
+    return Promise.reject(err);
+
+  });
+}
+
+/**
+ * Populates the static cache.
+ * @return {Promise} Resolves if the cache is successfully populated
+ */
+function populateStaticCache() {
+  console.debug('[SW] Populating the Static Cache');
+
+  return caches.open(staticCacheName).then((staticCache) => {
+    return filesInCache(staticCache).then(cachedFiles => {
+      return Promise.all(
+
+        staticFiles.map((url) => {
+
+          // Check if the file is already in the cache
+          if(
+            (url.startsWith('/') && cachedFiles.has(location.origin + url)) ||
+            cachedFiles.has(url)
+          ) {
+            return;
+          }
+
+          // Force the SW to bypass the cache when requesting files. This solves CORS
+          // issues that occur when the cached file wasn't requested with CORS and
+          // therefore doesn't have a 'Access-Control-Allow-Origin' header
+          let suffix;
+          if(url.includes('?')) {
+            suffix = '&-sw-skip-cache';
+          } else {
+            suffix = '?-sw-skip-cache';
+          }
+
+          // Fetch the request with the suffix
+          // QUESTION: Why doesn't using an init of {cache:'no-store'} bypass the cache?
+          return fetch(url + suffix).then((response) => {
+
+            if(!response.ok) {
+              throw new Error('Request for \'' + url + '\' returned a response with status ' + response.status);
+            }
+
+            // Store the response
+            staticCache.put(url, response).catch((err) => console.error('[SW] Error populating Static Cache:', url, err));
+          });
+
+        })
+
+      );
+    });
+
+  }).then(() => {
+
+    console.debug('[SW] Static Cache populated');
+
+  }).catch((err) => {
+
+    // Print the error then re-throw it
+    console.error('[SW] Error populating the static cache:', err);
+    return Promise.reject(err);
+
+  });
+}
+
+/************************
+ * DATABASE FUNCTIONS
+ ************************/
+
+var _db = null; // use getBGMSDatabase() to access
+
+/**
+ * Gets (and creates) the BGMS database
+ */
+function getBGMSDatabase() {
+  if(self._db) {
+    return Promise.resolve(self._db);
+  } else {
+    return idb.open(databaseName, databaseVersion, upgradeDB => {
+
+      switch (upgradeDB.oldVersion) {
+        case 0: // i.e. database didn't exist previously
+          let layerStore = upgradeDB.createObjectStore(layerTable, { keyPath: "group_layer_id"});
+          layerStore.createIndex("layer_code", "layer_code", { unique: false });
+
+          let securityStore = upgradeDB.createObjectStore(securityTable, { keyPath: "id"});
+
+          let featureStore = upgradeDB.createObjectStore(featureTable, { keyPath: "id" });
+          featureStore.createIndex("_layer_type", "_layer_type", { unique: false });
+
+          let personStore = upgradeDB.createObjectStore(personTable, { autoIncrement: true });
+          personStore.createIndex("memorial_id", "memorial_id", { unique: false });
+          personStore.createIndex("id", "id", { unique: false });
+
+          let memorialInscriptionStore = upgradeDB.createObjectStore(memorialInscriptionTable, { autoIncrement: true });
+          memorialInscriptionStore.createIndex("memorial", "memorial", { unique: false });
+      }
+      
+      if (!upgradeDB.objectStoreNames.contains(materialsTable)) {
+        let materialsStore = upgradeDB.createObjectStore(materialsTable, { autoIncrement: true });
+      }
+    }).then(db => {
+      self._db = db;
+      return Promise.resolve(db);
+    });
+  }
+}
+
+/**
+ * Downloads a list of all the layer groups and the layers they contain. Used to
+ * be able to build a response to /getLayerNames/ if the user is offline.
+ * @return {Promise} resolves on success, rejects on error (including network errors)
+ */
+function populateLayerTable() {
+  return new Promise((resolve, reject) => {
+    console.debug('[populateLayerTable] Populating the layer table');
+
+    Promise.all([
+      self.getBGMSDatabase(),
+      self.getQueueLength(),
+    ]).then(results => {
+      db = results[0];
+      length = results[1];
+
+      // We only want to populate the table if the queue is empty, otherwise we might break whatever is in there
+      if (length === 0) {
+        fetch('/geometries/getAllLayerNames/', { credentials: 'include' }).then(response => {
+
+          // If we've got this for, we're online and the other indexeddb tables will also be updated (in vue app).
+          // So reset flag false to stop tables being used before they are updated.
+          self.dataSavedInIndexedDBFlag = false;
+
+          response.json().then(jsonData => {
+
+            const tx = db.transaction(layerTable, 'readwrite');
+
+            jsonData.layer_groups.forEach(group => {
+              group.layers.forEach(layerInGroup => {
+
+                // Primary key consists of the group ID and layer ID
+                // (because some layers belong to two groups i.e. bench, lych gate)
+                let pk = group.group_id + '-' + layerInGroup.layer_id;
+
+                let layer = {
+                  group_layer_id: pk,
+                  layer_id: layerInGroup.layer_id,
+                  layer_code: layerInGroup.layer_code,
+                  layer_display_name: layerInGroup.display_name,
+                  layer_type: layerInGroup.layer_type,
+                  min_resolution: layerInGroup.min_resolution,
+                  max_resolution: layerInGroup.max_resolution,
+                  show_in_toolbar: layerInGroup.show_in_toolbar,
+                  layer_hierarchy: layerInGroup.hierarchy,
+                  switch_on_off: group.switch_on_off,
+                  initial_visibility: layerInGroup.initial_visibility,
+                  group_code: group.group_code,
+                  group_display_name: group.display_name,
+                  group_id: group.group_id,
+                  group_hierarchy: group.hierarchy,
+                };
+
+                tx.objectStore(layerTable).put(layer);
+              });
+            });
+
+            // When the transaction completes, resolve/reject appropriately
+            tx.complete.then(
+              resolve()
+            ).catch(err => {
+              reject('Error adding a group/layer to the database', err);
+            });
+          }).catch(err => {
+            reject('Error parsing the network response (expected JSON)', err);
+          });
+        }).catch(err => {
+
+          reject('Network unavailable');
+        });
+      } else {
+        reject('Queue isn\'t empty');
+      }
+
+    }).catch(err => {
+      reject("Error processing the layer table: " + err);    });
+  });
+}
+
+/**
+ * Sets a key-value pair in the security table.
+ * @returns a Promise that resolves/rejects if the database transaction is successful
+ */
+function setSecurityValue(key, value) {
+  return self.getBGMSDatabase().then(db => {
+
+    const tx = db.transaction(securityTable, 'readwrite');
+
+    tx.objectStore(securityTable).put({
+      id: key,
+      value: value
+    });
+
+    return tx.complete;
+
+  });
+}
+
+/**
+ * Gets a value from the security table
+ * @returns a Promise that resolves with the value, rejects on error
+ */
+function getSecurityValue(key) {
+  return self.getBGMSDatabase().then(db => {
+
+    const tx = db.transaction(securityTable, 'readwrite');
+    return tx.objectStore(securityTable).get(key);
+
+  });
+}
+
+/************************
+ * QUEUE FUNCTIONS
+ ************************/
+
+var _queue = null; // use getQueue() to access
+
+// Singleton object - multiple requests can subscribe to the same Promise
+var _synchronising = false;
+
+/**
+ * Attempts to synchronise the first item in queue with the remote database
+ * @returns a Promise which resolves when the attempt has finished
+ * NOTE: just because this resolves doesn't mean the attempt was successful!
+ */
+function synchroniseFirstItemInQueue() {
+
+  // If a synchronisation attempt is already taking place, return that
+  // Otherwise, get the CSRF Token from the client
+	self._synchronising = self._synchronising || self.getCSRFToken().then(token => {
+
+    // Use the token to synchronise the queue
+		console.debug('[SYNC] Starting synchronisation');
+		return syncFirstItemInQueue(token);
+
+	}).then(finished => {
+    if (finished) {
+      self.emitToClients(new Message('synchronised', {
+        finished: true
+      }));
+    }
+
+	}).catch(err => {
+
+		// getCSRFToken REJECTED (recursivelySyncFirstItemInQueue never rejects)
+		console.error('[SYNC] Error synchronising:', err);
+
+	}).then(() => {
+
+		console.debug('[SYNC] Synchronisation finished');
+		self._synchronising = false;
+
+	});
+
+  return self._synchronising;
+}
+
+/**
+ * Sends the first item in the queue to the server until either the
+ * queue is empty or a request fails
+ * @param {string} token - The CSRF Token to use when sending the requests
+ * @return {Promise} Always resolves
+ */
+function syncFirstItemInQueue(token) {
+
+  // Gets the first item in the queue
+	return self.getQueue().then(queue => {
+		return queue.first().then(firstItem => {
+
+      // Resolve if there's nothing in the queue
+			if (!firstItem) {
+				return Promise.resolve(true);
+			} else {
+        
+        key = firstItem[0];
+        request = firstItem[1];
+
+        // Update the CSRF header
+				request.headers['x-csrftoken'] = token;
+
+        // Send a clone of the request
+				return sendRequest(request).then(() => {
+
+					// Delete the original request from the queue
+					return queue.deleteItem(key).then(() => {
+            return Promise.resolve(true);
+					});
+				});
+			}
+
+		});
+	}).catch(err => {
+
+    // The only thing that causes an error is the server being unavailable
+    // If anything else causes the error then the queue is effectively being blocked by it
+		console.warn('[SYNC] Error synchronising the queue, try again later. Error message: ', err);
+		return Promise.resolve(false);
+
+	});
+}
+
+/**
+ * Sends a request to the server
+ */
+function sendRequest(request) {
+
+  let url = new URL(request.url);
+
+  // Send the request to the server
+  return fetch(url, {
+    method: request.method,
+    body: request.body,
+    mode: request.mode,
+    headers: request.headers,
+    credentials: 'same-origin' }).then(response => {
+
+    // If the response is ok, great!
+    if (response.ok) {
+      return Promise.resolve();
+    } else if (
+
+      // Detect potential conflicts, i.e. somebody has deleted a feature that the offline user had modified
+      (url.pathname === "/geometries/deletePlot/" ||
+      url.pathname === "/geometries/updatePlot/" ||
+      url.pathname === "/geometries/updateMemorial/" ||
+      url.pathname === "/mapmanagement/deleteHeadstone/" ||
+      url.pathname === "/mapmanagement/linkHeadstonePlot/") && response.status !== 403 // TODO: Forbidden status should force the user to login
+
+    ) {
+      console.warn('[SEND] Request to \'' + url.pathname + '\' failed with a status code of HTTP' + response.status + ', the feature may have been deleted by somebody else whilst the application was offline!');
+      return Promise.resolve();
+    } else if (response.status === 403) {
+
+      // TODO: Force login
+      return Promise.reject('//TODO\\\\');
+
+    } else {
+
+      // Worse case scenario; if this happens for whatever reason then the user's queue is blocked
+      console.error('[SEND] Request to \'' + url.pathname + '\' failed with a status code of HTTP' + response.status);
+      return Promise.reject('Error response from server: HTTP' + response.status);
+
+    }
+
+  }).catch(err => {
+
+    return Promise.reject('Couldn\'t reach server: ' + err);
+
+  });
+
+}
+
+/**
+ * Gets (and creates) the queue
+ */
+function getQueue() {
+  if (self._queue) {
+    return Promise.resolve(self._queue);
+  } else {
+    let queue = new RequestQueue({
+      name: appName
+    });
+
+    return queue.createDatabase().then(() => {
+      self._queue = queue;
+      return Promise.resolve(queue);
+    });
+  }
+}
+
+/**
+ * Gets the queue length
+ */
+function getQueueLength() {
+  return getQueue().then(queue => {
+    return queue.length();
+  });
+}
+
+/************************
+ * ROUTING FUNCTIONS
+ ************************/
+
+/**
+ * Defines how each Fetch request is handled
+ */
+function defineRoutes() {
+
+  // TODO: Handle these with a proper offline page.
+  router.get([
+    '/',
+    '/logout/',
+    '/dataentry/',
+    '/datamatching/',
+    '/siteadminportal/',
+  ], (request) => {
+    return new Promise((resolve, reject) => {
+
+      fetch(request).then(response => {
+        resolve(response);
+      }).catch(err => {
+        let responseBody = "This page is unavailable while offline. Until connectivity is restored, you may <a href='/mapmanagement/'>return to the map view</a>.";
+        let responseInit = { status: 503, statusText: 'Server unavailable, user may be offline', headers: {'Content-Type': 'text/html'} };
+        resolve(new Response(responseBody, responseInit));
+      });
+
+    });
+  });
+
+  router.get('/mapmanagement/', (request) => {
+    return new Promise((resolve, reject) => {
+
+      console.debug('[SW] Fetching /mapmanagement/');
+
+      // TODO check if these can be loaded in the background as this really slows down reload
+      // Re-populate the layer table
+      self.populateLayerTable()
+
+      // Finally, respond with the request
+      .then(() => {
+        resolve(runtimeFileHandler(request));
+      }).catch((err) => {
+        resolve(runtimeFileHandler(request));
+      });
+
+    });
+  });
+
+  
+  //router.get('/analytics/', (request) => {
+  //  return new Promise((resolve, reject) => {
+
+  //    console.debug('[SW] Fetching /analytics/');
+
+      // TODO check if these can be loaded in the background as this really slows down reload
+      // Re-populate the layer table
+  //   self.populateLayerTable()
+
+      // Finally, respond with the request
+  //    .then(() => {
+  //      resolve(runtimeFileHandler(request));
+  //    }).catch((err) => {
+  //      resolve(runtimeFileHandler(request));
+  //    });
+
+   // });
+  //});
+
+  router.get('/bgsite/group_required/', (request) => {
+    if (self.dataSavedInIndexedDBFlag) {
+      // extract parameter from url
+      const url = new URL(request.url);
+      let params = new URLSearchParams(url.search); 
+      const groupNames = params.getAll('group_names');
+
+      // Get the response from the database
+      return self.getSecurityValue("group_required").then(group_required => {
+        
+        const user_groups = group_required.value;
+        
+        // check if user is a superuser or in at least one of the specified groups
+        let returnValue = false;
+        if (user_groups.includes('Superuser'))
+          returnValue = true;
+        else {
+          for (i in user_groups) {
+            if (user_groups.includes(user_groups[i])) {
+              returnValue = true;
+              break;
+            }
+          }
+        }
+        let responseBody = JSON.stringify({"status": "ok", "group_required": returnValue});
+        let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+        return new Response(responseBody, responseInit);
+      }).catch(err => {
+        // There was an error getting the value from the DB - assume they're unauthorised!
+        let responseBody = JSON.stringify({"status": "ok", "group_required": false});
+        let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+        return new Response(responseBody, responseInit);
+      });
+    }
+    else {
+      return fetch(request).then(response => {
+        return response;
+      });
+    }
+  });
+
+  router.get('/bgsite/user_groups/', (request) => {
+    if (self.dataSavedInIndexedDBFlag) {
+      // Get the response from the database
+      return self.getSecurityValue("group_required").then(group_required => {
+        
+        let responseBody = JSON.stringify({"status": "ok", "groups": group_required.value});
+        let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+        return new Response(responseBody, responseInit);
+      }).catch(err => {
+        // There was an error getting the value from the DB - assume they're unauthorised!
+        let responseBody = JSON.stringify({"status": "ok", "group_required": false});
+        let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+        return new Response(responseBody, responseInit);
+      });
+    }
+    else {
+      return fetch(request).then(response => {
+        return response;
+      });
+    }
+  });
+
+  router.get('/geometries/getLayerNames/', (request) => {
+    if (self.dataSavedInIndexedDBFlag) {
+      return self.getBGMSDatabase().then(db => {
+
+        return Promise.all([
+
+          // Get a list of all layer types currently in use
+          new Promise((resolve, reject) => {
+
+            let layers_present = [];
+
+            const tx = db.transaction(featureTable);
+            tx.objectStore(featureTable).index('_layer_type').iterateKeyCursor(null, "nextunique", cursor => {
+              if (!cursor) return;
+
+              layers_present.push(cursor.key);
+              cursor.continue();
+            });
+
+            tx.complete.then(() => {
+              resolve(layers_present);
+            }).catch((err) => {
+              reject(err);
+            });
+
+          }),
+
+          // Get a list of all possible layers and their grouping
+          new Promise((resolve, reject) => {
+
+            let layer_groups = {
+              geometries: [],
+              memorials: []
+            };
+
+            const tx = db.transaction(layerTable);
+            tx.objectStore(layerTable).iterateCursor(cursor => {
+              if (!cursor) return;
+                let layer = cursor.value;
+
+                if (layer.group_code === "memorials" || layer.group_code === "memorial_cluster") {
+                  layer_groups.memorials[layer.layer_code] = layer;
+                } else {
+                  layer_groups.geometries[layer.layer_code] = layer;
+                }
+
+                cursor.continue();
+              });
+
+            tx.complete.then(() => {
+              resolve(layer_groups);
+            }).catch((err) => {
+              reject(err);
+            });
+
+          })
+
+        ]).then(results => {
+
+          let layers_present = results[0];
+          let all_layer_groups = results[1];
+
+          let layers_present_grouped = [];
+          let number_of_layers = 0;
+
+          // Add each present layer to their group
+          layers_present.forEach(layer => {
+            let layername = null;
+            let layerinfo = null;
+
+            if (layer.indexOf("memorials_") !== -1) { // features from /getLayers/
+              layername = layer.replace("memorials_", "");
+
+              // features in multiple groups including memorials
+              if (layername === "memorials_bench" || layername === "memorials_lych_gate" || layername === "memorials_mausoleum") {
+                layername = layername.replace("memorials_", "");
+              }
+
+              if (layername === "graveplot") {
+                layerinfo = all_layer_groups.geometries.plot;
+              } else {
+                layerinfo = all_layer_groups.memorials[layername];
+              }
+
+            } else if (layer.indexOf("geometries_") !== -1) { // features from /getMemorialLayers/
+              layername = layer.replace("geometries_", "");
+              layerinfo = all_layer_groups.geometries[layername];
+            }
+
+            if ( !layerinfo ) return;
+
+            if (!layers_present_grouped[layerinfo.group_code]) {
+              layers_present_grouped[layerinfo.group_code] = {
+                hierarchy: layerinfo.group_hierarchy,
+                initial_visibility: layerinfo.initial_visibility,
+                layers: [],
+                group_code: layerinfo.group_code,
+                switch_on_off: layerinfo.switch_on_off,
+                display_name: layerinfo.group_display_name,
+              };
+            }
+
+            layers_present_grouped[layerinfo.group_code].layers.push({
+              hierarchy: layerinfo.layer_hierarchy,
+              min_resolution: layerinfo.min_resolution,
+              initial_visibility: layerinfo.initial_visibility,
+              layer_type: layerinfo.layer_type,
+              layer_code: layerinfo.layer_code,
+              show_in_toolbar: layerinfo.show_in_toolbar,
+              max_resolution: layerinfo.max_resolution,
+              display_name: layerinfo.layer_display_name,
+            });
+
+            number_of_layers++;
+
+          });
+
+          // Creates the final response body
+          let responseBody = {
+            layer_groups: [],
+            number_of_layers: number_of_layers
+          };
+
+          // Orders the response by hierarchy
+          Object.keys(layers_present_grouped).forEach(group_code => {
+            let group = layers_present_grouped[group_code];
+            responseBody.layer_groups[group.hierarchy] = group;
+          });
+
+          // The base, aerial, available_plot and reserved_plot layers are always sent
+          // BUG: Get these values from the database rather than hardcoding them
+          // Adds the Map, Aerial and PLot groups if they aren't already present
+          if(!responseBody.layer_groups[0]) {
+            responseBody.layer_groups[0] = {"hierarchy": 0, "initial_visibility": true, "layers": [], "group_code": "base", "switch_on_off": false, "display_name": "Map"};
+          }
+          if(!responseBody.layer_groups[8]) {
+            responseBody.layer_groups[8] = {"hierarchy": 8, "initial_visibility": true, "layers": [], "group_code": "aerial", "switch_on_off": true, "display_name": "Aerial"};
+          }
+          if(!responseBody.layer_groups[13]) {
+            responseBody.layer_groups[13] = {"hierarchy": 13, "initial_visibility": true, "layers": [], "group_code": "plans", "switch_on_off": true, "display_name": "Plans"};
+          }
+          if(!responseBody.layer_groups[9]) {
+            responseBody.layer_groups[9] = {"hierarchy": 9, "initial_visibility": true, "layers": [], "group_code": "plots", "switch_on_off": true, "display_name": "Plot"};
+          }
+
+          // Adds the Base, Aerial, Available Plot and Reserved layers if they aren't already present
+          if(!responseBody.layer_groups[0].layers.find(layer => layer.layer_code === "base")) {
+            responseBody.layer_groups[0].layers.push({"hierarchy": 0, "min_resolution": 0.0, "layer_type": "raster", "layer_code": "base", "show_in_toolbar": false, "max_resolution": 1600.0, "display_name": "Base"});
+            responseBody.number_of_layers++;
+          }
+          if(!responseBody.layer_groups[8].layers.find(layer => layer.layer_code === "aerial")) {
+            responseBody.layer_groups[8].layers.push({"hierarchy": 40, "min_resolution": 0.0, "layer_type": "raster", "layer_code": "aerial", "show_in_toolbar": true, "max_resolution": 1600.0, "display_name": "Aerial"});
+            responseBody.number_of_layers++;
+          }
+          if(!responseBody.layer_groups[13].layers.find(layer => layer.layer_code === "plans")) {
+            responseBody.layer_groups[13].layers.push({"hierarchy": 40, "min_resolution": 0.0, "layer_type": "raster", "layer_code": "plans", "show_in_toolbar": true, "max_resolution": 1600.0, "display_name": "Plans"});
+            responseBody.number_of_layers++;
+          }
+          if(!responseBody.layer_groups[9].layers.find(layer => layer.layer_code === "available_plot")) {
+            responseBody.layer_groups[9].layers.push({"layer_type": "vector", "layer_code": "available_plot", "hierarchy": 43, "show_in_toolbar": true, "display_name": "Available Plot", "min_resolution": 0.0, "max_resolution": 0.5});
+            responseBody.number_of_layers++;
+          }
+          if(!responseBody.layer_groups[9].layers.find(layer => layer.layer_code === "reserved_plot")) {
+            responseBody.layer_groups[9].layers.push({"layer_type": "vector", "layer_code": "reserved_plot", "hierarchy": 44, "show_in_toolbar": true, "display_name": "Reserved", "min_resolution": 0.0, "max_resolution": 0.5});
+            responseBody.number_of_layers++;
+          }
+
+          // Removes all 'null' entries in the array
+          responseBody.layer_groups = responseBody.layer_groups.filter(group => group);
+
+          let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+          return new Response(JSON.stringify(responseBody), responseInit);
+
+        });
+      });
+    }
+    else {
+      return new Promise((resolve, reject) => {
+
+        self.getQueueLength().then(length => {
+          if (length > 0) {
+            reject();
+          } else {
+            fetch(request).then((response) => {
+              resolve(response);
+            }).catch((err) => {
+              reject();
+            });
+          }
+        });
+
+      });
+    }
+  });
+
+  router.get('/geometries/getAllLayerNames/', (request) => {
+    return new Promise((resolve, reject) => {
+
+      self.getQueueLength().then(length => {
+        if (length > 0) {
+          reject();
+        } else {
+          fetch(request).then((response) => {
+            resolve(response);
+          }).catch((err) => {
+            reject();
+          });
+        }
+      });
+
+    }).catch((err) => {
+
+      return self.getBGMSDatabase().then(db => {
+
+        return new Promise((resolve, reject) => {
+						
+					let layers = [];
+
+					let layer_groups = {
+						geometries: [],
+						memorials: []
+					};
+
+					const tx = db.transaction(layerTable);
+					tx.objectStore(layerTable).iterateCursor(cursor => {
+						if (!cursor) return;
+							let layer = cursor.value;
+							
+							layers.push(layer);
+
+							if (layer.group_code === "memorials" || layer.group_code === "memorial_cluster") {
+								layer_groups.memorials[layer.layer_code] = layer;
+							} else {
+								layer_groups.geometries[layer.layer_code] = layer;
+							}
+
+							cursor.continue();
+						});
+
+					tx.complete.then(() => {
+						resolve([layers, layer_groups]);
+					}).catch((err) => {
+						reject(err);
+					});
+
+        }).then(results => {
+
+          let layers_present = results[0];
+          let all_layer_groups = results[1];
+
+          let layers_present_grouped = [];
+          let number_of_layers = 0;
+
+          // Add each present layer to their group
+          layers_present.forEach(layerinfo => {
+
+            if ( !layerinfo ) return;
+
+            if (!layers_present_grouped[layerinfo.group_code]) {
+              layers_present_grouped[layerinfo.group_code] = {
+                hierarchy: layerinfo.group_hierarchy,
+                initial_visibility: layerinfo.initial_visibility,
+                layers: [],
+                group_code: layerinfo.group_code,
+                switch_on_off: layerinfo.switch_on_off,
+                display_name: layerinfo.group_display_name,
+              };
+            }
+
+            layers_present_grouped[layerinfo.group_code].layers.push({
+							layer_id: layerinfo.layer_id,
+              hierarchy: layerinfo.layer_hierarchy,
+              min_resolution: layerinfo.min_resolution,
+              initial_visibility: layerinfo.initial_visibility,
+              layer_type: layerinfo.layer_type,
+              layer_code: layerinfo.layer_code,
+              show_in_toolbar: layerinfo.show_in_toolbar,
+              max_resolution: layerinfo.max_resolution,
+              display_name: layerinfo.layer_display_name,
+            });
+
+            number_of_layers++;
+
+          });
+
+          // Creates the final response body
+          let responseBody = {
+            layer_groups: [],
+            number_of_layers: number_of_layers
+          };
+
+          // Orders the response by hierarchy
+          Object.keys(layers_present_grouped).forEach(group_code => {
+            let group = layers_present_grouped[group_code];
+            responseBody.layer_groups[group.hierarchy] = group;
+          });
+
+          // The base, aerial, available_plot and reserved_plot layers are always sent
+          // BUG: Get these values from the database rather than hardcoding them
+          // Adds the Map, Aerial and PLot groups if they aren't already present
+          if(!responseBody.layer_groups[0]) {
+            responseBody.layer_groups[0] = {"hierarchy": 0, "initial_visibility": true, "layers": [], "group_code": "base", "switch_on_off": false, "display_name": "Map"};
+          }
+          if(!responseBody.layer_groups[8]) {
+            responseBody.layer_groups[8] = {"hierarchy": 8, "initial_visibility": true, "layers": [], "group_code": "aerial", "switch_on_off": true, "display_name": "Aerial"};
+          }
+          if(!responseBody.layer_groups[13]) {
+            responseBody.layer_groups[13] = {"hierarchy": 13, "initial_visibility": true, "layers": [], "group_code": "plans", "switch_on_off": true, "display_name": "Plans"};
+          }
+          if(!responseBody.layer_groups[9]) {
+            responseBody.layer_groups[9] = {"hierarchy": 9, "initial_visibility": true, "layers": [], "group_code": "plots", "switch_on_off": true, "display_name": "Plot"};
+          }
+
+          // Adds the Base, Aerial, Available Plot and Reserved layers if they aren't already present
+          if(!responseBody.layer_groups[0].layers.find(layer => layer.layer_code === "base")) {
+            responseBody.layer_groups[0].layers.push({"hierarchy": 0, "min_resolution": 0.0, "layer_type": "raster", "layer_code": "base", "show_in_toolbar": false, "max_resolution": 1600.0, "display_name": "Base"});
+            responseBody.number_of_layers++;
+          }
+          if(!responseBody.layer_groups[8].layers.find(layer => layer.layer_code === "aerial")) {
+            responseBody.layer_groups[8].layers.push({"hierarchy": 40, "min_resolution": 0.0, "layer_type": "raster", "layer_code": "aerial", "show_in_toolbar": true, "max_resolution": 1600.0, "display_name": "Aerial"});
+            responseBody.number_of_layers++;
+          }
+          if(!responseBody.layer_groups[13].layers.find(layer => layer.layer_code === "plans")) {
+            responseBody.layer_groups[13].layers.push({"hierarchy": 40, "min_resolution": 0.0, "layer_type": "raster", "layer_code": "plans", "show_in_toolbar": true, "max_resolution": 1600.0, "display_name": "Plans"});
+            responseBody.number_of_layers++;
+          }
+          if(!responseBody.layer_groups[9].layers.find(layer => layer.layer_code === "available_plot")) {
+            responseBody.layer_groups[9].layers.push({"layer_type": "vector", "layer_code": "available_plot", "hierarchy": 43, "show_in_toolbar": true, "display_name": "Available Plot", "min_resolution": 0.0, "max_resolution": 0.5});
+            responseBody.number_of_layers++;
+          }
+          if(!responseBody.layer_groups[9].layers.find(layer => layer.layer_code === "reserved_plot")) {
+            responseBody.layer_groups[9].layers.push({"layer_type": "vector", "layer_code": "reserved_plot", "hierarchy": 44, "show_in_toolbar": true, "display_name": "Reserved", "min_resolution": 0.0, "max_resolution": 0.5});
+            responseBody.number_of_layers++;
+          }
+
+          // Removes all 'null' entries in the array
+          responseBody.layer_groups = responseBody.layer_groups.filter(group => group);
+
+          let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+          return new Response(JSON.stringify(responseBody), responseInit);
+
+        });
+      });
+    });
+  });
+
+  router.get('/mapmanagement/getMemorials/', (request) => {
+    return new Promise((resolve, reject) => {
+      if (self.dataSavedInIndexedDBFlag) {
+
+        // Search the database for every feature beginning with memorials_
+        // ` is the next unicode character after _ so we can get everything
+        // beginning with memorials_ by specifiying the upper bound as memorials`
+        // i.e. '_'.charCodeAt(0) === 95
+        //      '`'.charCodeAt(0) === 96
+        let keyRangeValue = IDBKeyRange.bound("memorials_", "memorials`");
+
+        self.getBGMSDatabase().then(db => {
+          // This will contain the centrepoint of every memorial, plot, and cluster
+          let responseBody = {
+            memorials: [],
+            sw: true
+          };
+          const tx = db.transaction(featureTable);
+          tx.objectStore(featureTable).index("_layer_type").openCursor(keyRangeValue).then(function cursorIterate(cursor) {
+            // console.debug('[getMemorials]', features);
+            if(cursor) {
+              feature = cursor.value;
+              let maxX = -Infinity;
+              let maxY = -Infinity;
+              let minX = Infinity;
+              let minY = Infinity;
+
+              let marker_type = feature.properties.marker_type;
+
+              // features in multiple groups including memorials
+              if (marker_type === "memorials_bench" || marker_type === "memorials_lych_gate" || marker_type === "memorials_mausoleum") {
+                marker_type = marker_type.replace("memorials_", "");
+              }
+
+              let memorial = {
+                id: feature.id,
+                centrepoint: null,
+                marker_type: marker_type
+              };
+
+              if (feature.geometry) {
+                // Calculate the centre of the feature; calculation depends on the
+                // type of the feature
+                if (feature.geometry.type === "Point") {
+
+                  // Point is easy to find the centre of!
+                  memorial.centrepoint = feature.geometry.coordinates;
+
+                } else if (feature.geometry.type === "MultiPolygon") {
+
+                  // Calculate the bounding box then find the middle of it
+                  feature.geometry.coordinates[0][0].forEach(point => {
+                    if(point[0] > maxX) maxX = point[0];
+                    if(point[0] < minX) minX = point[0];
+                    if(point[1] > maxY) maxY = point[1];
+                    if(point[1] < minY) minY = point[1];
+
+                    let centreX = (maxX + minX) / 2;
+                    let centreY = (maxY + minY) / 2;
+
+                    memorial.centrepoint = [centreX, centreY];
+
+                  });
+                } else if (feature.geometry.type === "MultiLineString") {
+
+                  // As far as I can tell, there are no memorials/plots that are
+                  // lines. TODO: May as well handle them, just in case
+                  console.error('[getMemorials] Unhandled MultiLineString; the centrepoint of this feature will not be returned.');
+
+                } else {
+
+                  // The server database is currently only configured to hold Points,
+                  // Polygons and Lines. If any other type is added in the future,
+                  // it'll need to be handled here.
+                  console.error('[getMemorials] Unhandled ' + feature.geometry.type + '; the centrepoint of this feature will not be returned.');
+                }
+              }
+
+              responseBody.memorials.push(memorial);
+              return cursor.continue().then(cursorIterate);
+            }
+            else {
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            }
+          }).catch(err => {
+            reject('Error reading from database');
+          });
+        }).catch(err => {
+          reject('Error getting database - ', err);
+        });
+      }
+      else {
+        // Attempt to send the request to the server
+        fetch(request.clone())
+        .then(res => {
+          // Server responded
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      }
+    });
+  });
+
+  router.get('/mapmanagement/getPersonByMemorialID/', (request) => {
+    
+    const getPersons = new Promise((resolve, reject) => {
+      
+      // extract parameter from url
+      const url = new URL(request.url);
+      const memorialIds = JSON.parse(url.searchParams.get('memorialId'));
+      
+      self.getBGMSDatabase().then(db => {
+        let persons = [];
+        const tx = db.transaction(personTable);
+        let personOS = tx.objectStore(personTable).index("memorial_id");
+        
+        for (let i=0, p = Promise.resolve(); i<memorialIds.length; i++) {
+          p = personOS.openCursor(memorialIds[i])
+          .then(function iteratePersons(cursor) {
+            if (!cursor) {return;}
+            persons.push(cursor.value);
+            return cursor.continue().then(iteratePersons);
+          })
+          .then(function() {
+            // if last one
+            if (i === (memorialIds.length-1)) {
+              resolve(persons);
+            }
+          });
+        }
+      });
+    });
+    
+    return new Promise((resolve, reject) => {
+      if (self.dataSavedInIndexedDBFlag && self.personsAvailableOfflineFlag) {
+        getPersons
+        .then(function(persons) {
+          let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+          resolve(new Response(JSON.stringify({ persons: persons }), responseInit));
+        })
+        .catch((err) => {
+          reject(err);
+        });
+      }
+      else {
+        // Attempt to send the request to the server
+        fetch(request.clone())
+        .then(res => {
+          // Server responded
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      }
+    });
+  });
+
+  router.get('/mapmanagement/getPersonByID/', (request) => {
+    
+    const getPersons = new Promise((resolve, reject) => {
+      
+      // extract parameter from url
+      const url = new URL(request.url);
+      const personIds = JSON.parse(url.searchParams.get('personIds'));
+      
+      self.getBGMSDatabase().then(db => {
+        let groupedPersons = {};
+        const tx = db.transaction(personTable);
+        let personOS = tx.objectStore(personTable).index("id");
+        
+        for (let i=0, p = Promise.resolve(); i<personIds.length; i++) {
+          p = personOS.openCursor(personIds[i])
+          .then(function iteratePersons(cursor) {
+            if (!cursor) {return;}
+              // group results so multiple records for the same person are kept together
+              if (cursor.value['id'] in groupedPersons)
+                groupedPersons[cursor.value['id']].push(cursor.value);
+              else
+                groupedPersons[cursor.value['id']] = [cursor.value];
+            return cursor.continue().then(iteratePersons);
+          })
+          .then(function() {
+            // if last one
+            if (i === (personIds.length-1)) {
+              resolve(groupedPersons);
+            }
+          });
+        }
+      });
+    });
+
+    return new Promise((resolve, reject) => {
+      if (self.dataSavedInIndexedDBFlag && self.personsAvailableOfflineFlag) {
+        getPersons
+        .then(function(persons) {
+          let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+          resolve(new Response(JSON.stringify({ persons: persons }), responseInit));
+        })
+        .catch((err) => {
+          reject(err);
+        });
+      }
+      else {
+        // Attempt to send the request to the server
+        fetch(request.clone())
+        .then(res => {
+          // Server responded
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      }
+    });
+  });
+
+  router.get('/api/memorialInscriptions/', (request) => {
+    return new Promise((resolve, reject) => {
+      if (self.dataSavedInIndexedDBFlag) {
+        self.getBGMSDatabase().then(db => {
+
+          const tx = db.transaction(memorialInscriptionTable);
+      
+          // extract parameter from url
+          let regexS = "[\\?&]memorial_uuid=([^&#]*)";
+          let regex = new RegExp( regexS );
+          let memorial_uuid = regex.exec( request.url )[1];
+          
+          let memorialInscriptions = [];
+          
+          // iterate through all records with memorial_uuid
+          tx.objectStore(memorialInscriptionTable).index("memorial").iterateCursor(IDBKeyRange.only(memorial_uuid), cursor => {
+              if (!cursor) return;
+
+              memorialInscriptions.push(cursor.value);
+              cursor.continue();
+          });
+
+          tx.complete.then(() => {
+              let responseBody = memorialInscriptions;
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+          }).catch((err) => {
+            reject(err);
+          });
+        });
+      }
+      else {
+        // Attempt to send the request to the server
+        fetch(request.clone())
+        .then(res => {
+          // Server responded
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      }
+    });
+  });
+
+  router.get('/geometries/featureAttributeMaterials/', (request) => {
+    return new Promise((resolve, reject) => {
+      if (self.dataSavedInIndexedDBFlag) {
+        self.getBGMSDatabase().then(db => {
+
+          const tx = db.transaction(materialsTable);
+          
+          let materials = [];
+          
+          // iterate through all records with memorial_uuid
+          tx.objectStore(materialsTable).iterateCursor(cursor => {
+              if (!cursor) return;
+
+              materials.push(cursor.value);
+              cursor.continue();
+          });
+
+          tx.complete.then(() => {
+              let responseBody = { materials: materials };
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+          }).catch((err) => {
+            reject(err);
+          });
+        });
+      }
+      else {
+        // Attempt to send the request to the server
+        fetch(request.clone())
+        .then(res => {
+          // Server responded
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      }
+    });
+  });
+
+  router.post('/geometries/featureAttributeMaterials/', (request) => {
+    
+    // Modifies material in the local database
+    let updateFeatureMaterial = function(req) {
+      
+      // Parse the response
+      req.clone().json().then(jsonData => {
+        
+        self.getBGMSDatabase().then(db => {
+          
+          // Get the memorial
+          const tx = db.transaction(featureTable, 'readwrite');
+          tx.objectStore(featureTable).get(jsonData.memorial_id).then(memorial => {
+            
+            // Increment the value
+            memorial.properties.material = jsonData.material;
+            
+            // Update the database
+            tx.objectStore(featureTable).put(memorial);
+          });  
+        });
+      });
+    }
+    
+    return new Promise((resolve, reject) => {
+      self.getQueueLength().then(length => {
+        
+        // If queue is empty
+        if (length === 0) {
+          
+          // Attempt to send request to the server
+          fetch(request.clone()).then(res => {
+            
+            if (self.dataSavedInIndexedDBFlag) {
+              // Server response
+              updateFeatureMaterial(request);
+            }
+            resolve(res);
+            
+          }).catch(err => {
+            
+            // Couldn't reach server
+            updateFeatureMaterial(request);
+            
+            // Save the request in the queue
+            self.getQueue().then(queue => {
+              queue.pushAndReturnKey(request).then((key) => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+                // Fake a success response
+                let responseBody = {"queueKey": key};
+                let responseInit = {status: 204, statusText: "UPDATED"};
+                resolve(new Response(null,responseInit));
+              });
+            });
+          });
+          
+        } else {
+          
+          if (self.dataSavedInIndexedDBFlag) {
+            updateFeatureMaterial(request);
+          }
+          
+          // Queue has items in it, push response to end of queue
+          self.getQueue().then(queue => {
+            queue.pushAndReturnKey(request).then((key) => {
+              queue.length().then(length => {
+                self.emitToClients(new Message('queueLength', length));
+              });
+              // Fake a success response
+              let responseBody = {"queueKey": key};
+              let responseInit = {status: 204, statusText: "UPDATED"};
+              resolve(new Response(null,responseInit));
+            });
+          });
+        }
+      });
+    });
+  });
+
+  router.get('/mapmanagement/getGraveplots/', (request) => {
+    return new Promise((resolve, reject) => {
+      if (self.dataSavedInIndexedDBFlag) {
+        self.getBGMSDatabase().then(db => {
+          
+          let features = [];
+
+          const tx = db.transaction(featureTable);
+          tx.objectStore(featureTable, 'readonly').index('_layer_type').openCursor("memorials_graveplot")
+          .then(function cursorIterate(cursor) {
+            if(cursor) {
+              feature = cursor.value;
+              features.push(feature);
+              return cursor.continue().then(cursorIterate);
+            }
+            else {
+              let responseBody = createFeatureCollection(features);
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            }
+          })
+          .catch(err => {
+            reject(err);
+          });
+        });
+      }
+      else {
+        // Attempt to send the request to the server
+        fetch(request.clone())
+        .then(res => {
+          // Server responded
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      }
+    });
+  });
+  router.get('/mapmanagement/getReservedGraveplots/', (request) => {
+    return new Promise((resolve, reject) => {
+      if (self.dataSavedInIndexedDBFlag) {
+        self.getBGMSDatabase().then(db => {
+          
+          let features = [];
+
+          const tx = db.transaction(featureTable);
+          tx.objectStore(featureTable, 'readonly').index('_layer_type').openCursor("memorials_reserved_graveplot")
+          .then(function cursorIterate(cursor) {
+            if(cursor) {
+              feature = cursor.value;
+              features.push(feature);
+              return cursor.continue().then(cursorIterate);
+            }
+            else {
+              let responseBody = createFeatureCollection(features);
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            }
+          })
+          .catch(err => {
+            reject(err);
+          });
+        });
+      }
+      else {
+        // Attempt to send the request to the server
+        fetch(request.clone())
+        .then(res => {
+          // Server responded
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      }
+    });
+  });
+
+  router.get('/geometries/getLayer/', (request) => {
+    return new Promise((resolve, reject) => {
+      if (self.dataSavedInIndexedDBFlag) {
+        self.getBGMSDatabase().then(db => {
+          
+          let url = new URL(request.url);
+          let layer = url.searchParams.get('layer');
+          let features = [];
+
+          const tx = db.transaction(featureTable);
+          tx.objectStore(featureTable, 'readonly').index('_layer_type').openCursor("geometries_" + layer)
+          .then(function cursorIterate(cursor) {
+            if(cursor) {
+              feature = cursor.value;
+              features.push(feature);
+              return cursor.continue().then(cursorIterate);
+            }
+            else {
+              let responseBody = createFeatureCollection(features);
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            }
+          })
+          .catch(err => {
+            reject(err);
+          });
+        });
+      }
+      else {
+        // Attempt to send the request to the server
+        fetch(request.clone())
+        .then(res => {
+          // Server responded
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      }
+    });
+  });
+  router.get('/mapmanagement/getMemorialLayers/', (request) => {
+    return new Promise((resolve, reject) => {
+      if (self.dataSavedInIndexedDBFlag) {
+        self.getBGMSDatabase().then(db => {
+          
+          let features = [];
+          const url = new URL(request.url);
+          let layer = url.searchParams.get('layer');
+
+          // features in multiple groups including memorials
+          if(layer === "memorials_bench" || layer === "memorials_lych_gate" || layer === "memorials_mausoleum") {
+            layer = layer.replace("memorials_", "");
+          }
+
+          const tx = db.transaction(featureTable);
+          tx.objectStore(featureTable, 'readonly').index('_layer_type').openCursor("memorials_" + layer)
+          .then(function cursorIterate(cursor) {
+            if(cursor) {
+              feature = cursor.value;
+              features.push(feature);
+              return cursor.continue().then(cursorIterate);
+            }
+            else {
+              let responseBody = createFeatureCollection(features);
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            }
+          })
+          .catch(err => {
+            reject(err);
+          });
+        });
+      }
+      else {
+        // Attempt to send the request to the server
+        fetch(request.clone())
+        .then(res => {
+          // Server responded
+          resolve(res);
+        })
+        .catch(err => {
+          reject(err);
+        });
+      }
+    });
+  });
+
+  router.get(staticFiles, staticFileHandler);
+  router.get(runtimeFiles, runtimeFileHandler);
+  router.get(Object.keys(offlineFiles), offlineFileHandler);
+
+  /*router.post('/mapmanagement/searchPerson/', (request) => {
+    return fetch(request).then(response => {
+      return response;
+    }).catch(err => {
+      let responseBody = JSON.stringify({"data": "<p style='color:#f00;padding-top:8px;font-weight:bold;text-align:center'>Searching is unavailable in offline mode.</p><script>document.getElementsByClassName('collapse-menu-results')[0].style.height = '';</script>"});
+      let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+      return new Response(responseBody, responseInit);
+    });
+  });*/
+
+  router.post('/mapmanagement/addAvailablePlot/', (request) => {
+    console.debug('[ADD PLOT] Adding plot');
+    return new Promise((resolve, reject) => {
+
+      self.getQueueLength().then(length => {
+        if (length === 0) {
+          fetch(request.clone()).then(response => {
+
+            if (response.ok) {
+              if (self.dataSavedInIndexedDBFlag) {
+                response.clone().json().then(jsonData => {
+                  let plot = jsonData;
+                  plot._layer_type = "geometries_" + plot.properties.marker_type;
+
+                  self.getBGMSDatabase().then(db => {
+                    const tx = db.transaction(featureTable, 'readwrite');
+                    tx.objectStore(featureTable).add(plot);
+                  });
+                });
+              }
+              resolve(response);
+            } else {
+              resolve(response);
+            }
+          }).catch(err => {
+
+            request.clone().json().then(jsonData => {
+              let plot = JSON.parse(jsonData.geojsonFeature);
+              plot._layer_type = "geometries_" + plot.properties.marker_type;
+
+              // Add the new plot to the local database
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(featureTable, 'readwrite');
+                tx.objectStore(featureTable).add(plot);
+              });
+
+              // Add to the queue
+              self.getQueue().then(queue => {
+                queue.push(request).then(() => {
+                  queue.length().then(length => {
+                    self.emitToClients(new Message('queueLength', length));
+                  });
+                });
+              });
+
+              // Respond with a fake response
+              let responseBody = plot;
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            });
+          });
+        } else {
+          request.clone().json().then(jsonData => {
+            let plot = JSON.parse(jsonData.geojsonFeature);
+            plot._layer_type = "geometries_" + plot.properties.marker_type;
+
+            if (dataSavedInIndexedDBFlag) {
+              // Add the new plot to the local database
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(featureTable, 'readwrite');
+                tx.objectStore(featureTable).add(plot);
+              });
+            }
+
+            // Add to the queue
+            self.getQueue().then(queue => {
+              queue.push(request).then(() => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+              });
+            });
+
+            // Respond with a fake response
+            let responseBody = plot;
+            let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+            resolve(new Response(JSON.stringify(responseBody), responseInit));
+          });
+        }
+      });
+
+    });
+  });
+  router.post('/geometries/updatePlot/', (request) => {
+    console.debug('[UPDATE PLOT] Updating plot');
+    return new Promise((resolve, reject) => {
+
+      self.getQueueLength().then(length => {
+        if (length === 0) {
+          fetch(request.clone()).then(response => {
+            if (response.ok) {
+              if (self.dataSavedInIndexedDBFlag) {
+                request.json().then(jsonData => {
+                  let plot = JSON.parse(jsonData.geojsonFeature);
+
+                  if(plot.properties.marker_type === "available_plot") {
+                    plot._layer_type = "geometries_" + plot.properties.marker_type;
+                  } else if(plot.properties.marker_type === "plot") {
+                    plot._layer_type = "memorials_graveplot";
+                  } else if(plot.properties.marker_type === "reserved_plot") {
+                    plot._layer_type = "memorials_reserved_graveplot";
+                  } else {
+                    console.error('[UPDATE] Unrecognised plot type: ' + plot.properties.marker_type);
+                  }
+
+                  self.getBGMSDatabase().then(db => {
+                    const tx = db.transaction(featureTable, 'readwrite');
+                    tx.objectStore(featureTable).put(plot);
+                  });
+
+                });
+              }
+              resolve(response);
+            } else {
+              resolve(response);
+            }
+          }).catch(err => {
+            request.clone().json().then(jsonData => {
+              let plot = JSON.parse(jsonData.geojsonFeature);
+
+              if(plot.properties.marker_type === "available_plot") {
+                plot._layer_type = "geometries_" + plot.properties.marker_type;
+              } else if(plot.properties.marker_type === "plot") {
+                plot._layer_type = "memorials_" + plot.properties.marker_type;
+              } else if(plot.properties.marker_type === "reserved_plot") {
+                plot._layer_type = "memorials_" + plot.properties.marker_type;
+              } else {
+                console.error('[UPDATE] Unrecognised plot type: ' + plot.properties.marker_type);
+              }
+
+              if (self.dataSavedInIndexedDBFlag) {
+                // Add the new plot to the local database
+                self.getBGMSDatabase().then(db => {
+                  const tx = db.transaction(featureTable, 'readwrite');
+                  tx.objectStore(featureTable).put(plot);
+                });
+              }
+
+              // Add to the queue
+              self.getQueue().then(queue => {
+                queue.push(request).then(() => {
+                  queue.length().then(length => {
+                    self.emitToClients(new Message('queueLength', length));
+                  });
+                });
+              });
+
+              // Respond with a fake response
+              let responseBody = self.createFeatureCollection([plot]);
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            });
+          });
+        } else {
+          request.clone().json().then(jsonData => {
+            let plot = JSON.parse(jsonData.geojsonFeature);
+
+            if(plot.properties.marker_type === "available_plot") {
+              plot._layer_type = "geometries_" + plot.properties.marker_type;
+            } else if(plot.properties.marker_type === "plot") {
+              plot._layer_type = "memorials_" + plot.properties.marker_type;
+            } else if(plot.properties.marker_type === "reserved_plot") {
+              plot._layer_type = "memorials_" + plot.properties.marker_type;
+            } else {
+              console.error('[UPDATE] Unrecognised plot type: ' + plot.properties.marker_type);
+            }
+
+            if (self.dataSavedInIndexedDBFlag) {
+              // Add the new plot to the local database
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(featureTable, 'readwrite');
+                tx.objectStore(featureTable).put(plot);
+              });
+            }
+
+            // Add to the queue
+            self.getQueue().then(queue => {
+              queue.push(request).then(() => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+              });
+            });
+
+            // Respond with a fake response
+            let responseBody = self.createFeatureCollection([plot]);
+            let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+            resolve(new Response(JSON.stringify(responseBody), responseInit));
+          });
+        }
+      });
+
+    });
+  });
+  router.post('/geometries/deletePlot/', (request) => {
+    console.debug('[DELETE PLOT] Deleting plot');
+    return new Promise((resolve, reject) => {
+
+      self.getQueueLength().then(length => {
+        if (length === 0) {
+          fetch(request.clone()).then(response => {
+            if (response.ok) {
+              if (self.dataSavedInIndexedDBFlag) {
+                response.clone().json().then(jsonData => {
+                  let plot_id = jsonData.plot_id;
+
+                  self.getBGMSDatabase().then(db => {
+                    const tx = db.transaction(featureTable, 'readwrite');
+                    tx.objectStore(featureTable).delete(plot_id);
+                  });
+
+                });
+              }
+              resolve(response);
+            } else {
+              resolve(response);
+            }
+          }).catch(err => {
+            request.clone().json().then(jsonData => {
+              let plot_id = jsonData.plot_id;
+
+              // Add the new plot to the local database
+              if (self.dataSavedInIndexedDBFlag) {
+                self.getBGMSDatabase().then(db => {
+                  const tx = db.transaction(featureTable, 'readwrite');
+                  tx.objectStore(featureTable).delete(plot_id);
+                });
+              }
+
+              // Add to the queue
+              self.getQueue().then(queue => {
+                queue.push(request).then(() => {
+                  queue.length().then(length => {
+                    self.emitToClients(new Message('queueLength', length));
+                  });
+                });
+              });
+
+              // Respond with a fake response
+              let responseBody = { plot_id: plot_id };
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            });
+          });
+        } else {
+          request.clone().json().then(jsonData => {
+            let plot_id = jsonData.plot_id;
+
+            if (self.dataSavedInIndexedDBFlag) {
+              // Add the new plot to the local database
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(featureTable, 'readwrite');
+                tx.objectStore(featureTable).delete(plot_id);
+              });
+            }
+
+            // Add to the queue
+            self.getQueue().then(queue => {
+              queue.push(request).then(() => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+              });
+            });
+
+            // Respond with a fake response
+            let responseBody = { plot_id: plot_id };
+            let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+            resolve(new Response(JSON.stringify(responseBody), responseInit));
+          });
+        }
+      });
+
+    });
+  });
+
+  router.post('/mapmanagement/addHeadstone/', (request) => {
+    console.debug('[ADD HEADSTONE] Adding a headstone');
+
+    // Must resolve with a Response or another Promise that resolves into a Response
+    // This Response is what is sent back to the client
+    // Rejecting will result in the client receiving a network error
+    return new Promise((resolve, reject) => {
+
+      // How we respond depends on whether the queue is empty or not
+      self.getQueueLength().then(length => {
+
+        // We don't want to send the request to the server if there's other pending requests
+        if (length === 0) {
+
+          // Send the request to the server
+          fetch(request.clone()).then(response => {
+
+            // Only add the item to the database if it's successful
+            if (response.ok) {
+              if (self.dataSavedInIndexedDBFlag) {
+                // Parse the response
+                response.clone().json().then(jsonData => {
+
+                  // Get the headstone and attach its layer type
+                  let headstone = jsonData;
+                  headstone._layer_type = "memorials_" + headstone.properties.marker_type;
+
+                  // Add the new headstone to the database
+                  self.getBGMSDatabase().then(db => {
+                    const tx = db.transaction(featureTable, 'readwrite');
+                    tx.objectStore(featureTable).add(headstone);
+                  });
+                });
+              }
+
+              // Return the response to the client
+              resolve(response);
+
+            } else {
+
+              // The response from the server wasn't a HTTP 2xx response
+              resolve(response);
+
+            }
+          }).catch(err => {
+            // The request couldn't reach the server (user is probably offline)
+            // NOTE: This is NOT an unsuccessful response e.g. 404 or 500
+
+            // Parse the request object
+            request.clone().json().then(jsonData => {
+
+              // Get the headstone and attach its layer type
+              let headstone = JSON.parse(jsonData.geojsonFeature);
+              headstone._layer_type = "memorials_" + headstone.properties.marker_type;
+              headstone.properties.id = headstone.id;
+
+              if (self.dataSavedInIndexedDBFlag) {
+                // Add the new headstone to the database
+                self.getBGMSDatabase().then(db => {
+                  const tx = db.transaction(featureTable, 'readwrite');
+                  tx.objectStore(featureTable).add(headstone);
+                });
+              }
+
+              // Add the request to the queue
+              self.getQueue().then(queue => {
+                queue.push(request).then(() => {
+                  queue.length().then(length => {
+                    self.emitToClients(new Message('queueLength', length));
+                  });
+                });
+              });
+
+              // Respond with a fake response
+              let responseBody = headstone;
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            });
+          });
+        } else {
+          // The queue has something in it!
+
+          // Parse the request object
+          request.clone().json().then(jsonData => {
+
+            // Get the headstone and attach its layer type
+            let headstone = JSON.parse(jsonData.geojsonFeature);
+            headstone._layer_type = "memorials_" + headstone.properties.marker_type;
+            headstone.properties.id = headstone.id;
+
+            if (self.dataSavedInIndexedDBFlag) {
+              // Add the new headstone to the database
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(featureTable, 'readwrite');
+                tx.objectStore(featureTable).add(headstone);
+              });
+            }
+
+            // Add the request to the queue
+            self.getQueue().then(queue => {
+              queue.push(request).then(() => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+              });
+            });
+
+            // Respond with a fake response
+            let responseBody = headstone;
+            let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+            resolve(new Response(JSON.stringify(responseBody), responseInit));
+          });
+        }
+      });
+    });
+  });
+  router.post('/geometries/updateMemorial/', (request) => {
+    console.debug('[UPDATE HEADSTONE] Updating a headstone');
+
+    // Must resolve with a Response or another Promise that resolves into a Response
+    // This Response is what is sent back to the client
+    // Rejecting will result in the client receiving a network error
+    return new Promise((resolve, reject) => {
+
+      // How we respond depends on whether the queue is empty or not
+      self.getQueueLength().then(length => {
+
+        // We don't want to send the request to the server if there's other pending requests
+        if (length === 0) {
+
+          // Send the request to the server
+          fetch(request.clone()).then(response => {
+
+            // Only update the headstone in the database if it's successful
+            if (response.ok) {
+              if (self.dataSavedInIndexedDBFlag) {
+                // Parse the response
+                request.json().then(jsonData => {
+
+                  // Get the headstone and attach its layer type
+                  let headstone = JSON.parse(jsonData.geojsonFeature);
+                  if(headstone.properties.marker_type === undefined) {
+                    console.error('[UPDATE HEADSTONE] Marker Type is undefined');
+                    headstone._layer_type = "memorials_gravestone";
+                  } else {
+                    console.debug('[UPDATE HEADSTONE] Marker Type is fine');
+                    headstone._layer_type = "memorials_" + headstone.properties.marker_type;
+                  }
+
+                  // Update the headstone in the database
+                  self.getBGMSDatabase().then(db => {
+                    const tx = db.transaction(featureTable, 'readwrite');
+                    tx.objectStore(featureTable).put(headstone);
+                  });
+                });
+              }
+
+              // Return the response to the client
+              resolve(response);
+
+            } else {
+
+              // The response from the server wasn't a HTTP 2xx response
+              resolve(response);
+
+            }
+          }).catch(err => {
+            // The request couldn't reach the server (user is probably offline)
+            // NOTE: This is NOT an unsuccessful response e.g. 404 or 500
+
+            // Parse the request object
+            request.clone().json().then(jsonData => {
+
+              // Get the headstone and attach its layer type
+              let headstone = JSON.parse(jsonData.geojsonFeature);
+              headstone._layer_type = "memorials_" + headstone.properties.marker_type;
+
+              if (self.dataSavedInIndexedDBFlag) {
+                // Update the headstone in the database
+                self.getBGMSDatabase().then(db => {
+                  const tx = db.transaction(featureTable, 'readwrite');
+                  tx.objectStore(featureTable).put(headstone);
+                });
+              }
+
+              // Add the request to the queue
+              self.getQueue().then(queue => {
+                queue.push(request).then(() => {
+                  queue.length().then(length => {
+                    self.emitToClients(new Message('queueLength', length));
+                  });
+                });
+              });
+
+              // Respond with a fake response
+              let responseBody = self.createFeatureCollection([headstone]);
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            });
+          });
+        } else {
+          // The queue has something in it!
+
+          // Parse the request object
+          request.clone().json().then(jsonData => {
+
+            // Get the headstone and attach its layer type
+            let headstone = JSON.parse(jsonData.geojsonFeature);
+            headstone._layer_type = "memorials_" + headstone.properties.marker_type;
+
+            if (self.dataSavedInIndexedDBFlag) {
+              // Update the headstone in the database
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(featureTable, 'readwrite');
+                tx.objectStore(featureTable).put(headstone);
+              });
+            }
+
+            // Add the request to the queue
+            self.getQueue().then(queue => {
+              queue.push(request).then(() => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+              });
+            });
+
+            // Respond with a fake response
+            let responseBody = self.createFeatureCollection([headstone]);
+            let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+            resolve(new Response(JSON.stringify(responseBody), responseInit));
+          });
+        }
+      });
+    });
+  });
+  router.post('/mapmanagement/deleteHeadstone/', (request) => {
+    console.debug('[DELETE HEADSTONE] Deleting a headstone');
+
+    // Must resolve with a Response or another Promise that resolves into a Response
+    // This Response is what is sent back to the client
+    // Rejecting will result in the client receiving a network error
+    return new Promise((resolve, reject) => {
+
+      // How we respond depends on whether the queue is empty or not
+      self.getQueueLength().then(length => {
+
+        // We don't want to send the request to the server if there's other pending requests
+        if (length === 0) {
+
+          // Send the request to the server
+          fetch(request.clone()).then(response => {
+
+            // Only update the headstone in the database if it's successful
+            if (response.ok) {
+              if (self.dataSavedInIndexedDBFlag) {
+                // Parse the request
+                request.json().then(jsonData => {
+
+                  // Get the headstone id
+                  let headstone_id = jsonData.memorial_id;
+
+                  // Delete the headstone from the database
+                  self.getBGMSDatabase().then(db => {
+                    const tx = db.transaction(featureTable, 'readwrite');
+                    tx.objectStore(featureTable).delete(headstone_id);
+                  });
+                });
+              }
+
+              // Return the response to the client
+              resolve(response);
+
+            } else {
+
+              // The response from the server wasn't a HTTP 2xx response
+              resolve(response);
+
+            }
+          }).catch(err => {
+            // The request couldn't reach the server (user is probably offline)
+            // NOTE: This is NOT an unsuccessful response e.g. 404 or 500
+
+            // Parse the request object
+            request.clone().json().then(jsonData => {
+              if (self.dataSavedInIndexedDBFlag) {
+                // Get the headstone id
+                let headstone_id = jsonData.memorial_id;
+
+                // Delete the headstone from the database
+                self.getBGMSDatabase().then(db => {
+                  const tx = db.transaction(featureTable, 'readwrite');
+                  tx.objectStore(featureTable).delete(headstone_id);
+                });
+              }
+
+              // Add the request to the queue
+              self.getQueue().then(queue => {
+                queue.push(request).then(() => {
+                  queue.length().then(length => {
+                    self.emitToClients(new Message('queueLength', length));
+                  });
+                });
+              });
+
+              // Respond with a fake response
+              let responseBody = { status: "OK" };
+              let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            });
+          });
+        } else {
+          // The queue has something in it!
+
+          // Parse the request object
+          request.clone().json().then(jsonData => {
+            if (self.dataSavedInIndexedDBFlag) {
+              // Get the headstone id
+              let headstone_id = jsonData.memorial_id;
+
+              // Delete the headstone from the database
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(featureTable, 'readwrite');
+                tx.objectStore(featureTable).delete(headstone_id);
+              });
+            }
+
+            // Add the request to the queue
+            self.getQueue().then(queue => {
+              queue.push(request).then(() => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+              });
+            });
+
+            // Respond with a fake response
+            let responseBody = { status: "OK" };
+            let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+            resolve(new Response(JSON.stringify(responseBody), responseInit));
+          });
+        }
+      });
+    });
+  });
+
+  router.post('/mapmanagement/linkHeadstonePlot/', (request) => {
+    console.debug('[LINK HEADSTONE] Linking a headstone to plot');
+
+    // Must resolve with a Response or another Promise that resolves into a Response
+    // This Response is what is sent back to the client
+    // Rejecting will result in the client receiving a network error
+    return new Promise((resolve, reject) => {
+
+      // How we respond depends on whether the queue is empty or not
+      self.getQueueLength().then(length => {
+
+        // We don't want to send the request to the server if there's other pending requests
+        if (length === 0) {
+
+          // Send the request to the server
+          fetch(request.clone()).then(response => {
+
+            // Only update the headstone in the database if it's successful
+            if (response.ok) {
+              if (self.dataSavedInIndexedDBFlag && self.personsAvailableOfflineFlag) {
+                // Parse the request
+                request.json().then(jsonData => {
+
+                  // Get the headstone id
+                  let memorial_id = jsonData.memorial_id;
+                  let plot_id = jsonData.plot_id;
+
+                  // Add the link to the personTable
+                  self.getBGMSDatabase().then(db => {
+                    const tx = db.transaction(personTable, 'readwrite');
+
+                    // Get person with `memorial_id` of plot_id
+                    tx.objectStore(personTable).index("memorial_id").get(plot_id).then(person => {
+
+                      // Duplicate person, replacing `memorial_id` with memorial_id
+                      let newLink = person;
+                      person.memorial_id = memorial_id;
+
+                      console.debug('[linkHeadstonePlot]', newLink);
+
+                      // Insert
+                      tx.objectStore(personTable).add(newLink);
+                    });
+                  });
+                });
+              }
+
+              // Return the response to the client
+              resolve(response);
+
+            } else {
+
+              // The response from the server wasn't a HTTP 2xx response
+              resolve(response);
+
+            }
+          }).catch(err => {
+            // The request couldn't reach the server (user is probably offline)
+            // NOTE: This is NOT an unsuccessful response e.g. 404 or 500
+
+            // Parse the request object
+            request.clone().json().then(jsonData => {
+
+              // Get the headstone id
+              let memorial_id = jsonData.memorial_id;
+              
+              let plot_id = jsonData.plot_id;
+
+              // Add the link to the personTable
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(personTable, 'readwrite');
+
+                // Get person with `memorial_id` of plot_id
+                tx.objectStore(personTable).index("memorial_id").get(plot_id).then(person => {
+
+                  // Duplicate person, replacing `memorial_id` with memorial_id
+                  let newLink = person;
+                  person.memorial_id = memorial_id;
+
+                  console.debug('[linkHeadstonePlot]', newLink);
+
+                  // Insert
+                  tx.objectStore(personTable).add(newLink);
+                });
+              });
+
+              // Add the request to the queue
+              self.getQueue().then(queue => {
+                queue.push(request).then(() => {
+                  queue.length().then(length => {
+                    self.emitToClients(new Message('queueLength', length));
+                  });
+                });
+              });
+
+              // Respond with a fake response
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(featureTable);
+                tx.objectStore(featureTable).get(memorial_id).then(memorial => {
+                  memorial.properties.id = memorial.id;
+
+                  let responseBody = createFeatureCollection([memorial]);
+                  let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+
+                  resolve(new Response(JSON.stringify(responseBody), responseInit));
+                });
+              });
+            });
+          });
+        } else {
+          // The queue has something in it!
+
+          console.debug('[LINK HEADSTONE] The queue has items in it');
+
+          // Parse the request object
+          request.clone().json().then(jsonData => {
+
+            console.debug('[LINK HEADSTONE] Parsed the request', jsonData);
+
+            // Get the headstone id
+            let memorial_id = jsonData.memorial_id;
+            let plot_id = jsonData.plot_id;
+
+            console.debug('[LINK HEADSTONE] Memorial ID: ' + memorial_id + ', GravePlot ID: ' + plot_id);
+
+            if (self.dataSavedInIndexedDBFlag && self.personsAvailableOfflineFlag) {
+              // Add the link to the personTable
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(personTable, 'readwrite');
+
+                // Get person with `memorial_id` of plot_id
+                tx.objectStore(personTable).index("memorial_id").get(plot_id).then(person => {
+
+                  console.debug('[LINK HEADSTONE] Got the person from the personTable with a memorial_id="' + plot_id + '"', person);
+
+                  // Duplicate person, replacing `memorial_id` with memorial_id
+                  let newLink = person;
+                  person.memorial_id = memorial_id;
+
+                  console.debug('[linkHeadstonePlot]', newLink);
+
+                  // Insert
+                  tx.objectStore(personTable).add(newLink);
+                });
+              });
+            }
+
+            // Add the request to the queue
+            self.getQueue().then(queue => {
+              queue.push(request).then(() => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+              });
+            });
+
+            // Respond with a fake response
+            self.getBGMSDatabase().then(db => {
+              const tx = db.transaction(featureTable);
+              tx.objectStore(featureTable).get(memorial_id).then(memorial => {
+                memorial.properties.id = memorial.id;
+
+                let responseBody = createFeatureCollection([memorial]);
+                let responseInit = {status: 200, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+
+                resolve(new Response(JSON.stringify(responseBody), responseInit));
+              });
+            });
+          });
+        }
+      });
+    });
+  });
+  
+  router.post('/mapmanagement/modifyBurialsLinkedFeatures/', (request) => {
+
+    // Must resolve with a Response or another Promise that resolves into a Response
+    // This Response is what is sent back to the client
+    // Rejecting will result in the client receiving a network error
+    return new Promise((resolve, reject) => {
+
+      // Send the request to the server (this request can only be made while online)
+      fetch(request.clone()).then(response => {
+
+        // Only update the database if fetch was successful
+        if (response.ok) {
+          if (self.dataSavedInIndexedDBFlag && self.personsAvailableOfflineFlag) {
+            // Parse the response
+            response.clone().json().then(jsonData => {
+
+              // Get the ids
+              let memorial_id = jsonData.memorial_id;
+              let graveplot_id = jsonData.graveplot_id;
+              
+              //get the lists
+              let addedToGrave = jsonData.added_to_grave;
+              let removedFromGrave = jsonData.removed_from_grave;
+              let addedToMemorial = jsonData.added_to_memorial;
+              let removedFromMemorial = jsonData.removed_from_memorial;
+
+              // Add the link to the personTable
+              self.getBGMSDatabase().then(db => {
+                const tx = db.transaction(personTable, 'readwrite');
+                
+                if ((removedFromGrave && removedFromGrave.length > 0) || (addedToMemorial && addedToMemorial.length > 0)) {
+                  // iterate through persons linked to graveplot
+                  tx.objectStore(personTable).index("memorial_id").openCursor(graveplot_id)
+                  .then(function iteratePersons(cursor) {
+                    if (!cursor) {return;}
+                    
+                    let person = cursor.value;
+                    
+                    if (removedFromGrave.includes(person.id)) {
+                      // if person has been removed from grave
+                      cursor.delete();
+                    }
+                    else if (addedToMemorial.includes(person.id)) {
+                      // if person has been added to memorial
+                      person.memorial_id = memorial_id;
+
+                      // Insert new record
+                      tx.objectStore(personTable).add(person);
+                    }
+                    
+                    return cursor.continue().then(iteratePersons);
+                  });
+                }
+                
+                if ((addedToGrave && addedToGrave.length > 0) || (removedFromMemorial && removedFromMemorial.length > 0)) {
+                  // iterate through persons linked to memorial
+                  tx.objectStore(personTable).index("memorial_id").openCursor(memorial_id)
+                  .then(function iteratePersons(cursor) {
+                    if (!cursor) {return;}
+                    
+                    let person = cursor.value;
+                    
+                    if (removedFromMemorial.includes(person.id)) {
+                      // if person has been removed from memorial
+                      cursor.delete();
+                    }
+                    else if (addedToGrave.includes(person.id)) {
+                      // if person has been added to grave
+                      person.memorial_id = graveplot_id;
+
+                      // Insert new record
+                      tx.objectStore(personTable).add(person);
+                    }
+                    
+                    return cursor.continue().then(iteratePersons);
+                  });
+                }
+              });
+            });
+          }
+
+          // Return the response to the client
+          resolve(response);
+
+        } else {
+
+          // The response from the server wasn't a HTTP 2xx response
+          resolve(response);
+
+        }
+      });
+    });
+  });
+
+  router.post('/mapmanagement/takePhoto/', (request) => {
+    console.debug('[TAKE PHOTO] Saving photo');
+    
+    // Increments the images_count in the local database
+    let increment = function(req) {
+      
+      // Parse the response
+      req.clone().json().then(jsonData => {
+        
+        self.getBGMSDatabase().then(db => {
+          
+          // Get the memorial
+          const tx = db.transaction(featureTable, 'readwrite');
+          tx.objectStore(featureTable).get(jsonData.memorial_id).then(memorial => {
+            
+            // Increment the value
+            memorial.properties.images_count++;
+            
+            // Update the database
+            tx.objectStore(featureTable).put(memorial);
+          });  
+        });
+      });
+    }
+    
+    return new Promise((resolve, reject) => {
+      self.getQueueLength().then(length => {
+        
+        // If queue is empty
+        if (length === 0) {
+          
+          // Attempt to send request to the server
+          fetch(request.clone()).then(res => {
+            
+            if (self.dataSavedInIndexedDBFlag) {
+              // Server response
+              increment(request);
+            }
+            resolve(res);
+            
+          }).catch(err => {
+            
+            // Couldn't reach server
+            increment(request);
+            
+            // Save the request in the queue
+            self.getQueue().then(queue => {
+              queue.pushAndReturnKey(request).then((key) => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+                // Fake a success response
+                let responseBody = {"queueKey": key};
+                let responseInit = {status: 201, statusText: "CREATED"};
+                resolve(new Response(JSON.stringify(responseBody), responseInit));
+              });
+            });
+          });
+          
+        } else {
+          
+          if (self.dataSavedInIndexedDBFlag) {
+            increment(request);
+          }
+          
+          // Queue has items in it, push response to end of queue
+          self.getQueue().then(queue => {
+            queue.pushAndReturnKey(request).then((key) => {
+              queue.length().then(length => {
+                self.emitToClients(new Message('queueLength', length));
+              });
+              // Fake a success response
+              let responseBody = {"queueKey": key};
+              let responseInit = {status: 201};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            });
+          });
+        }
+      });
+    });
+  });
+
+  router.post('/api/memorialInscriptions/', (request) => {
+    
+    let queueRequest = function(req) {
+      return new Promise((resolve, reject) => {
+        self.getQueue().then(queue => {
+          queue.pushAndReturnKey(req).then((key) => {
+            queue.length().then(length => {
+              self.emitToClients(new Message('queueLength', length));
+            });
+            resolve(key);
+          });
+        });
+      });
+    };
+    
+    // adds new inscription to indexeddb
+    let addToIndexedDB = function(req, key) {
+      return new Promise ((resolve, reject) => {
+        self.getQueue().then(queue => {
+          queue._serialize(req).then(value => {
+            let serialized = value;
+            var data = JSON.parse(serialized.body);
+            if (key)
+              data["queue_id"] = key;
+            
+            self.getBGMSDatabase().then(db => {
+              const tx = db.transaction(memorialInscriptionTable, 'readwrite');
+              tx.objectStore(memorialInscriptionTable).add(data);
+              resolve(data);
+            });
+          });
+        });
+      });
+    };
+    
+    return new Promise((resolve, reject) => {
+      self.getQueueLength().then(length => {
+        
+        // If queue is empty
+        if (length === 0) {
+          let result;
+          // Attempt to send the request to the server
+          fetch(request.clone()).then(res => {
+            result = res.clone();
+            return res.json();
+          })
+          .then(data => {
+            if (self.dataSavedInIndexedDBFlag)
+              addToIndexedDB(request).then(returnData => {
+                resolve(result);
+              });
+            else
+              resolve(result);
+          })
+          .catch(err => {
+            
+            // Couldn't reach server
+            queueRequest(request).then(key => {
+              addToIndexedDB(request,key).then(data => {
+                let responseInit = {status: 201, statusText: "CREATED"};
+                let blob = new Blob([JSON.stringify(data)], {type : 'application/json'});
+                resolve(new Response(blob, responseInit));
+              });
+            });
+          });
+          
+        } else {
+          
+          // Queue isn't empty
+          queueRequest(request).then(key => {
+              addToIndexedDB(request,key).then(data => {
+                let responseInit = {status: 201, statusText: "CREATED"};
+                let blob = new Blob([JSON.stringify(data)], {type : 'application/json'});
+                resolve(new Response(blob, responseInit));
+              });
+            });
+        }
+      });
+    });
+  });
+
+  router.delete('/api/memorialInscriptions/', (request) => {
+    
+    // Queues the request
+    let queueRequest = function(req) {
+      self.getQueue().then(queue => {
+        queue.push(req).then(() => {
+          queue.length().then(length => {
+            self.emitToClients(new Message('queueLength', length));
+          });
+        });
+      });
+    };
+    
+    // removes inscription from indexeddb
+    let removeFromIndexedDB = function(id, queue_id) {
+      return self.getBGMSDatabase().then(db => {
+        let tx = db.transaction(memorialInscriptionTable, 'readwrite');
+        let objectStore = tx.objectStore(memorialInscriptionTable);
+        return objectStore.openCursor().then(function cursorIterate(cursor) {
+          if (cursor) {
+            if ((cursor.value.id && cursor.value.id === id) || (cursor.value.queue_id && cursor.value.queue_id === queue_id)) {
+              return new Promise((resolve, reject) => {
+                cursor.delete().then(() => {
+                  return resolve();
+                });
+              });
+            }
+            
+            return cursor.continue().then(cursorIterate);
+          }
+          else
+            return;
+        });
+      });
+    };
+    
+    return new Promise((resolve, reject) => {
+			self.getQueue().then(queue => {
+				
+				// extract parameters from url
+				let id = null;
+				let queue_id = null;
+				
+				let regex = new RegExp( "[\\?&]id=([^&#]*)" );
+				let result = regex.exec( request.url );
+				
+				if (result)
+					id = result[1];
+				
+				regex = new RegExp( "[\\?&]queue_id=([^&#]*)" );
+				result = regex.exec( request.url );
+				
+				if (result)
+					queue_id = parseInt(result[1]);
+						
+				// if this inscription has just been created and has not yet been synced to server
+				if (!id && queue_id) {
+					queue.deleteItem(queue_id).then(() => {
+            if (self.dataSavedInIndexedDBFlag)
+              removeFromIndexedDB(id,queue_id);
+            
+            let responseInit = {status: 204, statusText: "DELETED"};
+            resolve(new Response(null, responseInit));
+					})
+					.catch(err => {
+						reject();
+					});
+				}
+				else {
+					// If queue is empty
+					queue.length().then(length => {
+						if (length === 0) {
+							
+							// Attempt to send the request to the server
+							fetch(request.clone())
+							.then(() => {
+                if (self.dataSavedInIndexedDBFlag)
+                  removeFromIndexedDB(id,queue_id);
+                
+                let responseInit = {status: 204, statusText: "DELETED"};
+                resolve(new Response(null, responseInit));
+							})
+							.catch(err => {
+								
+								// Couldn't reach server
+								queueRequest(request);
+							
+                if (self.dataSavedInIndexedDBFlag)
+                  removeFromIndexedDB(id,queue_id);
+									
+                let responseInit = {status: 204, statusText: "DELETED"};
+                resolve(new Response(null, responseInit));
+							});
+							
+						} else {
+							
+							// Queue isn't empty
+							queueRequest(request);
+							
+							removeFromIndexedDB(id,queue_id).then(() => {
+								let responseInit = {status: 204, statusText: "DELETED"};
+								resolve(new Response(null, responseInit));
+							});
+						}
+					});
+				}
+			});
+    });
+  });
+
+  router.post('/mapmanagement/memorialInspection/', (request) => {
+    
+    // Queues the request
+    let queueRequest = function(req) {
+      self.getQueue().then(queue => {
+        queue.push(req).then(() => {
+          queue.length().then(length => {
+            self.emitToClients(new Message('queueLength', length));
+          });
+        });
+      });
+    };
+    
+    return new Promise((resolve, reject) => {
+      self.getQueueLength().then(length => {
+        
+        // If queue is empty
+        if (length === 0) {
+          
+          // Attempt to send the request to the server
+          fetch(request.clone()).then(res => {
+            
+            // Server responded
+            resolve(res);
+            
+          }).catch(err => {
+            
+            // Couldn't reach server
+            queueRequest(request);
+            
+            let responseInit = {status: 201, statusText: "CREATED"};
+            resolve(new Response(null, responseInit));
+            
+          });
+          
+        } else {
+          
+          // Queue isn't empty
+          queueRequest(request);
+          
+          let responseInit = {status: 201, statusText: "CREATED"};
+          resolve(new Response(null, responseInit));
+          
+        }
+        
+      });
+    });
+  });
+  router.post('/mapmanagement/memorialUpdate/', (request) => {
+    
+    // This doesn't provide offline functionality, just updates the local database
+    return fetch(request).then(response => {
+      
+      if (response.ok && self.dataSavedInIndexedDBFlag) {
+        response.clone().json().then(jsonData => {
+          
+          let memorial_id = jsonData.memorial_uuid;
+          let new_layer_name = jsonData.new_layer_name;
+          
+          new_layer_name = "memorials_" + new_layer_name;
+          
+          self.getBGMSDatabase().then(db => {
+            const tx = db.transaction(featureTable, 'readwrite');
+            tx.objectStore(featureTable).get(memorial_id).then(memorial => {
+              memorial.properties.marker_type = new_layer_name.replace("memorials_", "");
+              memorial._layer_type = new_layer_name;
+              
+              tx.objectStore(featureTable).put(memorial);
+            });
+          });
+        });
+      }
+      
+      return response;
+      
+    });
+  });
+  
+  router.get('/mapmanagement/getMemorialImages/', (request) => {
+    return new Promise((resolve, reject) => {
+      
+      self.getQueueLength().then(length => {
+        
+        let fetchMemorialImagesFromServer = function (request, queueItems) {
+          if (queueItems && queueItems.length>0) {
+            // create a new response using the original response plus data from queue
+            for (let i=0;i<queueItems.length;i++) {
+              //queueItems[i].id = undefined;
+              queueItems[i].image_url = "data:image/jpeg;base64," + queueItems[i].image;
+              delete queueItems[i].image;
+            }
+          }
+          fetch(request).then(res => {
+            if (queueItems && queueItems.length>0) {
+              res.clone().json().then(jsonData => {
+                
+                let init = {
+                  status: res.status,
+                  statusText: res.statusText,
+                  headers: res.headers
+                };
+                
+                resolve(new Response(JSON.stringify(jsonData.concat(queueItems)), init));
+              });
+            }
+            else
+              resolve(res);
+          }).catch(err => {
+            // Couldn't get the image list - offline
+            let responseInit = {status: 404, statusText: "SW OFFLINE", headers: {'Content-Type': 'application/json'}};
+            let responseBody = [JSON.stringify({"offline": true})];
+            
+            if (queueItems && queueItems.length>0) {
+              responseBody = JSON.stringify(responseBody.concat(queueItems));
+            }
+            
+            resolve(new Response(responseBody, responseInit));
+          });
+        }
+        
+        if (length>0)
+        {
+          // memorial_id from url
+          let regex = new RegExp( "[\\?&]id=([^&#]*)" );
+          let memorial_id = regex.exec( request.url )[1];
+        
+          self.getQueue().then(queue => {
+            queue.getItems("POST", "mapmanagement/takePhoto", "memorial_id", memorial_id).then((queueItems) => {
+              fetchMemorialImagesFromServer(request, queueItems);
+            })
+            .catch(err => {
+              reject();
+            });
+          });
+        }
+        else
+          fetchMemorialImagesFromServer(request);
+        
+      }).catch(err => {
+        reject();
+      });
+    });
+  });
+  
+  router.post('/mapmanagement/deleteMemorialImage/', (request) => {
+    
+    // Increments the images_count in the local database
+    let increment = function(req) {
+      
+      req.clone().json().then(jsonData => {
+        self.getBGMSDatabase().then(db => {
+          
+          // Get the memorial
+          const tx = db.transaction(featureTable, 'readwrite');
+          tx.objectStore(featureTable).get(jsonData.memorial_uuid).then(memorial => {
+            
+            // Increment the value
+            memorial.properties.images_count++;
+            tx.objectStore(featureTable).put(memorial);
+            
+          });  
+        });
+      });
+    };
+    
+    return new Promise((resolve, reject) => {
+      
+      // How we respond depends on whether the queue is empty or not
+      self.getQueueLength().then(length => {
+        
+        // We don't want to send the request to the server if there's other pending requests
+        if (length === 0) {
+          
+          // Send the request to the server
+          fetch(request.clone()).then(response => {
+            
+            // Only update the headstone in the database if it's successful
+            if (response.ok) {
+              if (self.dataSavedInIndexedDBFlag) {
+                increment(request);
+              }
+              
+              // Return the response to the client
+              resolve(response);
+              
+            } else {
+              
+              // The response from the server wasn't a HTTP 2xx response
+              resolve(response);
+              
+            }
+          }).catch(err => {
+            // The request couldn't reach the server (user is probably offline)
+            // NOTE: This is NOT an unsuccessful response e.g. 404 or 500
+            if (self.dataSavedInIndexedDBFlag) {
+              increment(request);
+            }
+            
+            // Add the request to the queue
+            self.getQueue().then(queue => {
+              queue.push(request).then(() => {
+                queue.length().then(length => {
+                  self.emitToClients(new Message('queueLength', length));
+                });
+              });
+            });
+            
+            // Respond with a fake response
+            let responseBody = { status: "OK" };
+            let responseInit = {status: 201, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+            resolve(new Response(JSON.stringify(responseBody), responseInit));
+            
+          });
+        } else {
+          // The queue has something in it!
+          if (self.dataSavedInIndexedDBFlag) {
+            increment(request);
+          }
+          
+          request.clone().json().then(jsonData => {
+            // if this photo has just been created and has not yet been synced to server
+            if (!jsonData.id && jsonData.queue_id) {
+              self.getQueue().then(queue => {
+                // remove queue item
+                queue.deleteItem(jsonData.queue_id).then(() => {
+                  queue.length().then(length => {
+                    self.emitToClients(new Message('queueLength', length));
+                  });
+                  let responseInit = {status: 204, statusText: "DELETED"};
+                  resolve(new Response(null, responseInit));
+                })
+                .catch(err => {
+                  reject();
+                });
+              });
+            }
+            else {
+              // Add the request to the queue
+              self.getQueue().then(queue => {
+                queue.push(request).then(() => {
+                  queue.length().then(length => {
+                    self.emitToClients(new Message('queueLength', length));
+                  });
+                });
+              });
+              // Respond with a fake response
+              let responseBody = { status: "OK" };
+              let responseInit = {status: 201, statusText: "OK", headers: {'Content-Type': 'application/json'}};
+              resolve(new Response(JSON.stringify(responseBody), responseInit));
+            }
+          });
+        }
+      });
+    });
+  });
+  
+  router.post('/mapmanagement/sendReport/', (request) => {
+    
+    // Try to send it directly to the server
+    return fetch(request.clone(), { credentials: 'include' }).catch((err) => {
+      
+      // Add request to the queue
+      self.getQueue().then(queue => {
+        queue.push(request).then(() => {
+          queue.length().then(length => {
+            self.emitToClients(new Message('queueLength', length));
+          });
+        });
+      });
+      
+      // Return a fake success response
+      let responseInit = {status: 200};
+      return new Response(null, responseInit);
+      
+    });
+  });
+
+
+  return Promise.resolve();
+}
+
+/**
+ * Generic handler for returning static files directly from the cache
+ */
+function staticFileHandler(request) {
+  return caches.open(staticCacheName).then(function(staticCache) {
+
+    // Workaround for slow Chrome performance when using ignoreSearch: true
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=682677
+    // TODO: Remove this when Chrome is fixed
+    let hasQuery = request.url.indexOf('?') != -1;
+
+    return staticCache.match(request, {
+      ignoreVary: true,
+      ignoreSearch: hasQuery,
+    }).then(function(response) {
+      return response || fetch(request);
+    });
+  });
+}
+
+/**
+ * Generic handler for returning runtime files from the network first, cache second
+ */
+function runtimeFileHandler(request) {
+  return fetch(request).then(response => {
+
+    return caches.open(runtimeCacheName).then(runtimeCache => {
+      runtimeCache.add(request);
+      return response;
+    });
+  }).catch(err => {
+    console.debug('[SW] User is offline! Fetching \'' + request.url + '\' from cache.');
+    return caches.open(runtimeCacheName).then(function(runtimeCache) {
+      return runtimeCache.match(request).then(function(response) {
+        return response;
+      });
+    });
+  });
+}
+
+/**
+ * Generic handler for displaying alternate versions of files when offline
+ */
+function offlineFileHandler(request) {
+  let url = new URL(request.url);
+
+  return fetch(request).then(response => {
+    return response;
+  }).catch(err => {
+    return caches.open(staticCacheName).then(function(staticCache) {
+      return staticCache.match(offlineFiles[url.pathname]);
+    });
+  });
+}
+
+/**
+ * Generic handler for displaying django-generated forms
+ */
+function formFileHandler(request) {
+  let url = new URL(request.url);
+  
+  return fetch(request).then(response => {
+    return response;
+  }).catch(err => {
+    
+    return caches.open(formCacheName).then(function(formCache) {
+      return formCache.match(url.pathname);
+    });
+  });
+}
+
+/************************
+ * OTHER FUNCTIONS
+ ************************/
+
+/**
+ * Creates a FeatureCollection from a given array of features
+ * @param {array} features An array of GeoJSON Features
+ */
+function createFeatureCollection(features) {
+  return {
+    type: "FeatureCollection",
+    features: features,
+    crs: {
+      type: "name",
+      properties: {
+        name: "EPSG:27700"
+      }
+    }
+  };
+}
+
+/************************
+ * MESSAGING FUNCTIONS
+ ************************/
+
+/**
+ * Emits a message to all clients
+ * @param {Object} message
+ * @param {string} message.type - The type of the message, so the client knows how to respond
+ * @param {*} message.value - The contents of the message
+ */
+function emitToClients(message) {
+  self.clients.matchAll().then(clients => {
+    // console.debug('[SW] Sending message to clients.', clients, message);
+    Promise.all(clients.map(client => {
+      client.postMessage(message);
+    }));
+  });
+}
+
+/**
+ * Asks the client for it's CSRF Token
+ */
+function getCSRFToken() {
+  return Promise.race([
+
+    // Sets a time-out so the queue doesn't wait forever for the token
+    new Promise((resolve, reject) => {
+	    setTimeout(() => { reject('Request for CSRF Token timed out'); }, 5000);
+    }),
+
+    // Requests the token from the client
+    new Promise((resolve, reject) => {
+
+      // Get all clients
+      self.clients.matchAll({ type: 'window' }).then(function(clients) {
+
+        // Check there are clients
+        if(clients.length === 0) {
+          reject('No clients available');
+        } else {
+
+          // Find the /mapmanagement/ client
+          let mainClient = false;
+
+          clients.forEach(client => {
+            let url = new URL(client.url);
+
+            if(url.pathname === '/mapmanagement/') {
+              mainClient = true;
+
+              let messageChannel = new MessageChannel();
+
+              // Event listener; waits for response
+              messageChannel.port1.onmessage = function(event) {
+                if (event.data.type === "error") {
+                  reject('Unable to get CSRF Token from Client');
+                } else {
+                  resolve(event.data.value);
+                }
+              };
+
+              // Send the message
+              client.postMessage(new Message('needToken'), [messageChannel.port2]);
+
+            }
+          });
+
+          if(!mainClient) {
+            reject('Unable to find a client at with the URL: \'/mapmanagement/\' ');
+          }
+        }
+      });
+
+    })
+  ]);
+}
+
+/**
+ * Functions to run everytime the service worker starts (remember, service
+ * workers turn themselves off regularly to save power, which wipes any global
+ * variables).
+ */
+self.defineRoutes();

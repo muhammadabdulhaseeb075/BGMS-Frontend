@@ -1,0 +1,11 @@
+////
+/// Mixins
+////
+//img filter
+@mixin filter($percentage) {
+  -webkit-filter: opacity($percentage);
+  -moz-filter: opacity($percentage);
+  -o-filter: opacity($percentage);
+  -ms-filter: opacity($percentage);
+  filter: opacity($percentage);
+}

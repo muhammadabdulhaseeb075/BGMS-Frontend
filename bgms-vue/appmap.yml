@@ -1,0 +1,4 @@
+name: bgms-vue
+packages:
+  - path: src
+  - path: tests/unit

@@ -1,0 +1,37 @@
+<div ng-controller='listTemplatesController as list'>
+	<div class="row">
+		<h2 class="col-md-3">Templates</h2>
+	</div>
+	<div class="row" ng-repeat="template in list.templates">
+		<div class="col-md-2">
+			<label>{{template.name}}</label> 
+			{{template.description}}
+		</div>
+		<div class="col-md-3">
+				<label>Burials from {{template.burialImage.bookName}}</label> 
+				<img src="{{template.burialImage.url}}"/>
+		</div>
+		<div class="col-md-4 template-table">			
+			<label>Columns</label>
+			<div ui-grid="template.columnOptions" class="grid" ui-grid-auto-resize></div>
+		</div>
+		<div class="col-md-3 template-table">		
+			<div class="hi-icon-wrap hi-icon-effect-2 hi-icon-effect-2b row" style="display: flex;">
+				<div class="col-md-4">
+       				<button class='hi-icon fa icon-Delete-Filled' style="color: #FF3434;"  data-spinner-color='red' bgms-ladda="addRecord.loading" ng-click="list.deleteTemplate(template)">
+       				</button>
+        			<div>
+          				<h4>Delete</h4>
+          			</div>
+      			</div>
+      			<div class="col-md-4">
+      				<button class='hi-icon fa icon-Edit-Drawing-Filled' style="color: green;"  data-spinner-color='red' bgms-ladda="addRecord.loading" ui-sref='edit({templateId: template.id})'>
+      				</button>
+      				<div>
+        				<h4>Edit</h4>
+      				</div>
+    			</div>
+    		</div>
+		</div>
+	</div>  
+</div>

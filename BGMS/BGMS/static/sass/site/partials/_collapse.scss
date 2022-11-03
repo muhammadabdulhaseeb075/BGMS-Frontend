@@ -1,0 +1,16 @@
+////
+/// Everything related to collapse styles
+////
+
+// Collapse for search form
+// @todo Fix search results box to resize when portrait tablet.
+.collapse-menu {
+  border-radius: 2px;
+  position: absolute;
+  width: 300px;
+  background-color: $base-gold;
+}
+
+.login-box-body, .register-box-body{
+  background: $base-white-alpha;
+}

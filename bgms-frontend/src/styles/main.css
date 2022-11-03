@@ -1,0 +1,14 @@
+@import "./tailwind-config.css";
+@import "./fonts";
+
+html, body {
+    min-height: 100vh;
+    height: auto;
+    width: auto;
+    background-color: white;
+}
+
+#main {
+    color: $main-font-color;
+    min-height: inherit;
+}

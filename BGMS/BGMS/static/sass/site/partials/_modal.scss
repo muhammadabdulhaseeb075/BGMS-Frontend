@@ -1,0 +1,197 @@
+////
+/// Modal information form
+////
+
+/// Modal
+/// @group Modal
+$background-section: rgba(255,255,255,0.86);
+/// @group Modal
+$break-large: 1400px;
+/// @group Modal
+$break-small: 980px;
+
+// $border-box: #b3815c;
+
+
+.modal-header {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.68);
+    background-position: right center;
+
+    @media screen and (min-width: $break-small) {
+        background-image: url(#{$image-path}modal/modal_header_expanded.png);
+    }
+    @media (max-width: $break-small - 1){
+        background-image: url(#{$image-path}modal/modal_header.png);
+    }
+
+    .modal-title{
+        color: white;
+        text-shadow: 2px 2px 6px rgb(0, 0, 0);
+    }
+
+}
+
+
+.modal-body.detailed-form{
+    background-color: #E5E5E6;
+    // background-image: url('/static/images/modal/books.jpg');
+    padding-left: 30px;
+    padding-right: 30px;
+    /* height: 100%; */
+}
+
+.form-section {
+  background-color: $background-section;
+//   border-top: 4px solid $border-box;
+//   box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  padding-bottom: 8px;
+}
+
+// .row-eq-height {
+    // box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+// }
+
+.right-form-section .form-section{
+  padding-left: 15px;
+  padding-right: 15px;
+  /*min-height: 313px;*/
+  height: 100%;
+  /*margin-bottom: -99999px;
+  padding-bottom: 99999px;*/
+}
+.right-form-section{
+  padding-right: 0px;
+  /*float: none;*/
+  display: table-cell;
+  padding-left: 15px;
+  padding-right: 15px;
+  background-color: $background-section;
+//   border-top: 4px solid $border-box;
+  margin-left: 5px;
+  padding-bottom: 5px;
+}
+
+.left-form-section{
+  padding-left: 0px;
+  /*float: none;*/
+  display: table-cell;
+  background-color: $background-section;
+  /* padding-right: 15px; */
+//   border-top: 4px solid $border-box;
+  padding-left: 15px;
+  padding-right: 15px;
+  /* height: 100%; */
+  margin-right: 5px;
+}
+.left-form-section .form-section{
+  /*height: 396px;*/
+  padding-left: 15px;
+  padding-right: 15px;
+  height: 100%;
+}
+
+#id_modalBurialDetails{
+  h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6{
+      font-family: $font-titles;
+      font-style: italic;
+  }
+}
+
+#id_modalBurialDetails .close{
+    font-size: 24px;
+    opacity: .9;
+    background-color: $background-section;
+    line-height: .7;
+}
+
+
+/* Large desktop */
+@media (min-width: 1400px) {
+  /* ----------------------------------
+     Death Person Modal
+  ----------------------------------- */
+  .modal-dialog.modal-lg{
+    width: 1400px;
+  }
+  .burial-details-form input{
+    display: inline-block;
+    flex: 1;
+  }
+  .burial-details-form label{
+    display: inline-block;
+    width: 105px;
+    line-height: 2.3;
+  }
+  .burial-details-form label.two-line-label{
+    line-height: 1.2;
+  }
+  .burial-details-form .fieldWrapper{
+    display: flex;
+  }
+  .modal-body.detailed-form{
+    background-image: url(#{$image-path}modal/modal_large.jpg);
+    padding-left: 30px;
+    padding-right: 30px;
+    background-size: cover;
+   }
+}
+
+/* ----------------------------------
+   MEDIA QUERYS
+----------------------------------- */
+
+/* Landscape tablet and dated desktop */
+@media (min-width: 980px) and (max-width: 1400px) {
+  /* ----------------------------------
+     Death Person Modal
+  ----------------------------------- */
+  .modal-dialog.modal-lg{
+    width: 1000px;
+  }
+  .burial-details-form input{
+    display: inline-block;
+    flex: 1;
+  }
+  .burial-details-form label{
+    display: inline-block;
+    width: 105px;
+    line-height: 2.3;
+  }
+  .burial-details-form label.two-line-label{
+    line-height: 1.2;
+  }
+  .burial-details-form .fieldWrapper{
+    display: flex;
+  }
+  .modal-body.detailed-form{
+    background-image: url(#{$image-path}modal/modal_medium3.jpg);
+    padding-left: 30px;
+    padding-right: 30px;
+    background-size: cover;
+   }
+}
+
+/* Portrait tablet to landscape and desktop */
+/*@media (min-width: 768px) and (max-width: 979px) {*/
+@media (max-width: 980px) {
+  /* ----------------------------------
+     Death Person Modal
+  ----------------------------------- */
+  .modal-dialog.modal-lg{
+    width: 700px;
+  }
+  .modal-body.detailed-form{
+    background-image: url(#{$image-path}modal/modal_medium3.jpg);
+    padding-left: 30px;
+    padding-right: 30px;
+    background-size: cover;
+   }
+   .burial-details-form .fieldWrapper{
+     display: flex;
+   }
+  .burial-details-form label{
+    display: inline-block;
+    width: 105px;
+    line-height: 2.3;
+  }
+}

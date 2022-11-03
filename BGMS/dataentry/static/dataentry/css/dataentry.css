@@ -1,0 +1,223 @@
+/**
+Start: changes to capitalise every letter in header
+*/
+.columnsTable .ui-grid-cell-contents, .ui-grid-header-cell-label {
+    text-transform: capitalize;   
+  }
+/**
+End: changes to capitalise every letter in header
+*/
+
+/**
+Start: changes to move zoom button
+*/
+.burialImage .ol-zoom, .add-record-50 .ol-zoom{
+    left: 5px !important;   
+  }
+/**
+End: changes to move zoom button
+*/
+
+.template-table{
+	height: 260px;
+	overflow: auto;
+}
+
+/**
+Start: changes to move zoom button
+*/
+.columnsTable{
+	padding-right: 10px;
+}
+.overflow-scroll{
+	padding-left: 0px;
+	padding-right: 0px;
+}
+/**
+End: changes to move zoom button
+*/
+
+.width124{
+    min-width:132px; 
+    max-width:132px; 
+}
+
+
+.horizontal-tools {
+    position: absolute;
+    top: 5px;
+    right: 25px;
+}
+
+.angular-openlayers-map{
+    max-height: 300px;
+}
+
+.widthText{
+    min-width:115px; 
+    max-width:115px; 
+}
+
+.widthNumber{
+    min-width:115px; 
+    max-width:115px; 
+}
+
+.template-columns .table>thead>tr>th {
+	vertical-align: top;
+}
+
+.grid {
+  height: 70vh;
+}
+
+.burialImage .angular-openlayers-map{
+	max-height: 450px;
+    overflow:hidden; 
+}
+
+/**
+Start: Changes to reduce padding of the hi-icon button.
+*/
+.dataentry.hi-icon-wrap{
+	padding: 1em 0 0;
+}
+/**
+End: Changes to reduce padding of the hi-icon button.
+*/
+
+button.hi-icon[disabled]::before {
+  font-size: 0;
+}
+
+/**
+Start: Changes to enable UI-Grid to have auto row height.
+*/
+.addRecordGrid {
+  	height: auto!important;
+    max-height: 400px;
+}
+
+.overflow-scroll .ui-grid-row{
+  height: auto!important;
+}
+
+.overflow-scroll .ui-grid-row   > div {
+  display: table-row;
+  
+}
+
+.overflow-scroll .ui-grid-row > div .ui-grid-cell {
+  display: table-cell;
+  float: none;
+  vertical-align: middle;
+  height: auto!important;
+}
+
+.overflow-scroll .ui-grid-cell-contents{
+  white-space: normal;
+  text-overflow: inherit;
+  word-break: break-word;
+}
+
+.overflow-scroll .ui-grid-viewport .ui-grid-cell-contents {
+  word-wrap: break-word;
+  white-space: normal !important;
+   overflow:visible;
+}
+
+.overflow-scroll .ui-grid-cell {
+    display : table-cell;
+    height: auto !important;
+    overflow:visible;
+    position: static;
+}
+
+.overflow-scroll .ui-grid-row {
+  height: auto !important;
+  display : table-row;
+  position: static;
+}
+
+.overflow-scroll .ui-grid-row div[role=row] {
+  display: flex ;
+  align-content: stretch;
+}
+
+.overflow-scroll .ui-grid-viewport{
+	height: auto !important;
+	max-height: 300px;
+}
+
+.ui-grid-editable {
+    border: 1px solid red;
+}
+
+/**
+End: Changes to enable UI-Grid to have auto row height.
+*/
+/** 
+Start: changes to have grab icon on table header
+*/
+.template-columns .ui-grid-header-cell-label {
+    cursor: move; /* fallback if grab cursor is unsupported */
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
+ /* (Optional) Apply a "closed-hand" cursor during drag operation. */
+.template-columns .ui-grid-header-cell-label:active { 
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+}
+/** 
+End: changes to have grab icon on table header
+*/
+/**
+Start: changes for highlighting in select
+*/
+.hasTemplateTrue{
+    color:#01aac7;
+}
+.hasTemplateFalse{
+    color: red;
+}
+/**
+End: changes for icons in select
+*/
+/**
+Start: changes to ladda spinner
+*/
+.ladda-spinner{
+    top: 25px;
+    left: 22px;
+    position: absolute;
+}
+/**
+End: changes to ladda spinner
+*/
+
+/**
+Start: Changes to make subtitles grey and italic
+*/
+.subtitleClass{
+	font-style: italic;
+	color: gray;
+}
+/**
+End: Changes to make subtitles grey and italic
+*/
+
+/**
+ * Fix for Angular-UI-Grid scroll issue 
+ * See: https://stackoverflow.com/questions/42203532/ui-grid-insanely-fast-vertical-scroll-issue 
+ */
+.ui-grid-viewport {
+  overflow-anchor: none;
+}
+
+.comment-cell > .ui-grid-cell-contents {
+  white-space: normal;
+}

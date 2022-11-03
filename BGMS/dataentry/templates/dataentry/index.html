@@ -1,0 +1,93 @@
+{% extends "mapmanagement/base.html" %}
+{% load static %}
+{% load perm_filters %}
+
+{% block css %}
+    <link href="{% static 'dataentry/css/dataentry.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'build/css/de.min.css' %}" rel="stylesheet" media="screen">
+{% endblock %}
+
+{% block navbar %}
+{% endblock %}
+
+{% block dropdown %}
+  <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Actions <span class="caret"></span></a>
+      <ul class="dropdown-menu" role="menu">
+        <li><a href="{{SiteUrls.mapmanagement}}">Map Portal</a></li>
+        {% if user|group_required:"DataMatcher, SiteWarden, SiteAdmin" %}
+          <li><a href="{{SiteUrls.datamatching}}">Image Matching Portal</a></li>
+        {% endif %}
+        {% if user|group_required:"SiteAdmin" %}
+          <li><a href="/siteadminportal/">Admin Portal</a></li>
+        {% endif %}
+      </ul>
+   </li>
+ {% endblock %}
+{% block sidebar %}
+      <aside class="main-sidebar">
+        <!-- sidebar: style can be found in sidebar.less -->
+        <div class="sidebar" id="scrollspy">
+
+          <!-- sidebar menu: : style can be found in sidebar.less -->
+          <ul class="nav sidebar-menu">
+            {% if user|group_required:"SiteAdmin" %}
+	            <li class="header"><h3>Templates</h3></li>
+	            <li><a href="#/listTemplates"><i class="fa far fa-circle"></i> View Templates</a></li>
+	            <li><a href="#/createTemplate"><i class="fa far fa-circle"></i> Create New Template</a></li>
+	        {% endif %}
+	            <li class="header"><h3>Burial Records</h3></li>
+	            <li><a href="#/addRecord"><i class="fa far fa-circle"></i> Add Burial Record</a></li>
+	            <li class="header"><h3>History</h3></li>
+	            <li><a href="#/imageStatus"><i class="fa far fa-circle"></i> Burial Record Status</a></li>
+	            <li><a href="#/userActivity"><i class="fa far fa-circle"></i> User Activity</a></li>
+          </ul>
+        </div>
+        <!-- /.sidebar -->
+      </aside>
+{% endblock %}
+
+{% block content %}
+        <div class="content body">
+    		{% include 'dataentry/angular/index.html' %}
+    	</div>
+{% endblock %}
+
+{% block jquery_js %}
+
+
+{% endblock %}
+
+{% block js%}
+<script src="{% static 'libs/bower_components/jquery/dist-js/jquery.min.js' %}"></script>
+<script
+  src="https://browser.sentry-cdn.com/6.17.4/bundle.min.js"
+  integrity="sha384-b8AsyZZuCfveCM8XQGBncVPihJcaG//cLVfziPjfE1RLhc++ZJ8x3BIS0Izv9Iey"
+  crossorigin="anonymous"
+></script>
+
+<!-- If you include the integration it will be available under Sentry.Integrations.Angular -->
+<script
+  src="https://browser.sentry-cdn.com/6.17.4/angular.min.js"
+  crossorigin="anonymous"
+></script>
+
+<script>
+  Sentry.init({
+    dsn: "https://d1eb8523464046c9b09dc9c009ad8406@sentry.burialgrounds.co.uk/5",
+    tracesSampleRate: 1.0,
+  });
+</script>
+    <script src="{% static 'mapmanagement/js/js_to_angular_interface.js' %}"></script>
+	<script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.custom.min.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.buttons.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.confirm.js' %}"></script>
+    <script src="{% static 'libs/pnotify/v2.0.1/js/pnotify.callbacks.js' %}"></script>
+    <script src="{% static 'libs/ladda/v0.9.4/js/spin.min.js' %}"></script>
+    <script src="{% static 'libs/ladda/v0.9.4/js/ladda.min.js' %}"></script>
+    {% if debug %}
+      <script src="{% static 'dataentry/js/dataentry.js' %}"></script>      
+    {% else %}
+      <script src="{% static 'build/js/all-de.js' %}"></script>
+    {% endif %}
+{% endblock %}

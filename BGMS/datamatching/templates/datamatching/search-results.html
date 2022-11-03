@@ -1,0 +1,147 @@
+<!-- deathPerson table -->
+
+<script>
+  $(function () {
+    $('.basic-search-results').bootstrapTable({
+      data: $.parseJSON('{{deathPerson|safe|escape}}'),
+      onPostBody: function () {
+        var trs = $('.basic-search-results').find('tbody').children();
+        if ($('.basic-search-results').find('tbody').children()[0].className === "no-records-found") {
+          $('#total-results').text('0');
+        } else {
+          $('#total-results').text(trs.length);
+        }
+      },
+      flat: true,
+      columns: [
+        {
+          field: 'full_name',
+          title: 'Name',
+          formatter: function (value, row) {
+            if (row["first_memorial_id"])
+              return [
+                  '<a class="burial-record" href="javascript:void(0);" onclick="memorialModule.showCompleteDetails(\''+row["id"]+'\')" title="Burial record">',
+                  '<i class="icon-View-Burial-Record-Filled"></i>',
+                  '</a>',' ',
+                  '<a class="burial-record" title="Linked">',
+                  '<i class="fa fa-link" style="color: green;"></i>',
+                  '</a>',' ',row['first_names'], ' ',row['last_name']
+                  ].join('');
+            else
+              return [
+                  '<a class="burial-record" href="javascript:void(0);" onclick="memorialModule.showCompleteDetails(\''+row["id"]+'\')" title="Burial record">',
+                  '<i class="icon-View-Burial-Record-Filled"></i>',
+                  '</a>',' ',
+                  '<a class="burial-record" title="Not Linked">',
+                  '<i class="fa fa-unlink" style="color: red;"></i>',
+                  '</a>',' ',row['first_names'], ' ', row['last_name']
+                  ].join('');
+          }
+        },
+        {
+          field: 'burial_date',
+          title: 'Burial<br>Date',
+          formatter: function (value, row) {
+            return searchSection.formatterBurialDate(value, row);
+          }
+        },
+        {
+          field: 'age_years',
+          title: 'Age',
+          formatter: function (value, row) {
+            return searchSection.formatterAgeYears(value, row);
+          }
+        },
+        {
+            field: 'state',
+            title: 'Create<br>Link',
+            formatter: function (value, row) {
+              return [
+                '<button type="submit" class="btn btn-bgms btn-form btn-table ladda-button" data-style="slide-right" aria-label="Left Align"',
+                'onclick=\'memorialModule.linkMemorial("',row['first_names'],'","',row['last_name'],'","',row['id'],'","',searchSection.formatterAgeYears(value, row),'")\'',
+                '<span=""><span class="ladda-label"><span class="fa fa-plug" aria-hidden="true"></span></span>',
+                '<span class="ladda-spinner"></span><div class="ladda-progress" style="width: 0px;"></div></button>'
+              ].join('');
+            }
+        },
+      ]
+    });
+
+    $.tablesorter.addParser({
+        // set a unique id
+        id: 'age_years',
+        is: function(s) {
+            // return false so this parser is not auto detected
+            return false;
+        },
+        format: function(s) {
+            // format your data for normalization
+            return s.toLowerCase().replace(/< 1/,0.5);
+        },
+        // set type, either numeric or text
+        type: 'numeric'
+    });
+
+    $("#table-search-sorter").tablesorter({
+        theme : 'blue',
+        widgets : ["columns"],
+        headerTemplate : '{content}{icon}',
+        headers: {
+          // 2: { sorter: "digit", string: "min" }
+          2: { sorter:'age_years' }
+        }
+    });
+  });
+</script>
+
+<div class="link-memorial-result"></div>
+
+<div class="col-xs-6">
+    <h5><strong>Total results: <span id="total-results"></span></strong></h5>
+</div>
+<div class="col-xs-6" style="margin-bottom: 5px;">
+   <button title="Reset filters" type="button" class="btn btn-bgms btn-form btn-xs" aria-label="Left Align" style="float: right;" onclick="searchSection.resetFiltersTableResult()">
+       <span class="fa fa-filter" aria-hidden="true" style="margin-right: 8px;"></span>
+       <span class="fa fa-times" aria-hidden="true" style="font-size: 10px;position: absolute;top: 20px;right: 20px;"></span>
+   </button>
+</div>
+
+<table id="table-search-sorter" class='table basic-search-results table-fixed borderless' data-toggle="table" data-page-size="5" data-single-select="true">
+   <thead>
+   <tr>
+       <th class="dm column-one-search-results" data-field="full_name" data-events="operateEvents" data-sortable="true">Name</th>
+       <th class="dm column-two-search-results" data-field="burial_date" data-sortable="true" data-align="center">Date</th>
+       <th class="dm column-three-search-results" data-field="age_years" data-sortable="true" data-align="center">Age</th>
+       <th class="dm column-four-search-results" data-field="state" data-align="center">Link Memorial</th>
+   </tr>
+   </thead>
+</table>
+
+
+{% comment %} <table
+  class='table basic-search-results'
+  data-toggle="table"
+  data-pagination="true"
+  data-flat="true"
+  data-page-size="5"
+  data-click-to-select="false"
+  data-checkbox-header="false"
+  data-single-select="true"
+  data-select-item-name="myRadioName"
+  data-row-style="rowStyle">
+  <thead>
+    <tr>
+      <th data-field="is_matched">Matched?</th>
+      <th data-field="full_name">Name</th>
+      <th data-field="burial_date">Date of Burial</th>
+      <th data-field="age_years">Age</th>
+      <th data-field="state" data-checkbox="true">Add
+        <br/>
+        Memorial</th>
+    </tr>
+  </thead>
+</table> {% endcomment %}
+
+
+
+<!-- /.deathPerson table -->

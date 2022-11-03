@@ -1,0 +1,32 @@
+////
+/// This is the primary stylesheet to load all sass files
+/// It will load all the sass styles related to BGMS Admin Portal app
+/// @group Admin-Portal
+////
+
+/// The base stylesheet sets global variables.
+@import 'site/partials/base';
+
+// Reset
+// @import 'partials/reset';
+
+html,
+body {
+  // overflow-y: hidden;
+  scrollbar-face-color: $base-grey-alpha;
+  scrollbar-arrow-color: $base-grey-alpha;
+  scrollbar-track-color: #F5F5F5;
+}
+
+// All images should be responsive
+img {
+  max-width: 100% !important;
+}
+
+
+/// Partials: where all CSS is constructed.
+@import 'admin/partials/header';
+@import 'admin/partials/table';
+@import 'admin/partials/button';
+@import 'admin/partials/menus';
+@import 'admin/partials/notifications';

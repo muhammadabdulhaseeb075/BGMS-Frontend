@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static %}
+
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+
+{% block userlinks %}
+
+  {% if site_url %}
+      <a href="{{ site_url }}">Return to burial ground</a> /
+  {% endif %}
+  {% if user.is_active and user.is_staff %}
+      {% url 'django-admindocs-docroot' as docsroot %}
+      {% if docsroot %}
+          <a href="{{ docsroot }}">Documentation</a> /
+      {% endif %}
+  {% endif %}
+  {% if user.has_usable_password %}
+  <a href="{% url 'admin:password_change' %}">Change password</a> /
+  {% endif %}
+  <a href="{% url 'logout' %}">Log out</a>
+{% endblock %}
+
+{% block content %}
+<h1>ERROR | Please fix the following error(s) and try again:</h1>
+
+    <fieldset class="module aligned">
+        {% for err in errors %}
+          <div class="form-row">
+            <p style="background-color: #FAC6C6;">{{ err }}</p>
+          </div>
+        {% endfor %}
+        <div class="submit-row">
+          <a href="#" onclick="window.history.back(); return false;" class="button cancel-link">{% trans "Take me back" %}</a>
+        </div>
+
+    </fieldset>
+{% endblock %}

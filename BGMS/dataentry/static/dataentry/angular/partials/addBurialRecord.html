@@ -1,0 +1,95 @@
+<div ng-controller='addBurialRecordController as addRecord'>
+  <div ng-hide="addRecord.templateForm.fields.templates.choices && addRecord.templateForm.fields.templates.choices.length===0">
+	<div class="row">
+		<div class="col-md-7">
+			<h4 ng-show="addRecord.image.url">
+		  		<strong>Book from {{addRecord.image.bookName}}, Page No. {{addRecord.image.pageNo}}</strong>
+		  	</h4>
+		  	<div class="row">
+			  <div class="col-md-4">
+			    <label for="{{  addRecord.templateForm.fields.templates.id }}">Template for this book</label> 
+			    <select name="{{ addRecord.templateForm.fields.templates.name }}" ng-model="addRecord.template_name"
+                    ng-change="addRecord.getTemplate()" class="form-control" id="{{ addRecord.templateForm.fields.templates.id }}"
+			    	ng-options="option.name for option in addRecord.templateChoices | filter:{bookName:addRecord.book_name.label}" disabled
+                    style="appearance: none;">
+			    </select>
+			  </div>
+			  <div class="col-md-4">
+			    <label for="{{  addRecord.templateForm.fields.books.id }}">Select book to work from</label> 
+			    <select name="{{ addRecord.templateForm.fields.books.name }}" ng-model="addRecord.book_name"
+			    	ng-change="addRecord.changeBook()" class="form-control" id="{{ addRecord.templateForm.fields.books.id }}"
+			    	ng-options="option.label for option in addRecord.templateForm.fields.books.choices | orderBy: ['-label']">
+			    </select>
+			  </div>
+			</div>
+		</div>
+    <div class="col-md-offset-1 col-md-4">
+      <div style="float:right"> 
+        <div class="hi-icon-effect-2 hi-icon-effect-2b row" style="display: flex;">
+          
+          <div class="col-md-3">
+            <button class='hi-icon fa fa-arrow-left' style="color: black;" data-spinner-color='red' bgms-ladda="addRecord.loading" ng-click="addRecord.prevImage()">
+            </button>
+            <div>
+              <h4>Previous Page</h4>
+            </div>
+          </div>
+          
+          <div class="col-md-3">
+            <button class='hi-icon fa fa-arrow-right' style="color: black;" data-spinner-color='red' bgms-ladda="addRecord.loading" ng-click="addRecord.nextImage()">
+            </button>
+            <div>
+              <h4>Next Page</h4>
+            </div>
+          </div>
+          
+          <div class="col-md-3">
+            <button class='hi-icon fa fa-times' style="color: #FF3434;" data-spinner-color='red' bgms-ladda="addRecord.loading" ng-click="addRecord.skipImage()">
+            </button>
+            <div>
+              <h4>Skip Page</h4>
+            </div>
+          </div>
+          
+          <div class="col-md-3">
+            <button class='hi-icon fa fa-check' style="color: green;" data-spinner-color='red' bgms-ladda="addRecord.loading" ng-click="addRecord.finishedImage()">
+            </button>
+            <div>
+              <h4>Page Finished</h4>
+            </div>
+          </div>
+          
+        </div> 
+      </div>
+    </div>
+	</div>
+	<div class="row">
+	  <div class="col-md-12 add-record-50">	
+		  <bgms-image-viewer image="addRecord.image" width="addRecord.imageViewerWidth" image-id-for-tags="addRecord.image.id" 
+		  	add-tag="addRecord.savedTag" remove-tag="addRecord.deletedTag" edit-tag="addRecord.editTag">
+		  	<bgms-image-tagger image-tag="addRecord.tag"></bgms-image-tagger> 
+		  </bgms-image-viewer>
+	  </div>
+	  <div ng-show="addRecord.baseDynamicForm.fields['tags-top_left_bottom_right'].error" style="color: #FF3434;" role="alert">
+		 <div>{{addRecord.baseDynamicForm.fields['tags-top_left_bottom_right'].error}}</div>
+	  </div>
+	</div>
+	<br/>
+	
+ 	<form name="form" id='burialform'>
+ 		<div class="col-md-12 overflow-scroll">
+			<div class='addRecordGrid' ui-grid="addRecord.tableOptions" ui-grid-auto-resize ui-grid-resize-columns></div>
+		</div>
+	</form>
+	<div class="row">
+	  <div class="col-md-12">
+	  	<br/>
+	    <label for="{{  addRecord.form.comments[0].id }}">Comments</label>
+	    <textarea name="{{ addRecord.form.comments[0].name }}" placeholder="If you have any problems with this image please leave a comment" ng-model="addRecord.image.comments" class="form-control" id="{{ addRecord.form.comments[0].id }}" ng-blur="addRecord.saveComment()"></textarea>
+	  </div>
+	</div>
+  </div>  
+  <div ng-show="addRecord.templateForm.fields.templates.choices && addRecord.templateForm.fields.templates.choices.length===0">
+  	No templates have been created for this site. Please ask the site administrator to create some templates.
+  </div>
+</div>

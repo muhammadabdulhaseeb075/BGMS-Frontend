@@ -1,0 +1,3 @@
+name: bgms-frontend
+packages:
+  - path: src

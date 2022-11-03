@@ -1,0 +1,35 @@
+/* colors */
+/* names from http://chir.ag/projects/name-that-color/ */
+$alabaster   : #F7F7F7;
+$mercury     : #E6E6E6;
+$cod-gray    : #1E1E1E;
+$mine-shaft  : #262626;
+$dusty-gray  : #999999;
+$royal-blue  : #4548F1;
+$san-marino  : #4F5BA8;
+$white-lilac : #F6F8FC;
+$cornflower-blue: #6195ED;
+$white-back: #FFFFFF;
+
+/* Theme colors */
+$main-color: #C2B042;
+$second-color: #DCD39C;
+$third-color: #F0632E;
+$highligh-color: #F2F2F2;
+$main-font-color: #000000;
+$second-font-color: #ffffff;
+
+/* Fonts */
+$main-font: 'Droid Sans';
+$icon-font: 'icons';
+
+/* z-index Layers */
+$cover-layer: 3;
+$closeup: 2;
+$foreground: 1;
+$midground: 0;
+$background: -1;
+
+/* Shared values */
+$header-height: 50px;
+$sidebar-width: 230px;

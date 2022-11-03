@@ -1,0 +1,22 @@
+////
+/// Color style for PNotify in admin portal
+////
+
+
+
+.alert-success{
+    background-color: #00a65a !important;
+    border-color: #008d4c;
+    color: #fff !important;
+}
+
+.alert-warning {
+    color: #8a6d3b !important;
+    background-color: #fcf8e3 !important;
+    border-color: #faebcc;
+}
+.alert-danger {
+    background-color: #dd4b39 !important;
+    color: #fff !important;
+    border-color: #d73925;
+}

@@ -1,0 +1,90 @@
+#booking {
+  width: 100%;
+  display: flex;
+  flex: 1 0 auto;
+
+  .v-navigation-drawer {
+    height: auto!important;
+    flex: 0 0 auto;
+
+    .v-list-item__icon{
+      margin-left: 0px!important;
+      margin-right: 0px!important;
+    }
+  }
+
+  main {
+    flex: 1 1 auto;
+  }
+
+  #calendar {
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    min-height: 350px;
+    overflow-y: auto;
+
+    // fix for Safari
+    .v-calendar-weekly__week {
+      height: unset;
+    }
+
+    .calendar-views:disabled {
+      color: rgba(0, 0, 0, 0.87)!important;
+    }
+
+    #site_selection {
+      flex: 0 0 auto;
+    }
+
+    #calendar_header_sheet {
+      flex: 0 0 64px;
+    }
+
+    #calendar_sheet {
+      display: flex;
+      flex-flow: column;
+      flex: 1 1 auto;
+
+      .v-calendar-weekly__day-label {
+        .v-btn--fab.v-size--small {
+          height: 25px;
+          width: 25px;
+        }
+      }
+    }
+  }
+
+  #funeralBookings {
+    td {
+      cursor: pointer;
+    }
+  }
+}
+
+.booking-dialog {
+  width: 100%;
+  overflow-x: hidden;
+
+  .v-tabs {
+    margin-bottom: 5px;
+  }
+
+  .v-card__text {
+    padding-bottom: 0px!important;
+
+    .v-text-field {
+      padding-top: 4px;
+    }
+
+    .v-btn--active {
+      color: #1E88E5;
+    }
+  }
+}
+
+@media screen and (min-width: 960px) {
+  .booking-dialog {
+    width: 800px;
+  }
+}

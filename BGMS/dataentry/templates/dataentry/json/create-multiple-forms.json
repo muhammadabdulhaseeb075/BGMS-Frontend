@@ -1,0 +1,66 @@
+{	"status":"{{status}}",
+	"csrfmiddlewaretoken":{
+		"name": "csrfmiddlewaretoken",
+		"value": "{{csrf_token}}"
+	},
+	"fields": {	
+	  {% for form in formset %}
+		{% if forloop.counter0 > 0 %}
+			,
+		{% endif %}
+		{% for field in form %}
+			{% if forloop.counter0 > 0 %}
+				,
+			{% endif %}
+			{% include "dataentry/json/base-field.json" with field=field %}
+		{% endfor %}	
+	  {% endfor %}
+	},
+	"foreign_keys": {
+	  {% for form in foreign_keys %}
+		{% if forloop.counter0 > 0 %}
+			,
+		{% endif %}
+		"{{form.prefix}}":{ 
+			{% for field in form %}
+				{% if forloop.counter0 > 0 %}
+					,
+				{% endif %}
+				{% include "dataentry/json/base-field.json" with field=field %}
+			{% endfor %}
+		}	
+	  {% endfor %}
+	},
+	"many_to_many_keys": {
+	{% for formset in many_to_many_keys %}
+		{% if forloop.counter0 > 0 %}
+			,
+		{% endif %}
+		
+		"{{formset.prefix}}": {
+			"management_form":{
+				{%  for field in formset.management_form %}		
+					{% if forloop.counter0 > 0 %}
+						,
+					{% endif %}
+					{% include "dataentry/json/base-field.json" with field=field %}			
+				{% endfor %}
+			},
+			"form_fields":{
+				{% for form in formset %}
+					{% if forloop.counter0 > 0 %}
+						,
+					{% endif %}
+					{% for field in form %}						
+						{% if forloop.counter0 > 0 %}
+							,
+						{% endif %}
+						{% include "dataentry/json/base-field.json" with field=field %}
+					{% endfor %}
+				{% endfor %}
+			}
+		}		
+	{% endfor %}
+	}
+	{% block additional_fields %}{% endblock %}
+}

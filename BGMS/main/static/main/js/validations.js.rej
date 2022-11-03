@@ -1,0 +1,6 @@
+diff a/BGMS/main/static/main/js/validations.js b/BGMS/main/static/main/js/validations.js	(rejected hunks)
+@@ -7,4 +6,3 @@
+-        return true;
+ /**
+  *
+  * Validation for Select site page and login page

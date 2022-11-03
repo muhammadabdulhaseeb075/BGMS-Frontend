@@ -1,0 +1,392 @@
+.key {
+  width: 50px;
+  height: 10px;
+  border-width: 2px;
+  border-style: solid;
+  margin-top: 5px;
+}
+.assumed_wall_key, .assumed_hedge_key {
+  outline-style: dashed;
+  outline-width: 2px;
+  border: none;
+  width: 48px;
+  height: 8px;
+}
+
+.tree_key{
+  background: rgba(169,218,116,0.7);
+  border-color: rgba(143, 178, 107, 1);
+}
+.tree_trunk_key{
+  background: #926239;
+  border-color: #614126;
+}
+.trunk_key{
+  background: #926239;
+  border-color: #614126;
+}
+
+.plot_key {
+  background: rgba(224, 239, 253, 0);
+  border-color: #5e6163;
+  border-style: dashed;
+  border-width: 1.5px;
+}
+.gravestone_key {
+  background: rgba(41, 88, 237, 0.7);
+  border-color: rgba(41, 88, 237, 0.7);
+}
+.available_plot_key {
+  background: rgba(224, 255, 207, 0);
+  border-color: #33CC33;
+  border-style: dashed;
+}
+.reserved_plot_key {
+  background: rgba(253, 241, 240, 0);
+  border-color: #EE592A;
+  border-style: dashed;
+}
+.pet_grave_key {
+  background: rgba(253, 241, 240, 0);
+  border-color: #673AB7;
+  border-style: dashed;
+}
+.tree_canopy_key {
+  background: rgba(126,193,48, 0.7);
+  border-color: rgba(143, 178, 107, 1);
+
+  /*Include and icon as key legend*/
+  /*background-image: url(../../images/Layers/icons/canopy.png);
+  background-repeat: repeat;
+  background-size: 35px 35px;
+  height: 25px;
+  opacity: 1;*/
+}
+.bush_key {
+  background: rgba(108, 165, 35, 0.4);
+  border-color: rgba(108, 165, 35, 1);
+}
+.manhole_key {
+  background: rgba(90, 98, 78, 0.4);
+  border-color: rgba(90, 98, 78, 1);
+}
+.inspection_cover_key {
+  background: rgba(90, 98, 55, 0.4);
+  border-color: rgba(90, 98, 55, 1);
+}
+.wall_key {
+  background: #948f8a;
+  border-color: #948f8a;
+}
+.assumed_wall_key {
+  background: #948f8a;
+  outline-color: #948f8a;
+}
+.hedge_key {
+  background: rgba(108, 165, 35, 0.4);
+  border-color: rgba(108, 165, 35, 1);
+}
+.assumed_hedge_key {
+  background: rgba(108, 165, 35, 0.4);
+  outline-color: rgba(108, 165, 35, 1);
+}
+.fence_key, .assumed_fence_key {
+  /*background: rgba(85, 52, 0, 0.4);*/
+  border-color: rgba(85, 52, 0, 1);
+  border-top-style: dashed;
+  border-left-style: none;
+  border-right-style: none;
+  border-bottom-style: none;
+  border-top-width: medium;
+  margin-top: 8px;
+}
+.gate_key {
+  /*background: #936951;*/
+  border-color: #936951;
+  border-left-style: none;
+  border-right-style: none;
+  border-bottom-style: none;
+  border-top-width: medium;
+  margin-top: 8px;
+}
+.handrail_key {
+  border-color: #9C27B0;
+  border-left-style: none;
+  border-right-style: none;
+  border-bottom-style: none;
+  border-top-width: medium;
+  margin-top: 8px;
+}
+.kerb_key {
+  border-color: #91908e;
+  border-left-style: none;
+  border-right-style: none;
+  border-bottom-style: none;
+  border-top-width: medium;
+  margin-top: 8px;
+}
+.microchip_key {
+  border-color: #F41818;
+  border-left-style: none;
+  border-right-style: none;
+  border-bottom-style: none;
+  border-top-width: medium;
+	width: 2px;
+  margin-top: 8px;
+}
+.path_key {
+  background: #f9f19d;
+  border-color: #c7c07d;
+}
+.road_key {
+  background: rgb(227, 214, 120);
+  border-color: #c7c07d;
+}
+.grass_key {
+  background: #d0f48e;
+  border-color: #d0f48e;
+}
+.planting_key {
+  background: rgb(85, 45, 0);
+  border-color: #765632;
+}
+.building_key {
+  background: #D3CDC6;
+  border-color: #7B7268;
+}
+.tank_key {
+  background: #7f6f05;
+  border-color: #eed737;
+}
+.steps_key {
+  background: #c2c5c9;
+  border-color: #727170;
+}
+.pavestone_key {
+  background: rgba(31, 25, 9, 0.4);
+  border-color: rgba(31, 25, 9, 0);
+}
+.bench_key {
+  border-style: dashed;
+  border-color: rgba(47, 74, 118, 1);
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH3wwCEBkljGf//wAAAHtJREFUWMNjYBgFo2AUjIJRMNIBI4xR6sOu+u8f404GBgZFGtt5n4npv3v3lp+3GRgYGJhgon//M/nTwXIGBgYGRahdDCgOYGb8t5GBgeEpHRzwFGrXIEsD6KDYi+M/jN277QcjOYYTYwbTQIfAqANGHTAKRsEoGAWjAAAQOhsdYrxF4AAAAABJRU5ErkJggg==);
+  background-repeat: no-repeat;width: auto;
+  height: auto;
+  margin: 0;
+  padding: 8px;
+  background-position: center;
+}
+.bin_key {
+  background: grey;
+  border-color: black;
+}
+.bollard_key {
+  background: grey;
+  border-color: black;
+}
+.site_boundary_key {
+  background: rgba(116,67,67, .3);
+  border-color: rgba(116,67,67, .3);
+}
+.grid_key{
+  background: rgba(85, 45, 0, 0.2);
+  border-color: #765632;
+}
+.plaque_key{
+  background: #FFC64B;
+  border-color: rgba(128, 125, 104, 1);
+}
+.statue_key{
+  background: rgba(255, 255, 255,1);
+  border-color: rgba(0, 0, 0, 0.44);
+}
+.stone_vase_key{
+  background: rgba(108, 165, 35, 1);
+  border-color: rgb(127, 127, 127);
+  border-width: 3px;
+}
+.obelisk_key{
+  background: rgba(255, 255, 255,1);
+  border-color: rgba(0, 0, 0, 0.44);
+}
+.table_tomb_key{
+  background: #417bbd;
+  border-color: #417bbd;
+}
+.chest_tomb_key{
+  background: rgb(32,52,84);
+  border-color: rgb(32,52,84);
+}
+.cross_key{
+  background: #614126;
+  border-color: #91908e;
+}
+.grave_slab_key{
+  background: rgb(199, 166, 126);
+  border-color: rgb(199, 166, 126);
+}
+.window_key{
+  background: rgba(181, 0, 180, 0.4);
+  border-color: rgba(181, 0, 180, 0.8);
+}
+.war_grave_key{
+  background: rgba(255, 255, 255,1);
+  border-color: rgb(182, 7, 7);
+}
+.war_memorial_key{
+  background: rgba(255, 255, 255,1);
+  border-color: rgb(242, 160, 36);
+}
+.memorials_lych_gate_key{
+  background: rgb(204, 153, 255);
+  border-color: rgb(135, 159, 228);
+}
+.memorial_tree_key{
+  background: rgba(242, 160, 36, 0.7);
+  border-color: #614126;
+}
+.memorial_bush_shrub_key{
+  background: rgba(112, 146, 68, 0.7);
+  border-color: rgb(112, 146, 68);
+}
+.memorials_bench_key{
+  border-style: dashed;
+  border-color: rgba(47, 74, 118, 1);
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH3wwHCSE2O29qFwAAAERJREFUWMNjYBgFo2AUjIJRMNIBI4zxfxXDf7paHAaxm2mgQ4BpNA3gkkBOE7D4IhUQY8ZoGhh1wGg2HAWjYBSMggEHAHHTCRFsa9ExAAAAAElFTkSuQmCC);
+  background-repeat: no-repeat;width: auto;
+  height: auto;
+  margin: 0;
+  padding: 8px;
+  background-position: center;
+}
+.lych_gate_key{
+  background: #DCD8D8;
+  border-color: rgb(135, 159, 228);
+}
+.shrubland_key{
+  background: rgb(226, 233, 110);
+  border-color: rgb(226, 233, 110);
+}
+.coffin_tomb_key{
+  background: rgba(227, 125, 19, 0.7);
+  border-color: rgba(41, 88, 237, 0.4);
+}
+.utility_pole_key{
+  background: #8a663a;
+  border-color: #8a663a;
+}
+.gully_key{
+  background: #72c1b6;
+  border-color: #72c1b6;
+}
+.stile_key {
+  border-color: #FF5722;
+  border-left-style: none;
+  border-right-style: none;
+  border-bottom-style: none;
+  border-top-width: medium;
+  margin-top: 8px;
+}
+.tap_key{
+  border-style: none;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAACOUlEQVRYhe2Wv2tTURTHv9+b95Kq0CoOQqAYSwMOUqtVFzcJ/gE6OXaztVID1UWENwgFl4itIkWsYwexCi7+og4dJKW1tA1WDTVRUcQiVaFN817ucUnUVF+aJk2C2C+84Zx3fnzuOVy4wIb+d7GUpN3WcECUnBIyL58QrZREXpw//rHYWkYpAFrpEMgeQPL8AiCT4QSAobIB2h9MNyqvbsjZdJzMjdD+WZCiqUYUdT9BQwQns72vAdRa69G1HMZ1Be1PJr8CqM8LFhy5GWodydkBa7DO62lYApB5deFYSdNUBf75Vjo0+IevXBUCqIoKrSCFFVOYnXjZ+/nD/LecrUAlvrqjFGidXnpI0RrEe1Ji/vovsaeW5awrQPRRdHw5lW5brWi29GtQzsYjXfcKRVVwBRKE4G4w3NddI4AshvBS8MzV1nUBaDm856IDe5vbl/EgIMQJAMnf0ryAdLjVXNPd9W3akkpcDi8UCFkAkGwO909D8ByACQAi0uKWUJEVxCNdMRBTvzzc6hbrOgERXoES/88SoGMozBQLISJJgm0AIHS/ba4At0J7zxXb7G8iOQOR7QBA8G05tUpWZzTeuFpMxa7h6bFkiMq4XzOAZZqTICyIsGMs2VR1gIED/nlFe7Rn6tNmA6g+AABobQ4t2qlDfQd3Pq4JAMlB7ZE33c/mdtQEIC3mHUOzyTGU6xuxYgCd4++avbCHHSVzIjLgFlfSO64Ymbb93TY9t6/v25UAkKhUnw39+/oB8MbQCztX4+0AAAAASUVORK5CYII=);
+  background-repeat: no-repeat;width: auto;
+  height: auto;
+  margin: 0;
+  padding: 12px;
+  background-position: center;
+}
+.water_trough_key{
+  border-style: none;
+  position: relative;
+  margin: 0;
+  left: 18px;
+}   
+.water_trough_key:before {
+    content: "\f111";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: #2196F3;
+    position:absolute;
+ }
+.sign_key{
+  background: black;
+  border-color: white;
+}
+.lamppost_key{
+  background: #3e4346;
+  border-color: white;
+}
+/*line*/
+.grave_kerb_key{
+  border-color: #91908e;
+  background: rgba(0, 0, 0, 0);
+}
+.gravestone_with_kerb_key{
+  border-color: #91908e;
+  background: rgba(65, 123, 189, 0.4);
+}
+.kerb_with_cross_key{
+  border-color: #91908e;
+  background: #cc6600;
+}
+.plaque_with_kerb_key{
+  border-color: #91908e;
+  background: rgba(248, 155, 62, 0.4);
+}
+.unmarked_grave_key{
+  border-color: #5e6163;
+  border-style: dashed;
+}
+.catacomb_key{
+  background: #91908e;
+  border-color: rgb(255, 255, 255);
+}
+.mausoleum_key{
+  background: #D3CDC6;
+  border-color: #f9f19d;
+}
+.car_park_key{
+  background: #d6d5ca;
+  border-color: #d6d5ca;
+}
+.bridge_key{
+  background: rgb(102, 51, 0);
+  border-color: rgb(102, 51, 0);
+}
+.woodland_key{
+  background: #a9da64;
+  border-color: #a9da64;
+}
+.water_key{
+  background: #bdd7ff;
+  border-color: #bdd7ff;
+}
+.stream_key{
+  background: #bdd7ff;
+  border-color: #b3b3b3;
+}
+.recreation_key{
+  background: #dc7e41;
+  border-color: white;
+}
+.other_surface_key{
+  background: #92b79f;
+  border-color: #92b79f;
+}
+/*.ward_key{
+  background: #e4cdaa;
+  border-color: #b3b3b3;
+}*/
+.section_key{
+  background: rgba(203, 15, 1, 0.15);
+  border-color: rgb(203, 15, 1);
+}
+.subsection_key{
+  background: rgba(2, 114, 202, 0.15);
+  border-color: rgb(2, 114, 202);
+}
+.sundial_key{
+  background: rgb(255, 191, 0);
+  border-color: rgb(255, 191, 0)
+}

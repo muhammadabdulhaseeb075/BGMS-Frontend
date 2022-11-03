@@ -1,0 +1,100 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_modify %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "libs/jquery.modal/css/jquery.modal.min.css" %}" />
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="post" id="personfield_form">
+    {% csrf_token %}
+    <fieldset class="module aligned ">
+        <div class="form-row field-name">
+            <div>
+                <label class="required" for="id_name">Name:</label>
+                <input type="text" class="vLargeTextField" name="name" required="" id="id_name" value="{{ data.name }}"/>
+            </div>
+        </div>
+        <div class="form-row field-type">
+            <div>
+                <label class="required" for="id_type">Type:</label>
+                <select name="type" id="id_type" onchange="is_disabled()">
+                    <option value="text" selected="">text</option>
+                    <option value="select">select</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row field-options">
+            <div>
+                <label for="id_options">Options:</label>
+                <textarea name="options" cols="40" rows="10" class="vLargeTextField" id="id_options">{{ data.options }}</textarea>
+                <div class="help">if the question type is "select," provide a comma-separated list of options for this question.</div>
+            </div>
+        </div>
+        <div class="form-row field-required">
+            <div class="checkbox-row">
+                <input type="checkbox" name="required" id="id_required"><label class="vCheckboxLabel" for="id_required">Required</label>
+            </div>
+        </div>
+        <div class="form-row field-is_default">
+            <div class="checkbox-row">
+                <input type="checkbox" name="is_default" id="id_is_default"><label class="vCheckboxLabel" for="id_is_default">Is default</label>
+            </div>
+        </div>
+        <div class="form-row field-name">
+            <div>
+                <label class="required" for="id_field_form">Field Form:</label>
+                <input type="text" class="vLargeTextField" name="field_form" required="" id="id_field_form" value="{{ data.field_form }}"/>
+            </div>
+        </div>
+        <div class="form-row field-name">
+            <div>
+                <label class="required" for="id_order">Order:</label>
+                <input type="number" class="vLargeTextField" name="order" required="" id="id_order" value="{{ data.order }}"/>
+            </div>
+        </div>
+        <div class="form-row field-name">
+            <div>
+                <label class="required" for="id_content">Content:</label>
+                <input type="text" class="vLargeTextField" name="content" required="" id="id_content" value="{{ data.content }}"/>
+            </div>
+        </div>
+    </fieldset>
+    <div class="submit-row">
+        <input type="submit" value="Save" class="default" name="_save">
+        <p class="deletelink-box"><a href="/siteadminportal/bgsite/personfield/{{data.id}}/delete/" class="deletelink">Delete</a></p>
+        <input type="submit" value="Save and add another" name="_addanother">
+        <input type="submit" value="Save and continue editing" name="_continue">
+    </div>
+</form>
+<br>
+
+<script type="text/javascript">
+    window.addEventListener("load", function(event) {
+        let data_type = '{{ data.type }}'
+        let required = '{{ data.required }}'
+        let is_default = '{{ data.is_default }}'
+        let type = document.getElementById('id_type').value;
+
+        if(data_type)
+            document.getElementById('id_type').value = data_type;
+        if(required == 'True')
+            document.getElementById('id_required').checked = true;
+        if(is_default == 'True')
+            document.getElementById('id_is_default').checked = true;
+        is_disabled()
+    });
+
+    function is_disabled(){
+        type = document.getElementById('id_type').value;
+        if (type == 'text'){
+            document.getElementById('id_options').disabled = true;
+        }
+        else if (type == 'select'){
+            document.getElementById('id_options').disabled = false;
+        }
+    }
+</script>
+{% endblock content %}

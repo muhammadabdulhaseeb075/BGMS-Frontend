@@ -1,0 +1,56 @@
+////
+/// This is base file where all global variables are defined
+////
+
+/// Fonts
+/// @group font
+$base-font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+/// @group font
+$heading-font-size: 25px;
+/// @group font
+$heading-font-weight: 500;
+/// @group font
+$font-titles: FertigoPro-Regular;
+
+
+/// Colors: base, base-light, base-alplha, base-light-alpha color versions.
+/// @group Colors
+/// @example
+///   $base-grey: rgb(56,59,61);
+///   $base-grey-alpha: rgba($base-grey, 0.7);
+///   $base-light-grey: rgb(223, 223, 224);
+///   $base-light-grey-alpha: rgba($base-light-grey, 0.8);
+$base-gold: rgb(195,175,66);// rgb(194, 173, 66);
+/// @group Colors
+$base-gold-light-1: rgb(222, 207, 132);
+/// @group Colors
+$base-gold-light-0: rgb(241, 231, 177);
+/// @group Colors
+$base-gold-alpha: rgba($base-gold, 0.76);
+/// @group Colors
+$base-grey: rgb(56,59,61);
+/// @group Colors
+$base-lighter-grey: #727272;
+/// @group Colors
+$base-light-grey: rgb(223, 223, 224);
+/// @group Colors
+$base-orange: rgb(238, 89, 42);
+/// @group Colors
+$base-white: rgb(255, 255, 255);
+/// @group Colors
+$base-grey-alpha: rgba($base-grey, 0.7);
+/// @group Colors
+$base-light-grey-alpha: rgba($base-light-grey, 0.8);
+/// @group Colors
+$base-orange-alpha: rgba($base-orange, 0.7);
+/// @group Colors
+$base-white-alpha: rgba(255, 255, 255, 0.76);
+/// @group Colors
+
+/// Media querys
+/// @group Media-Querys
+$break-portrait-tablet: 768px;
+
+
+/// Images Path
+$image-path: "../../images/";

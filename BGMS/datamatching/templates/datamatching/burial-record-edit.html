@@ -1,0 +1,201 @@
+{% load perm_filters %}
+<!-- BurialRecord form -->
+<form id="BurialForm" action="/datamatching/burialEdit/" method="post" class="burial-details-form burial-details-form-editable read-only-form">
+	{% csrf_token %}
+	<ul class="gallery clearfix">
+		<li>
+			<a href="{{burial_image.image_url}}" rel="prettyPhoto[gallery1]" id="id_burial_image_url">
+				<img src="{{burial_image.thumbnail_url}}" width="60" height="60" alt="Burial record" id="id_burial_thumbnail_url"/>
+			</a>
+		</li>
+	</ul>
+	<!-- endif  -->
+
+	<div id="burial_image_input" class="row field-to-show" style="display: none;">
+		<div class="fieldWrapper form-group col-xs-12 floating-label-form-group-style">
+			{{ form.burial_image_input.errors }}
+			<label for="{{ form.burial_image_input.id_for_label }}">Burial image</label>
+			<span class="btn btn-bgms btn-file icon-Upload-Image-Filled">
+				{{ form.burial_image_input }}
+			</span>
+			<span id="nameBurialImage"></span>
+		</div>
+	</div>
+
+	<div class="input-group modal-details-group row">
+		{{ form.non_field_errors }}
+
+		<!-- First and second columns Burial recod details -->
+		<div class="col-xs-8">
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{{ form.burial_number.errors }}
+					<label for="{{ form.burial_number.id_for_label }}">Burial number
+					</label> {{ form.burial_number }}
+				</div>
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style impossible-date" style="max-height: none;">
+					{{ form.burial_date.errors }}
+					<label for="{{ form.burial_date.id_for_label }}">Date of burial
+					</label>
+					<div class="select-day">
+						<!--<span class="label-date">day</span>-->
+						{{form.impossible_date_day}}
+					</div>
+					<div class="select-month">
+						<!--<span class="label-date">month</span>-->
+						{{form.impossible_date_month}}
+					</div>
+					<div class="select-year">
+						<!--<span class="label-date">year</span>-->
+						{{form.impossible_date_year}}
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{{ form.cremation_certificate_no.errors }}
+					<label class="two-line-label" for="{{ form.cremation_certificate_no.id_for_label }}">Cremation certificate no.</label> {{ form.cremation_certificate_no }}
+				</div>
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{{ form.depth.errors }}
+					<label for="{{ form.depth.id_for_label }}">Depth</label>
+					{{ form.depth }}
+				</div>
+			</div>
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{{ form.consecrated.errors }}
+					<label for="{{ form.consecrated.id_for_label }}">Consecrated</label>
+					{{ form.consecrated }}
+				</div>
+				{% comment %} <div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style field-to-hide"  style="display: none;">
+					{{ form.burial_remarks.errors }}
+					<label for="{{ form.burial_remarks.id_for_label }}">Burial remarks
+					</label>
+					<div id="id_burial_remarks_disable" class="texarea-disable"> {{ form.burial_remarks.value|default_if_none:"" }} </div>
+				</div> {% endcomment %}
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{{ form.burial_remarks.errors }}
+					<label for="{{ form.burial_remarks.id_for_label }}">Burial remarks
+					</label> {{ form.burial_remarks }}
+				</div>
+			</div>
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{{ form.interred.errors }}
+					<label for="{{ form.interred.id_for_label }}">Interred</label>
+					{{ form.interred }}
+				</div>
+				{% comment %} <div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style field-to-hide">
+					{% if user|group_required:"SiteAdmin, SiteWarden" %}
+						{{ form.user_remarks.errors }}
+						<label for="{{ form.user_remarks.id_for_label }}">User remarks
+						</label>
+						<div id="id_user_remarks_disable" class="texarea-disable"> {{ form.user_remarks.value|default_if_none:"" }} </div>
+					{% endif %}
+				</div> {% endcomment %}
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{% if user|group_required:"SiteAdmin, SiteWarden" %}
+						{{ form.user_remarks.errors }}
+						<label for="{{ form.user_remarks.id_for_label }}">User remarks
+						</label> {{ form.user_remarks }}
+					{% endif %}
+				</div>
+			</div>
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{{ form.requires_investigation.errors }}
+					<label class="two-line-label" for="{{ form.requires_investigation.id_for_label }}">Requires investigation
+					</label> {{ form.requires_investigation }}
+				</div>
+				<div class="fieldWrapper form-group col-xs-6 floating-label-form-group-style">
+					{{ form.grave_number.errors }}
+					<label for="{{ form.grave_number.id_for_label }}">Grave plot number
+					</label> {{ form.grave_number }}
+				</div>
+			</div>
+		</div>
+		<!-- FIN: First and second columns Burial recod details -->
+
+
+		{% comment %} <form id="BurialOfficialForm" action="/mapmanagement/burialEdit/" method="post" class="burial-details-form burial-details-form-editable read-only-form">
+			{% csrf_token %} {% endcomment %}
+
+		<!-- Third column Burial recod details -->
+		{{ burial_official_formset.management_form }}
+		<div class="col-xs-4">
+			<div class="row">
+				<div class="col-xs-12 field-to-show" style="display: none;">
+					<span class="label-date">Select burial official(s)</span>
+					<select id="burialOfficialsSelect" ></select>
+				</div>
+				{% comment %} <div class="col-xs-2 field-to-show btn-add-burial" style="display: none;">
+					<span class="label-date">add new</span>
+					<button type="button" class="btn btn-bgms btn-form btn-add" data-style="slide-right" aria-label="Left Align" style="float: right;"
+	        onclick="burialOfficialForm.addNew()"><span class="icon-Zoom-In-Filled" aria-hidden="true"></span>
+	    	  </button>
+				</div> {% endcomment %}
+			</div>
+			<div id="flexslider-burial-official" class="flexslider">
+			<ul class="slides">
+			{% for official_form in burial_official_formset %}
+			<li id="id-burialOfficial-{{forloop.counter|add:'-1'}}" class="burial-official">
+			<div class="group-formset">
+			<div class="row">
+				<div class="col-xs-12" style="font-weight: bold;margin-bottom: 10px;">
+					<div class="field-to-hide"> Burial official </div>
+					<div class="field-to-show" style="display: none;"> Remove Burial official
+				<!-- Burial official No. {{ forloop.counter }} -->
+					<button type="button" class="btn btn-bgms btn-form-details btn-small" aria-label="Left Align" onclick="modalBurialDetails.removeBurialOfficial({{forloop.counter|add:'-1'}}, 'burialOfficial')">
+			  		<span class="fa fa-times-circle" aria-hidden="true"></span>
+					</button>
+				</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-12 floating-label-form-group-style field-to-show" style="display: none;">
+					{{ official_form.official_types.errors }}
+					<label for="{{ official_form.official_type.id_for_label }}">Select type</label>
+					{{ official_form.official_types }}
+				</div>
+				<div class="fieldWrapper form-group col-xs-12">
+					{{ official_form.official_type.errors }}
+					{{ official_form.official_type }}
+				</div>
+			</div>
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-12 floating-label-form-group-style">
+					{{ official_form.official_title.errors }}
+					<label for="{{ official_form.official_title.id_for_label }}">Title</label> {{ official_form.official_title }}
+				</div>
+			</div>
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-12 floating-label-form-group-style">
+					{{ official_form.official_first_names.errors }}
+					<label for="{{ official_form.official_first_names.id_for_label }}">First names</label>
+					{{ official_form.official_first_names }}
+				</div>
+			</div>
+			<div class="row">
+				<div class="fieldWrapper form-group col-xs-12 floating-label-form-group-style">
+					{{ official_form.official_last_name.errors }}
+					<label for="{{ official_form.official_last_name.id_for_label }}">Last name</label>
+					{{ official_form.official_last_name }}
+				</div>
+			</div>
+			{{ official_form.official_id }}
+			{% comment %} {% if burial_official_formset.can_delete %}
+					{{ official_form.DELETE }}
+			{% endif %} {% endcomment %}
+			</div>
+			</li>
+			{% endfor %}
+			</ul>
+			</div>
+		</div>
+		<!-- FIN: Third columns Burial recod details -->
+
+		{# Temp input holders to hold the memorial headpoint and graveplot feature id #}
+		{{form.graveplot_polygon_feature}} {{form.person_id}}
+	</div>
+</form>

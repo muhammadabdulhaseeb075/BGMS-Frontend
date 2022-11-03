@@ -1,0 +1,76 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load perm_filters %}
+
+{% block content %}
+
+
+<form method="post" action="" >
+{% csrf_token %}
+
+<div id="loginModal" class="hold-transition login-page" style="background: transparent;">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="{% static 'images/logo/BGMS_logo_white.png' %}"/>
+    </div>
+    <div class="login-box-body">
+      {% if not request_success %}
+        {% if not form.conflict.errors %}
+          {% if form.email.errors %}
+            <div class="form-group">
+            {{form.email.errors.0}}
+            </div>
+          {% else %}
+            <p class="login-box-msg">Please enter your email address</p>
+          {% endif %}
+
+          <div class="form-group has-feedback">
+            <input id="id_email" type="email" class="form-control"  name="email" placeholder="Email address">
+            <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+          </div>
+
+          <p><a href="{% url 'login' %}">Go back, this was a mistake...</a></p>
+
+          <div class="row margin-zero">
+            <div id="login-disclaimer" class="checkbox">
+              <div class="statement text-justify">Please be aware that password resetting is, for security purposes, not instantaneous. Your reset request will be approved by your BGMS Site Administrator. If you are the Site Administrator for this BGMS your request will be passed to a member of the team at Atlantic Geomatics.
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-5">
+              <button id="id_request_btn" class="btn btn-primary btn-lg btn-block ladda-button"  data-style="slide-right"><span class="ladda-label">Request</span></button>
+            </div><!-- /.col -->
+          </div>
+
+        {% else %} <!-- form conflict error -->
+
+          <div class="row margin-zero">
+            <div id="login-disclaimer" class="checkbox">
+              <div class="statement text-justify">You already have a pending request. A reset email will be sent to you after the approval of an administrator.<br/><br/>
+              <p><a href="{% url 'login' %}">Return to the login page</a></p>
+              </div>
+            </div>
+          </div>
+
+        {% endif %} <!-- checked for conflict -->
+
+      {% else %} <!-- request_success -->
+
+        <div class="row margin-zero">
+          <div id="login-disclaimer" class="checkbox">
+            <div class="statement text-justify">Your password reset request has been successful.<br/><br/>A password reset email will be sent to <b>{{ email }}</b> after the approval of your BGMS Site Administrator or Atlantic Geomatics, if you are the Site Administrator for this BGMS.<br/><br/>
+            <p><a href="{% url 'login' %}">Return to the login page</a></p>
+            </div>
+          </div>
+        </div>
+
+      {% endif %} <!-- request_success checked -->
+
+    </div><!-- /.login-box-body -->
+  </div><!-- /.login-box -->
+</div>
+
+
+</form>
+{% endblock %}

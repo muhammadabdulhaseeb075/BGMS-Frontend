@@ -1,0 +1,97 @@
+////
+/// Everything related to buttons in class
+////
+
+.bgms-button {
+  border-style: solid;
+  border-width: 1px!important;
+  //border-color: $base-grey!important;
+  border-color: $base-gold!important;
+  //border-radius: 3px!important;
+
+  font-weight: bold;
+
+  //background-color: white;
+  background-color: $base-gold-light-1!important;
+
+  padding: 3px 6px;
+  margin-top: 5px;
+}
+
+.bgms-button:hover:not([disabled]), .bgms-button.focus-visible:focus:not([disabled]) {
+  //border-color: $base-orange!important;
+  //color: $base-orange;
+  background-color: $base-orange!important;
+}
+
+.imagewrap {
+    position: relative;
+    display: inline-block;
+}
+
+.imagewrap .closethumb {
+    position: absolute;
+    left: 80%;
+    top: -10%;
+    z-index: 100;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 19px;
+    border-radius: 100%;
+    opacity: .7;
+    background: white;
+}
+
+.closethumb:focus, .closethumb:hover{
+  opacity: 1
+}
+
+.thumb-margin{
+  margin-right: 6px;
+}
+
+.imagewrap div[role='progressbar']{
+  margin-left: 30px !important;
+  margin-top: -28px !important;
+}
+
+/// hi-icon button small
+.hi-icon-small-round {
+  float: right;
+  margin-left: 10px;
+  .hi-icon-wrap {
+    display: flex;
+    padding: 0;
+  }
+  .hi-icon {
+    color: $base-gold;
+    box-shadow: 0 0 0 3px $base-gold;
+    width: 40px;
+    height: 40px;
+    margin-top: 14px;
+    &:before {
+      line-height: 38px;
+    }
+    &.btn-cancel-resv:before{
+      line-height: 41px;
+      padding-left: 1px;
+    }
+    &.btn-cancel-resv{
+      color: #e47f5f;
+      box-shadow: 0 0 0 3px #e47f5f;
+    }
+  }
+}
+
+
+.hi-icon-loading{
+  z-index: 0;
+  background-color: rgba(0, 0, 0, 0.53);
+  border-radius: 20px;
+}
+
+.hi-icon div[role='progressbar']{
+  margin-left: 20px !important;
+  margin-top: -21px !important;
+}
+

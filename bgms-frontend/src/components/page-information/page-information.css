@@ -1,0 +1,9 @@
+@import "styles/theme.css";
+
+.page-information {
+    @apply hidden sm:flex-1 sm:flex sm:items-center sm:justify-between;
+}
+
+.text-wrapper {
+    @apply font-medium;
+}

@@ -1,0 +1,23 @@
+////
+/// Buttons across the bgms site
+////
+
+
+.btn-primary{
+  background-color: $base-grey;
+  border-color: $base-grey;
+}
+
+.btn-primary.active, .btn-primary.focus, .btn-primary:active, .btn-primary:focus, .btn-primary:hover, .btn-primary[disabled]:hover, .btn-primary[disabled]{
+  background-color: $base-orange;
+}
+
+.img-wrap {
+    position: relative;
+}
+.img-wrap .close {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 100;
+}

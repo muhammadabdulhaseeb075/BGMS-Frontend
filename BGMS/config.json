@@ -1,0 +1,24 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "include": ["./"],
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "docs|main|bower_components"
+    },
+    "plugins": [],
+    "templates": {
+        "default": {
+            "outputSourceFiles": true
+        },
+        "monospaceLinks": false,
+        "cleverLinks": false
+    },
+    "opts": {
+        "encoding": "utf8",
+        "destination": "docs/js/build",
+        "recurse": true,
+        "private": true
+    }
+}
